@@ -1,8 +1,8 @@
 #include <Rcpp/Lightest>
 using namespace Rcpp;
 
-#ifndef ANY_ATTRIB
-#define ANY_ATTRIB(x) (ATTRIB(x) != R_NilValue)
+#if R_VERSION < R_Version(4, 5, 0)
+#  define ANY_ATTRIB(x) (ATTRIB(x) != R_NilValue)
 #endif
 
 // Note: More comments are in fvar.cpp (C++ folder, not on GitHub)

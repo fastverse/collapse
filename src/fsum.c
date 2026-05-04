@@ -1,6 +1,10 @@
 #include "collapse_c.h"
 // #include <R_ext/Altrep.h>
 
+// Multiple independent accumulators break the serial dependency chain, enabling
+// SIMD vectorization even without OpenMP (where #pragma omp simd is ignored).
+#define FSUM_N_ACC 4
+
 double fsum_double_impl(const double *restrict px, const int narm, const int l) {
   double sum;
   if(narm == 1) {
@@ -8,18 +12,32 @@ double fsum_double_impl(const double *restrict px, const int narm, const int l) 
     sum = px[0];
     while(ISNAN(sum) && j!=l) sum = px[j++];
     if(j != l) {
-      #pragma omp simd reduction(+:sum)
-      for(int i = j; i < l; ++i) sum += NISNAN(px[i]) ? px[i] : 0.0;
+      double acc[FSUM_N_ACC] = {0};
+      int i = j, uend = l - FSUM_N_ACC + 1;
+      for(; i < uend; i += FSUM_N_ACC)
+        for(int k = 0; k < FSUM_N_ACC; ++k)
+          acc[k] += NISNAN(px[i+k]) ? px[i+k] : 0.0;
+      for(int k = 0; k < FSUM_N_ACC; ++k) sum += acc[k];
+      for(; i < l; ++i) sum += NISNAN(px[i]) ? px[i] : 0.0;
     }
   } else {
     sum = 0;
     if(narm) {
-      #pragma omp simd reduction(+:sum)
-      for(int i = 0; i < l; ++i) sum += NISNAN(px[i]) ? px[i] : 0.0;
+      double acc[FSUM_N_ACC] = {0};
+      int i = 0, uend = l - FSUM_N_ACC + 1;
+      for(; i < uend; i += FSUM_N_ACC)
+        for(int k = 0; k < FSUM_N_ACC; ++k)
+          acc[k] += NISNAN(px[i+k]) ? px[i+k] : 0.0;
+      for(int k = 0; k < FSUM_N_ACC; ++k) sum += acc[k];
+      for(; i < l; ++i) sum += NISNAN(px[i]) ? px[i] : 0.0;
     } else {
-     // Should just be fast, don't stop for NA's
-      #pragma omp simd reduction(+:sum)
-      for(int i = 0; i < l; ++i) sum += px[i];
+      double acc[FSUM_N_ACC] = {0};
+      int i = 0, uend = l - FSUM_N_ACC + 1;
+      for(; i < uend; i += FSUM_N_ACC)
+        for(int k = 0; k < FSUM_N_ACC; ++k)
+          acc[k] += px[i+k];
+      for(int k = 0; k < FSUM_N_ACC; ++k) sum += acc[k];
+      for(; i < l; ++i) sum += px[i];
     }
   }
   return sum;
@@ -52,13 +70,29 @@ double fsum_double_omp_impl(const double *restrict px, const int narm, const int
     sum = px[0];
     while(ISNAN(sum) && j != l) sum = px[j++];
     if(j != l) {
-      #pragma omp parallel for simd num_threads(nthreads) reduction(+:sum)
-      for(int i = j; i < l; ++i) sum += NISNAN(px[i]) ? px[i] : 0.0;
+      int nfull = (l - j) / FSUM_N_ACC;
+      double partial_sums[FSUM_N_ACC] = {0};
+      #pragma omp parallel for num_threads(nthreads) reduction(+:partial_sums[:FSUM_N_ACC])
+      for(int chunk = 0; chunk < nfull; ++chunk) {
+        int i = j + chunk * FSUM_N_ACC;
+        for(int k = 0; k < FSUM_N_ACC; ++k)
+          partial_sums[k] += NISNAN(px[i+k]) ? px[i+k] : 0.0;
+      }
+      for(int k = 0; k < FSUM_N_ACC; ++k) sum += partial_sums[k];
+      for(int i = j + nfull * FSUM_N_ACC; i < l; ++i) sum += NISNAN(px[i]) ? px[i] : 0.0;
     } else if(narm == 2) sum = 0.0;
   } else {
     sum = 0;
-    #pragma omp parallel for simd num_threads(nthreads) reduction(+:sum)
-    for(int i = 0; i < l; ++i) sum += px[i]; // Cannot have break statements in OpenMP for loop
+    int nfull = l / FSUM_N_ACC;
+    double partial_sums[FSUM_N_ACC] = {0};
+    #pragma omp parallel for num_threads(nthreads) reduction(+:partial_sums[:FSUM_N_ACC])
+    for(int chunk = 0; chunk < nfull; ++chunk) {
+      int i = chunk * FSUM_N_ACC;
+      for(int k = 0; k < FSUM_N_ACC; ++k)
+        partial_sums[k] += px[i+k];
+    }
+    for(int k = 0; k < FSUM_N_ACC; ++k) sum += partial_sums[k];
+    for(int i = nfull * FSUM_N_ACC; i < l; ++i) sum += px[i];
   }
   return sum;
 }
@@ -87,22 +121,36 @@ double fsum_double_omp_impl(const double *restrict px, const int narm, const int
 double fsum_weights_impl(const double *restrict px, const double *restrict pw, const int narm, const int l) {
   double sum;
   if(narm == 1) {
-    int j = 0, end = l-1;
-    while((ISNAN(px[j]) || ISNAN(pw[j])) && j!=end) ++j;
+    int j = 0;
+    while(j < l-1 && (ISNAN(px[j]) || ISNAN(pw[j]))) ++j;
     sum = px[j] * pw[j];
-    if(j != end) {
-      #pragma omp simd reduction(+:sum)
-      for(int i = j+1; i < l; ++i) sum += (NISNAN(px[i]) && NISNAN(pw[i])) ? px[i] * pw[i] : 0.0;
+    if(j < l-1) {
+      double acc[FSUM_N_ACC] = {0};
+      int i = j+1, uend = l - FSUM_N_ACC + 1;
+      for(; i < uend; i += FSUM_N_ACC)
+        for(int k = 0; k < FSUM_N_ACC; ++k)
+          acc[k] += (NISNAN(px[i+k]) && NISNAN(pw[i+k])) ? px[i+k] * pw[i+k] : 0.0;
+      for(int k = 0; k < FSUM_N_ACC; ++k) sum += acc[k];
+      for(; i < l; ++i) sum += (NISNAN(px[i]) && NISNAN(pw[i])) ? px[i] * pw[i] : 0.0;
     }
   } else {
     sum = 0;
     if(narm) {
-      #pragma omp simd reduction(+:sum)
-      for(int i = 0; i < l; ++i) sum += (NISNAN(px[i]) && NISNAN(pw[i])) ? px[i] * pw[i] : 0.0;
+      double acc[FSUM_N_ACC] = {0};
+      int i = 0, uend = l - FSUM_N_ACC + 1;
+      for(; i < uend; i += FSUM_N_ACC)
+        for(int k = 0; k < FSUM_N_ACC; ++k)
+          acc[k] += (NISNAN(px[i+k]) && NISNAN(pw[i+k])) ? px[i+k] * pw[i+k] : 0.0;
+      for(int k = 0; k < FSUM_N_ACC; ++k) sum += acc[k];
+      for(; i < l; ++i) sum += (NISNAN(px[i]) && NISNAN(pw[i])) ? px[i] * pw[i] : 0.0;
     } else {
-      // Also here speed is key...
-      #pragma omp simd reduction(+:sum)
-      for(int i = 0; i < l; ++i) sum += px[i] * pw[i];
+      double acc[FSUM_N_ACC] = {0};
+      int i = 0, uend = l - FSUM_N_ACC + 1;
+      for(; i < uend; i += FSUM_N_ACC)
+        for(int k = 0; k < FSUM_N_ACC; ++k)
+          acc[k] += px[i+k] * pw[i+k];
+      for(int k = 0; k < FSUM_N_ACC; ++k) sum += acc[k];
+      for(; i < l; ++i) sum += px[i] * pw[i];
     }
   }
   return sum;
@@ -135,13 +183,30 @@ double fsum_weights_omp_impl(const double *restrict px, const double *restrict p
     while(j!=l && (ISNAN(px[j]) || ISNAN(pw[j]))) ++j;
     if(j != l) {
       sum = px[j] * pw[j];
-      #pragma omp parallel for simd num_threads(nthreads) reduction(+:sum)
-      for(int i = j+1; i < l; ++i) sum += (NISNAN(px[i]) && NISNAN(pw[i])) ? px[i] * pw[i] : 0.0;
+      int nfull = (l - j - 1) / FSUM_N_ACC;
+      double partial_sums[FSUM_N_ACC] = {0};
+      #pragma omp parallel for num_threads(nthreads) reduction(+:partial_sums[:FSUM_N_ACC])
+      for(int chunk = 0; chunk < nfull; ++chunk) {
+        int i = j + 1 + chunk * FSUM_N_ACC;
+        for(int k = 0; k < FSUM_N_ACC; ++k)
+          partial_sums[k] += (NISNAN(px[i+k]) && NISNAN(pw[i+k])) ? px[i+k] * pw[i+k] : 0.0;
+      }
+      for(int k = 0; k < FSUM_N_ACC; ++k) sum += partial_sums[k];
+      for(int i = j + 1 + nfull * FSUM_N_ACC; i < l; ++i)
+        sum += (NISNAN(px[i]) && NISNAN(pw[i])) ? px[i] * pw[i] : 0.0;
     } else sum = narm == 1 ? NA_REAL : 0.0;
   } else {
     sum = 0;
-    #pragma omp parallel for simd num_threads(nthreads) reduction(+:sum)
-    for(int i = 0; i < l; ++i) sum += px[i] * pw[i];
+    int nfull = l / FSUM_N_ACC;
+    double partial_sums[FSUM_N_ACC] = {0};
+    #pragma omp parallel for num_threads(nthreads) reduction(+:partial_sums[:FSUM_N_ACC])
+    for(int chunk = 0; chunk < nfull; ++chunk) {
+      int i = chunk * FSUM_N_ACC;
+      for(int k = 0; k < FSUM_N_ACC; ++k)
+        partial_sums[k] += px[i+k] * pw[i+k];
+    }
+    for(int k = 0; k < FSUM_N_ACC; ++k) sum += partial_sums[k];
+    for(int i = nfull * FSUM_N_ACC; i < l; ++i) sum += px[i] * pw[i];
   }
   return sum;
 }
@@ -172,7 +237,13 @@ double fsum_int_impl(const int *restrict px, const int narm, const int l) {
     while(px[j] == NA_INTEGER && j!=0) --j;
     sum = (long long)px[j];
     if(j == 0 && px[j] == NA_INTEGER) return narm == 1 ? NA_REAL : 0;
-    for(int i = j; i--; ) if(px[i] != NA_INTEGER) sum += (long long)px[i];
+    long long acc[FSUM_N_ACC] = {0};
+    int i = 0, uend = j - FSUM_N_ACC;
+    for(; i <= uend; i += FSUM_N_ACC)
+      for(int k = 0; k < FSUM_N_ACC; ++k)
+        acc[k] += (px[i+k] != NA_INTEGER) ? (long long)px[i+k] : 0LL;
+    for(int k = 0; k < FSUM_N_ACC; ++k) sum += acc[k];
+    for(; i < j; ++i) if(px[i] != NA_INTEGER) sum += (long long)px[i];
   } else {
     sum = 0;
     for(int i = 0; i != l; ++i) {
@@ -234,13 +305,29 @@ double fsum_int_omp_impl(const int *restrict px, const int narm, const int l, co
     while(px[j] == NA_INTEGER && j!=l) ++j;
     if(j == l && px[j-1] == NA_INTEGER) return narm == 1 ? NA_REAL : 0;
     sum = (long long)px[j];
-    #pragma omp parallel for simd num_threads(nthreads) reduction(+:sum)
-    for(int i = j+1; i < l; ++i) sum += px[i] != NA_INTEGER ? (long long)px[i] : 0;
+    int nfull = (l - j - 1) / FSUM_N_ACC;
+    long long partial_sums[FSUM_N_ACC] = {0};
+    #pragma omp parallel for num_threads(nthreads) reduction(+:partial_sums[:FSUM_N_ACC])
+    for(int chunk = 0; chunk < nfull; ++chunk) {
+      int i = j + 1 + chunk * FSUM_N_ACC;
+      for(int k = 0; k < FSUM_N_ACC; ++k)
+        partial_sums[k] += px[i+k] != NA_INTEGER ? (long long)px[i+k] : 0LL;
+    }
+    for(int k = 0; k < FSUM_N_ACC; ++k) sum += partial_sums[k];
+    for(int i = j + 1 + nfull * FSUM_N_ACC; i < l; ++i) sum += px[i] != NA_INTEGER ? (long long)px[i] : 0LL;
   } else {
     if(px[0] == NA_INTEGER || px[l-1] == NA_INTEGER) return NA_REAL;
     sum = 0;
-    #pragma omp parallel for simd num_threads(nthreads) reduction(+:sum)
-    for(int i = 0; i < l; ++i) sum += (long long)px[i]; // Need this, else wrong result
+    int nfull = l / FSUM_N_ACC;
+    long long partial_sums[FSUM_N_ACC] = {0};
+    #pragma omp parallel for num_threads(nthreads) reduction(+:partial_sums[:FSUM_N_ACC])
+    for(int chunk = 0; chunk < nfull; ++chunk) {
+      int i = chunk * FSUM_N_ACC;
+      for(int k = 0; k < FSUM_N_ACC; ++k)
+        partial_sums[k] += (long long)px[i+k];
+    }
+    for(int k = 0; k < FSUM_N_ACC; ++k) sum += partial_sums[k];
+    for(int i = nfull * FSUM_N_ACC; i < l; ++i) sum += (long long)px[i];
   }
   return (double)sum;
 }

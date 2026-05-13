@@ -3,47 +3,75 @@
 
 // Adapted from fsum.c
 
+// Number of independent accumulators for SIMD loop unrolling.
+// 4 doubles fills a 256-bit AVX2 register; the compiler can freely vectorize
+// independent accumulator chains when there is no serial dependency.
+#define FMEAN_N_ACC 4
+
 double fmean_double_impl(const double *restrict px, const int narm, const int l) {
   if(narm) {
     int j = 1, n = 1;
     double mean = px[0];
     while(ISNAN(mean) && j!=l) mean = px[j++];
     if(j != l) {
-      #pragma omp simd reduction(+:mean,n)
-      for(int i = j; i < l; ++i) {
-          int tmp = NISNAN(px[i]);
-          mean += tmp ? px[i] : 0.0;
-          n += tmp ? 1 : 0;
+      double acc[FMEAN_N_ACC] = {0.0};
+      int nacc[FMEAN_N_ACC] = {0};
+      acc[0] = mean; nacc[0] = 1;
+      int rem = (l - j) % FMEAN_N_ACC;
+      for(int i = j; i < j + rem; ++i) {
+        int tmp = NISNAN(px[i]);
+        acc[0] += tmp ? px[i] : 0.0;
+        nacc[0] += tmp;
       }
+      for(int i = j + rem; i < l; i += FMEAN_N_ACC) {
+        for(int k = 0; k < FMEAN_N_ACC; ++k) {
+          int tmp = NISNAN(px[i+k]);
+          acc[k] += tmp ? px[i+k] : 0.0;
+          nacc[k] += tmp;
+        }
+      }
+      double sum = 0.0; int count = 0;
+      for(int k = 0; k < FMEAN_N_ACC; ++k) { sum += acc[k]; count += nacc[k]; }
+      return sum / count;
     }
-    return  mean / n;
+    return mean / n;
   }
-  double mean = 0;
-  #pragma omp simd reduction(+:mean)
-  for(int i = 0; i < l; ++i) {
-    // if(ISNAN(px[i])) {
-    //   mean = px[i];
-    //   break;
-    // }
-    mean += px[i];
+  double acc[FMEAN_N_ACC] = {0.0};
+  int rem = l % FMEAN_N_ACC;
+  for(int i = 0; i < rem; ++i) acc[0] += px[i];
+  for(int i = rem; i < l; i += FMEAN_N_ACC) {
+    for(int k = 0; k < FMEAN_N_ACC; ++k) acc[k] += px[i+k];
   }
+  double mean = 0.0;
+  for(int k = 0; k < FMEAN_N_ACC; ++k) mean += acc[k];
   return mean / l;
 }
 
 double fmean_double_omp_impl(const double *restrict px, const int narm, const int l, const int nthreads) {
-  double mean = 0;
+  double acc[FMEAN_N_ACC] = {0.0};
+  int rem = l % FMEAN_N_ACC;
   if(narm) {
-    int n = 0;
-    #pragma omp parallel for simd num_threads(nthreads) reduction(+:mean,n)
-    for(int i = 0; i < l; ++i) {
-      int tmp = NISNAN(px[i]);
-      mean += tmp ? px[i] : 0.0;
-      n += tmp ? 1 : 0;
+    int nacc[FMEAN_N_ACC] = {0};
+    for(int i = 0; i < rem; ++i) { int tmp = NISNAN(px[i]); acc[0] += tmp ? px[i] : 0.0; nacc[0] += tmp; }
+    #pragma omp parallel for simd num_threads(nthreads) reduction(+:acc[:FMEAN_N_ACC],nacc[:FMEAN_N_ACC])
+    for(int i = rem; i < l; i += FMEAN_N_ACC) {
+      for(int k = 0; k < FMEAN_N_ACC; ++k) {
+        int tmp = NISNAN(px[i+k]);
+        acc[k] += tmp ? px[i+k] : 0.0;
+        nacc[k] += tmp;
+      }
     }
+    double mean = 0.0; int n = 0;
+    for(int k = 0; k < FMEAN_N_ACC; ++k) { mean += acc[k]; n += nacc[k]; }
     return n == 0 ? NA_REAL : mean / n;
   }
-  #pragma omp parallel for simd num_threads(nthreads) reduction(+:mean)
-  for(int i = 0; i < l; ++i) mean += px[i];
+  for(int i = 0; i < rem; ++i) acc[0] += px[i];
+  #pragma omp parallel for simd num_threads(nthreads) reduction(+:acc[:FMEAN_N_ACC])
+  for(int i = rem; i < l; i += FMEAN_N_ACC) {
+    for(int k = 0; k < FMEAN_N_ACC; ++k) acc[k] += px[i+k];
+  }
+  double mean = 0.0;
+  for(int k = 0; k < FMEAN_N_ACC; ++k) mean += acc[k];
   return mean / l;
 }
 
@@ -71,52 +99,76 @@ void fmean_double_g_impl(double *restrict pout, const double *restrict px, const
 }
 
 double fmean_weights_impl(const double *restrict px, const double *restrict pw, const int narm, const int l) {
-  double mean, sumw;
   if(narm) {
     int j = 0, end = l-1;
     while((ISNAN(px[j]) || ISNAN(pw[j])) && j!=end) ++j;
-    sumw = pw[j];
-    mean = px[j] * sumw;
+    double macc[FMEAN_N_ACC] = {0.0}, wacc[FMEAN_N_ACC] = {0.0};
+    macc[0] = px[j] * pw[j]; wacc[0] = pw[j];
     if(j != end) {
-      #pragma omp simd reduction(+:mean,sumw)
-      for(int i = j+1; i < l; ++i) {
+      int rem = (l - j - 1) % FMEAN_N_ACC;
+      for(int i = j+1; i < j+1+rem; ++i) {
         int tmp = NISNAN(px[i]) && NISNAN(pw[i]);
-        mean += tmp ? px[i] * pw[i] : 0.0;
-        sumw += tmp ? pw[i] : 0.0;
+        macc[0] += tmp ? px[i] * pw[i] : 0.0;
+        wacc[0] += tmp ? pw[i] : 0.0;
+      }
+      for(int i = j+1+rem; i < l; i += FMEAN_N_ACC) {
+        for(int k = 0; k < FMEAN_N_ACC; ++k) {
+          int tmp = NISNAN(px[i+k]) && NISNAN(pw[i+k]);
+          macc[k] += tmp ? px[i+k] * pw[i+k] : 0.0;
+          wacc[k] += tmp ? pw[i+k] : 0.0;
+        }
       }
     }
-  } else {
-    mean = 0, sumw = 0;
-    #pragma omp simd reduction(+:mean,sumw)
-    for(int i = 0; i < l; ++i) {
-      // if(ISNAN(px[i]) || ISNAN(pw[i])) {
-      //   mean = px[i] + pw[i];
-      //   break;
-      // }
-      mean += px[i] * pw[i];
-      sumw += pw[i];
+    double mean = 0.0, sumw = 0.0;
+    for(int k = 0; k < FMEAN_N_ACC; ++k) { mean += macc[k]; sumw += wacc[k]; }
+    return mean / sumw;
+  }
+  double macc[FMEAN_N_ACC] = {0.0}, wacc[FMEAN_N_ACC] = {0.0};
+  int rem = l % FMEAN_N_ACC;
+  for(int i = 0; i < rem; ++i) { macc[0] += px[i] * pw[i]; wacc[0] += pw[i]; }
+  for(int i = rem; i < l; i += FMEAN_N_ACC) {
+    for(int k = 0; k < FMEAN_N_ACC; ++k) {
+      macc[k] += px[i+k] * pw[i+k];
+      wacc[k] += pw[i+k];
     }
   }
+  double mean = 0.0, sumw = 0.0;
+  for(int k = 0; k < FMEAN_N_ACC; ++k) { mean += macc[k]; sumw += wacc[k]; }
   return mean / sumw;
 }
 
 double fmean_weights_omp_impl(const double *restrict px, const double *restrict pw, const int narm, const int l, const int nthreads) {
-  double mean = 0, sumw = 0;
+  double macc[FMEAN_N_ACC] = {0.0}, wacc[FMEAN_N_ACC] = {0.0};
+  int rem = l % FMEAN_N_ACC;
   if(narm) {
-    #pragma omp parallel for simd num_threads(nthreads) reduction(+:mean,sumw)
-    for(int i = 0; i < l; ++i) {
-      int tmp = NISNAN(px[i]) + NISNAN(pw[i]) == 2; // && doesn't vectorize for some reason
-      mean += tmp ? px[i] * pw[i] : 0.0;
-      sumw += tmp ? pw[i] : 0.0;
+    for(int i = 0; i < rem; ++i) {
+      int tmp = NISNAN(px[i]) + NISNAN(pw[i]) == 2;
+      macc[0] += tmp ? px[i] * pw[i] : 0.0;
+      wacc[0] += tmp ? pw[i] : 0.0;
     }
+    #pragma omp parallel for simd num_threads(nthreads) reduction(+:macc[:FMEAN_N_ACC],wacc[:FMEAN_N_ACC])
+    for(int i = rem; i < l; i += FMEAN_N_ACC) {
+      for(int k = 0; k < FMEAN_N_ACC; ++k) {
+        int tmp = NISNAN(px[i+k]) + NISNAN(pw[i+k]) == 2;
+        macc[k] += tmp ? px[i+k] * pw[i+k] : 0.0;
+        wacc[k] += tmp ? pw[i+k] : 0.0;
+      }
+    }
+    double mean = 0.0, sumw = 0.0;
+    for(int k = 0; k < FMEAN_N_ACC; ++k) { mean += macc[k]; sumw += wacc[k]; }
     if(mean == 0 && sumw == 0) sumw = NA_REAL;
-  } else {
-    #pragma omp parallel for simd num_threads(nthreads) reduction(+:mean,sumw)
-    for(int i = 0; i < l; ++i) {
-      mean += px[i] * pw[i];
-      sumw += pw[i];
+    return mean / sumw;
+  }
+  for(int i = 0; i < rem; ++i) { macc[0] += px[i] * pw[i]; wacc[0] += pw[i]; }
+  #pragma omp parallel for simd num_threads(nthreads) reduction(+:macc[:FMEAN_N_ACC],wacc[:FMEAN_N_ACC])
+  for(int i = rem; i < l; i += FMEAN_N_ACC) {
+    for(int k = 0; k < FMEAN_N_ACC; ++k) {
+      macc[k] += px[i+k] * pw[i+k];
+      wacc[k] += pw[i+k];
     }
   }
+  double mean = 0.0, sumw = 0.0;
+  for(int k = 0; k < FMEAN_N_ACC; ++k) { mean += macc[k]; sumw += wacc[k]; }
   return mean / sumw;
 }
 
@@ -171,21 +223,33 @@ double fmean_int_impl(const int *restrict px, const int narm, const int l) {
 }
 
 double fmean_int_omp_impl(const int *restrict px, const int narm, const int l, const int nthreads) {
-  long long mean = 0;
   double dmean;
+  int rem = l % FMEAN_N_ACC;
   if(narm) {
-    int n = 0;
-    #pragma omp parallel for simd num_threads(nthreads) reduction(+:mean,n)
-    for(int i = 0; i < l; ++i) {
-      int tmp = px[i] != NA_INTEGER;
-      mean += tmp ? px[i] : 0;
-      n += tmp ? 1 : 0;
+    long long acc[FMEAN_N_ACC] = {0};
+    int nacc[FMEAN_N_ACC] = {0};
+    for(int i = 0; i < rem; ++i) { int tmp = px[i] != NA_INTEGER; acc[0] += tmp ? px[i] : 0; nacc[0] += tmp; }
+    #pragma omp parallel for simd num_threads(nthreads) reduction(+:acc[:FMEAN_N_ACC],nacc[:FMEAN_N_ACC])
+    for(int i = rem; i < l; i += FMEAN_N_ACC) {
+      for(int k = 0; k < FMEAN_N_ACC; ++k) {
+        int tmp = px[i+k] != NA_INTEGER;
+        acc[k] += tmp ? px[i+k] : 0;
+        nacc[k] += tmp;
+      }
     }
+    long long mean = 0; int n = 0;
+    for(int k = 0; k < FMEAN_N_ACC; ++k) { mean += acc[k]; n += nacc[k]; }
     dmean = n == 0 ? NA_REAL : (double)mean / n;
   } else {
     if(px[0] == NA_INTEGER || px[l-1] == NA_INTEGER) return NA_REAL;
-    #pragma omp parallel for simd num_threads(nthreads) reduction(+:mean)
-    for(int i = 0; i < l; ++i) mean += px[i];
+    long long acc[FMEAN_N_ACC] = {0};
+    for(int i = 0; i < rem; ++i) acc[0] += px[i];
+    #pragma omp parallel for simd num_threads(nthreads) reduction(+:acc[:FMEAN_N_ACC])
+    for(int i = rem; i < l; i += FMEAN_N_ACC) {
+      for(int k = 0; k < FMEAN_N_ACC; ++k) acc[k] += px[i+k];
+    }
+    long long mean = 0;
+    for(int k = 0; k < FMEAN_N_ACC; ++k) mean += acc[k];
     dmean = (double)mean / l;
   }
   return dmean;

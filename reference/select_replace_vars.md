@@ -12,7 +12,7 @@ expressions matching column names.
 fselect(.x, ..., return = "data")
 fselect(x, ...) <- value
 slt(.x, ..., return = "data")   # Shorthand for fselect
-slt(x, ...) <- value
+slt(x, ...) <- value            # Shorthand for fselect<-
 
 ## Select and replace columns by names, indices, logical vectors,
 ## regular expressions or using functions to identify columns
@@ -22,22 +22,22 @@ get_vars(x, vars, return = "data", regex = FALSE, rename = FALSE, ...)
      gvr(x, vars, return = "data", ...)   # Shorthand for get_vars(..., regex = TRUE)
 
 get_vars(x, vars, regex = FALSE, ...) <- value
-gv(x, vars, ...) <- value
-gvr(x, vars, ...) <- value
+gv(x, vars, ...) <- value           # Shorthand for get_vars<-
+gvr(x, vars, ...) <- value           # Shorthand for get_vars<-(..., regex = TRUE)
 
 ## Add columns at any position within a data.frame
 
 add_vars(x, ..., pos = "end")
 add_vars(x, pos = "end") <- value
       av(x, ..., pos = "end")             # Shorthand for add_vars
-av(x, pos = "end") <- value
+av(x, pos = "end") <- value         # Shorthand for add_vars<-
 
 ## Select and replace columns by data type
 
 num_vars(x, return = "data")
 num_vars(x) <- value
       nv(x, return = "data")       # Shorthand for num_vars
-nv(x) <- value
+nv(x) <- value               # Shorthand for num_vars<-
 cat_vars(x, return = "data")       # Categorical variables, see is_categorical
 cat_vars(x) <- value
 char_vars(x, return = "data")

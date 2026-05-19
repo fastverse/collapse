@@ -301,5 +301,4 @@ cylF
 # Factor to numeric conversions
 identical(mtcars,  as_numeric_factor(dapply(mtcars, qF)))
 #> [1] TRUE
-
 ```

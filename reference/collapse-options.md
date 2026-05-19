@@ -48,7 +48,7 @@ get_collapse(opts = NULL)
   |  |  |  |
   |  |  |  |
   |  |  |  |
-  | `stub` |  | logical, default `TRUE`. Controls whether [transformation operators](https://fastverse.org/collapse/reference/data-transformations.md) (`.OPERATOR_FUN`) such as [`W`](https://fastverse.org/collapse/reference/fbetween_fwithin.md), [`L`](https://fastverse.org/collapse/reference/flag.md), [`STD`](https://fastverse.org/collapse/reference/fscale.md) etc. add prefixes to transformed columns of matrix and data.frame-like objects. |
+  | `stub` |  | logical, default `TRUE`. Controls whether [transformation operators](https://fastverse.org/collapse/reference/data-transformations.html) (`.OPERATOR_FUN`) such as [`W`](https://fastverse.org/collapse/reference/fbetween_fwithin.md), [`L`](https://fastverse.org/collapse/reference/flag.md), [`STD`](https://fastverse.org/collapse/reference/fscale.md) etc. add prefixes to transformed columns of matrix and data.frame-like objects. |
   |  |  |  |
   |  |  |  |
   |  |  |  |

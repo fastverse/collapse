@@ -116,15 +116,15 @@
 <span class="r-in"><span>  <span class="fu">fdist</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, nthreads <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">x</span><span class="op">-</span><span class="va">y</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Unit: microseconds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Unit: milliseconds</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                       expr      min       lq     mean   median       uq</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                fdist(x, y)  994.291 1056.529 1568.375 1191.235 1472.556</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  fdist(x, y, nthreads = 2)  993.348 1052.675 1505.873 1235.063 1488.157</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       sqrt(sum((x - y)^2)) 2568.486 3714.149 6718.956 4943.595 6428.677</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       max neval</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  17270.92   100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  15438.92   100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  42381.62   100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                fdist(x, y) 1.008805 1.041011 1.604960 1.109440 1.591907</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  fdist(x, y, nthreads = 2) 1.005566 1.041257 1.329227 1.158148 1.590882</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sqrt(sum((x - y)^2)) 3.254949 3.637786 6.299320 4.888471 7.332481</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        max neval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  16.921233   100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   2.611331   100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  49.425418   100</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
@@ -137,7 +137,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
 </div>
 
     </footer></div>

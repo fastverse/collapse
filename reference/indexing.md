@@ -775,7 +775,7 @@ lm(G(PCGDP, 5, p = 1/5) ~ L(G(LIFEEX, 5, p = 1/5), c(0, 5)), wldi) # p abbreviat
 plm::plm(G(PCGDP, 5, p = 1/5) ~ L(G(LIFEEX, 5, p = 1/5), c(0, 5)), to_plm(wldi), effect = "time")
 #> 
 #> Model Formula: G(PCGDP, 5, p = 1/5) ~ L(G(LIFEEX, 5, p = 1/5), c(0, 5))
-#> <environment: 0x145fc6b00>
+#> <environment: 0x138bec858>
 #> 
 #> Coefficients:
 #> L(G(LIFEEX, 5, p = 1/5), c(0, 5))-- L(G(LIFEEX, 5, p = 1/5), c(0, 5))L5 
@@ -968,7 +968,6 @@ wldidt[, .c(PCGDP_gr_5Y, LIFEEX_gr_5Y) := G(slt(.SD, PCGDP, LIFEEX), 5, power = 
 #> Warning: Found '.SD' in the call but no 'apply' function. Please note that .SD is not an indexed_frame but a plain data.table containing indexed_series. Thus indexed_frame / pdata.frame methods don't work on .SD! Consider using (m/l)apply(.SD, FUN) or reindex(.SD, ix(data)). If you are not performing indexed operations on .SD please ignore or suppress this warning.
 # This gives the correct outcome
 wldidt[, .c(PCGDP_gr_5Y, LIFEEX_gr_5Y) := lapply(slt(.SD, PCGDP, LIFEEX), G, 5, power = 1/5)]
-
 if (FALSE) { # \dontrun{
 library(sf)
 nc <- st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)

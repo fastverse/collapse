@@ -36,7 +36,7 @@ settfmv(.data, ...)
 
 # Replace/add modified columns in/to a data frame
 ftransform(.data) <- value
-tfm(.data) <- value
+tfm(.data) <- value           # Shorthand for ftransform<-
 
 # Compute columns, returned as a new data frame
 fcompute(.data, ..., keep = NULL)

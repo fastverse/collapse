@@ -19,9 +19,9 @@ fmatch(x, table, nomatch = NA_integer_,
 ckmatch(x, table, e = "Unknown columns:", ...)
 
 # Infix operators based on fmatch():
-x %!in% table
-x %iin% table
-x %!iin% table
+x %!in% table   # Opposite of %in%
+x %iin% table   # = which(x %in% table), but more efficient
+x %!iin% table  # = which(x %!in% table), but more efficient
 # Use set_collapse(mask = "%in%") to replace %in% with
 # a much faster version based on fmatch()
 ```

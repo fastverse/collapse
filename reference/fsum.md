@@ -355,14 +355,14 @@ microbenchmark(mtcDT[, lapply(.SD, sum), by = f],
                rowsum(mtcDT, f, reorder = FALSE),
                fsum(mtcDT, f, na.rm = FALSE), unit = "relative")
 #> Unit: relative
-#>                               expr        min         lq      mean    median
-#>  mtcDT[, lapply(.SD, sum), by = f] 100.330357 101.094595 53.780159 61.473438
-#>  rowsum(mtcDT, f, reorder = FALSE)   3.419643   3.222973  2.572506  2.698437
-#>      fsum(mtcDT, f, na.rm = FALSE)   1.000000   1.000000  1.000000  1.000000
-#>         uq       max neval
-#>  48.010172 50.933277   100
-#>   2.071205  3.068423   100
-#>   1.000000  1.000000   100
+#>                               expr       min        lq      mean   median
+#>  mtcDT[, lapply(.SD, sum), by = f] 97.057692 86.726908 62.675561 72.93851
+#>  rowsum(mtcDT, f, reorder = FALSE)  3.615385  3.353414  2.974297  3.28479
+#>      fsum(mtcDT, f, na.rm = FALSE)  1.000000  1.000000  1.000000  1.00000
+#>         uq        max neval
+#>  50.801242 129.102007   100
+#>   2.708075   7.496656   100
+#>   1.000000   1.000000   100
 
 # Now larger data
 tdata <- qDT(replicate(100, rnorm(1e5), simplify = FALSE)) # 100 columns with 100.000 obs
@@ -373,13 +373,13 @@ microbenchmark(tdata[, lapply(.SD, sum), by = f],
                fsum(tdata, f, na.rm = FALSE), unit = "relative")
 #> Unit: relative
 #>                               expr      min       lq     mean   median       uq
-#>  tdata[, lapply(.SD, sum), by = f] 3.382853 3.823326 3.453474 3.423963 3.243198
-#>  rowsum(tdata, f, reorder = FALSE) 2.152765 2.434678 2.246862 2.117024 2.048072
+#>  tdata[, lapply(.SD, sum), by = f] 3.279410 3.405599 3.679183 3.568268 3.120769
+#>  rowsum(tdata, f, reorder = FALSE) 2.265599 2.225511 2.184322 2.393392 2.080953
 #>      fsum(tdata, f, na.rm = FALSE) 1.000000 1.000000 1.000000 1.000000 1.000000
-#>       max neval
-#>  8.816586   100
-#>  6.817447   100
-#>  1.000000   100
+#>        max neval
+#>  12.822560   100
+#>   1.973362   100
+#>   1.000000   100
 # Reset options
 set_collapse(opts)
 ```

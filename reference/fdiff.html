@@ -160,12 +160,10 @@
     <p>By default, <code>fdiff/D/Dlog</code> return <code>x</code> with all columns differenced / log-differenced. Differences are computed as <code>repeat(diff) x[i] - rho*x[i-n]</code>, and log-differences as <code>log(x[i]) - rho*log(x[i-n])</code> for <code>diff = 1</code> and <code>repeat(diff-1) x[i] - rho*x[i-n]</code> is used to compute subsequent differences (usually <code>diff = 1</code> for log-differencing). If <code>rho &lt; 1</code>, this becomes quasi- (or partial) differencing, which is a technique suggested by Cochrane and Orcutt (1949) to deal with serial correlation in regression models, where <code>rho</code> is typically estimated by running a regression of the model residuals on the lagged residuals. <!-- %Setting \code{diff = 2} returns differences of differences etc\dots and setting \code{n = 2} returns simple differences computed by subtracting twice-lagged \code{x} from \code{x}. -->
 It is also possible to compute forward differences by passing negative <code>n</code> values. <code>n</code> also supports arbitrary vectors of integers (lags), and <code>diff</code> supports positive sequences of integers (differences):</p>
 <p>If more than one value is passed to <code>n</code> and/or <code>diff</code>, the data is expanded-wide as follows: If <code>x</code> is an atomic vector or time series, a (time series) matrix is returned with columns ordered first by lag, then by difference. If <code>x</code> is a matrix or data frame, each column is expanded in like manor such that the output has <code>ncol(x)*length(n)*length(diff)</code> columns ordered first by column name, then by lag, then by difference.</p>
-<p><!-- %With groups/panel-identifiers supplied to \code{g/by}, \code{fdiff/D/Dlog} efficiently compute panel-differences. If \code{t} is left empty, the data needs to be ordered such that all values belonging to a group are consecutive and in the right order. It is not necessary that the groups themselves occur in the right order. If time-variable(s) are supplied to \code{t}, the panel is fully identified and differences can be securely computed even if the data is unordered. --></p>
-<p><!-- % \code{fdiff/D/Dlog} supports balanced panels and unbalanced panels where various individuals are observed for different time-sequences. -->
-<!-- % (both start, end and duration of observation can differ for each individual), but does not natively support irregularly spaced time series and panels. -->
-For further computational details and efficiency considerations see the help page of <code><a href="flag.html">flag</a></code>. <!-- %A work-around for differencing irregular panels is easily achieved with the help of \code{\link{seqid}}. --></p>
-<p><!-- %It is also possible to compute differences on unordered vectors or irregular time series (thus utilizing \code{t} but leaving \code{g/by} empty). --></p>
-<p><!-- %The methods applying to \emph{plm} objects (panel series and panel data frames) automatically utilize the panel-identifiers attached to these objects and thus securely compute fully identified panel-differences. If these objects have &gt; 2 panel-identifiers attached to them, the last identifier is assumed to be the time-variable, and the others are taken as grouping-variables and interacted. --></p>
+
+<p>For further computational details and efficiency considerations see the help page of <code><a href="flag.html">flag</a></code>. <!-- %A work-around for differencing irregular panels is easily achieved with the help of \code{\link{seqid}}. --></p>
+
+
     </div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -619,7 +617,7 @@ For further computational details and efficiency considerations see the help pag
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
 </div>
 
     </footer></div>

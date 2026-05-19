@@ -12,11 +12,3 @@ namespace more consistent.
     fHDbetween -> fhdbetween
     replace_NA -> replace_na
     replace_Inf -> replace_inf
-
-
-
-
-
-
-
-

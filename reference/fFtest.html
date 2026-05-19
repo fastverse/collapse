@@ -67,7 +67,7 @@
 <dd><p>numeric. A vector of (frequency) weights.</p></dd>
 
   <dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>
-<dd><p>a 2-part formula: <code>y ~ exc | X</code>, where both <code>exc</code> and <code>X</code> are expressions connected with <code>+</code>, and <code>X</code> can be omitted. <em>Note</em> that other operators (<code>:</code>, <code>*</code>, <code>^</code>, <code>-</code>, etc.) are not supported, you can interact variables using standard functions like <code><a href="qF.html">finteraction/itn</a></code> or <code><a href="https://magrittr.tidyverse.org/reference/aliases.html" class="external-link">magrittr::multiply_by</a></code> inside the formula e.g. <code>log(y) ~ x1 + itn(x2, x3) | x4</code> or <code>log(y) ~ x1 + multiply_by(x2, x3) | x4</code>.</p></dd>
+<dd><p>a 2-part formula: <code>y ~ exc | X</code>, where both <code>exc</code> and <code>X</code> are expressions connected with <code>+</code>, and <code>X</code> can be omitted. <em>Note</em> that other operators (<code>:</code>, <code>*</code>, <code>^</code>, <code>-</code>, etc.) are not supported, you can interact variables using standard functions like <code><a href="https://fastverse.org/collapse/reference/qF.html">finteraction/itn</a></code> or <code><a href="https://magrittr.tidyverse.org/reference/aliases.html" class="external-link">magrittr::multiply_by</a></code> inside the formula e.g. <code>log(y) ~ x1 + itn(x2, x3) | x4</code> or <code>log(y) ~ x1 + multiply_by(x2, x3) | x4</code>.</p></dd>
 
  <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>a named list or data frame.</p></dd>
@@ -99,11 +99,6 @@
 <li><p>the Restricted Model (<code>y ~ X</code>)</p></li>
 <li><p>the Exclusion Restriction of <code>exc</code>. The R-squared shown is simply the difference of the full and restricted R-Squared's, not the R-Squared of the model <code>y ~ exc</code>.</p></li>
 </ol><p>If <code>X = NULL</code>, only a vector of the same 5 statistics testing the model (<code>y ~ exc</code>) is shown.</p>
-<p><!-- %%  ~Describe the value returned -->
-<!-- %%  If it is a LIST, use -->
-<!-- %%  \item{comp1 }{Description of 'comp1'} -->
-<!-- %%  \item{comp2 }{Description of 'comp2'} -->
-<!-- %% \dots --></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -212,7 +207,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
 </div>
 
     </footer></div>

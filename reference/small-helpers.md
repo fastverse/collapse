@@ -8,12 +8,12 @@ metaprogramming, and that improve the workflow.
 
 ``` r
 .c(...)                       # Non-standard concatenation i.e. .c(a, b) == c("a", "b")
-nam %=% values
+nam %=% values                # Multiple-assignment e.g. .c(x, y) %=% c(1, 2),
 massign(nam, values,          # can also assign to different environment.
         envir = parent.frame())
 vlabels(X, attrn = "label",   # Get labels of variables in X, in attr(X[[i]], attrn)
         use.names = TRUE)
-vlabels(X, attrn = "label") <- value
+vlabels(X, attrn = "label") <- value    # Set labels of variables in X (by reference)
 setLabels(X, value = NULL,    # Set labels of variables in X (by reference) and return X
           attrn = "label", cols = NULL)
 vclasses(X, use.names = TRUE) # Get classes of variables in X
@@ -182,7 +182,7 @@ Overview](https://fastverse.org/collapse/reference/collapse-documentation.md)
 .c(T, N) %=% dim(EuStockMarkets)
 names(iris) %=% iris
 list2env(iris)          # Same thing
-#> <environment: 0x120435fb8>
+#> <environment: 0x138f132c8>
 rm(list = c("a", "b", "T", "N", names(iris)))
 
 ## Variable labels

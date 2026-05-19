@@ -94,7 +94,7 @@ print(x, n = 14, perc = TRUE, digits = .op[["digits"]], t.table = TRUE, total = 
 
   double. Probabilities for quantiles to compute on numeric variables,
   passed down to
-  [`.quantile`](https://fastverse.org/collapse/reference/fquantile.md).
+  [`.quantile`](https://fastverse.org/collapse/reference/fquantile.html).
   If something non-numeric is passed (i.e. `NULL`, `FALSE`, `NA`, `""`
   etc.), no quantiles are computed.
 

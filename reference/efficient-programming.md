@@ -15,8 +15,8 @@ allNA(x)                    # Faster than all(is.na(x)). See also kit::pallNA()
 whichv(x, value,            # Faster than which(x == value)
        invert = FALSE)      # or which(x != value). See also Note (3)
 whichNA(x, invert = FALSE)  # Faster than which((!)is.na(x))
-x %==% value
-x %!=% value
+x %==% value                # Infix for whichv(v, value, FALSE), use e.g. in fsubset()
+x %!=% value                # Infix for whichv(v, value, TRUE). See also Note (3)
 alloc(value, n,             # Fast rep_len(value, n) or replicate(n, value).
       simplify = TRUE)      # simplify only works if length(value) == 1. See Details.
 copyv(X, v, R, ..., invert  # Fast replace(X, v, R), replace(X, X (!/=)= v, R) or
@@ -27,10 +27,10 @@ setv(X, v, R, ..., invert   # Same for X[v] <- r, X[x (!/=)= v] <- r or
     xlist = FALSE)          # X/R/V can also be lists/DFs. See Details and Examples.
 setop(X, op, V, ...,        # Faster than X <- X +\-\*\/ V (modifies by reference)
       rowwise = FALSE)      # optionally can also add v to rows of a matrix or list
-X %+=% V
-X %-=% V
-X %*=% V
-X %/=% V
+X %+=% V                    # Infix for setop(X, "+", V). See also Note (2)
+X %-=% V                    # Infix for setop(X, "-", V). See also Note (2)
+X %*=% V                    # Infix for setop(X, "*", V). See also Note (2)
+X %/=% V                    # Infix for setop(X, "/", V). See also Note (2)
 na_rm(x)                    # Fast: if(anyNA(x)) x[!is.na(x)] else x, last
 na_locf(x, set = FALSE)     # obs. carried forward and first obs. carried back.
 na_focb(x, set = FALSE)     # (by reference). These also support lists (NULL/empty)

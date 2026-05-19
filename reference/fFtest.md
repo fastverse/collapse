@@ -48,7 +48,7 @@ fFtest(formula, data = NULL, weights = NULL, ...)
   expressions connected with `+`, and `X` can be omitted. *Note* that
   other operators (`:`, `*`, `^`, `-`, etc.) are not supported, you can
   interact variables using standard functions like
-  [`finteraction/itn`](https://fastverse.org/collapse/reference/qF.md)
+  [`finteraction/itn`](https://fastverse.org/collapse/reference/qF.html)
   or
   [`magrittr::multiply_by`](https://magrittr.tidyverse.org/reference/aliases.html)
   inside the formula e.g. `log(y) ~ x1 + itn(x2, x3) | x4` or

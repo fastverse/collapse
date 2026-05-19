@@ -39,7 +39,7 @@ CRAN release: 2026-05-19
   non-factor grouping columns—the full Cartesian product—similar to
   `dplyr::group_by(.drop = FALSE)`. Unobserved combinations get
   `group.sizes` of `0` and `group.starts` of `0L`. Correspondingly,
-  [`fgroup_by()`](https://fastverse.org/collapse/reference/GRP.md)/[`gby()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`fgroup_by()`](https://fastverse.org/collapse/reference/GRP.md)/[`gby()`](https://fastverse.org/collapse/reference/GRP.html)
   gain a `.drop` argument, and
   [`fcount()`](https://fastverse.org/collapse/reference/fcount.md)/[`fcountv()`](https://fastverse.org/collapse/reference/fcount.md)/[`collap()`](https://fastverse.org/collapse/reference/collap.md)/[`collapv()`](https://fastverse.org/collapse/reference/collap.md)
   gain a `drop` argument, enabling counts and aggregations that retain
@@ -1318,7 +1318,7 @@ estimation of sample quantiles.
   overhead of [`stats::quantile`](https://rdrr.io/r/stats/quantile.html)
   becomes burdensome. For maximum performance during repeated
   executions, a programmers version
-  [`.quantile()`](https://fastverse.org/collapse/reference/fquantile.md)
+  [`.quantile()`](https://fastverse.org/collapse/reference/fquantile.html)
   with different defaults is also provided.
 
 - Added function

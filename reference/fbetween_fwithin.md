@@ -419,7 +419,7 @@ lm(mpg ~ carb + B(carb,cyl), data = mtcars)                     # Procedure sugg
 plm::plm(mpg ~ carb, mtcars, index = "cyl", model = "within")   # "Proof"..
 #> 
 #> Model Formula: mpg ~ carb
-#> <environment: 0x1417bd120>
+#> <environment: 0x14bc6a098>
 #> 
 #> Coefficients:
 #>     carb 
@@ -509,7 +509,7 @@ lm(mpg ~ carb, data = W(mtcars, ~ cyl, theta = theta, mean = "overall.mean", stu
 plm::plm(mpg ~ carb, mtcars, index = "cyl", model = "random")
 #> 
 #> Model Formula: mpg ~ carb
-#> <environment: 0x1417bd120>
+#> <environment: 0x14bc6a098>
 #> 
 #> Coefficients:
 #> (Intercept)        carb 

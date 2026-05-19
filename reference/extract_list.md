@@ -240,7 +240,7 @@ str(reg_elem(l))
 #>   .. .. ..- attr(*, "order")= int [1:2] 1 1
 #>   .. .. ..- attr(*, "intercept")= int 1
 #>   .. .. ..- attr(*, "response")= int 1
-#>   .. .. ..- attr(*, ".Environment")=<environment: 0x1618570b0> 
+#>   .. .. ..- attr(*, ".Environment")=<environment: 0x14bb25378> 
 #>   .. .. ..- attr(*, "predvars")= language list(mpg, cyl, vs)
 #>   .. .. ..- attr(*, "dataClasses")= Named chr [1:3] "numeric" "numeric" "numeric"
 #>   .. .. .. ..- attr(*, "names")= chr [1:3] "mpg" "cyl" "vs"
@@ -257,7 +257,7 @@ str(irreg_elem(l))
 #>   .. ..- attr(*, "order")= int [1:2] 1 1
 #>   .. ..- attr(*, "intercept")= int 1
 #>   .. ..- attr(*, "response")= int 1
-#>   .. ..- attr(*, ".Environment")=<environment: 0x1618570b0> 
+#>   .. ..- attr(*, ".Environment")=<environment: 0x14bb25378> 
 #>   .. ..- attr(*, "predvars")= language list(mpg, cyl, vs)
 #>   .. ..- attr(*, "dataClasses")= Named chr [1:3] "numeric" "numeric" "numeric"
 #>   .. .. ..- attr(*, "names")= chr [1:3] "mpg" "cyl" "vs"

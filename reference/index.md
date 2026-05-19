@@ -1,14 +1,9 @@
-# Package index
+# Function Reference
 
 - [`collapse-package`](https://fastverse.org/collapse/reference/collapse-package.md)
   [`collapse`](https://fastverse.org/collapse/reference/collapse-package.md)
   : Advanced and Fast Data Transformation
-- [`A0-collapse-documentation`](https://fastverse.org/collapse/reference/collapse-documentation.md)
-  [`collapse-documentation`](https://fastverse.org/collapse/reference/collapse-documentation.md)
-  [`.COLLAPSE_TOPICS`](https://fastverse.org/collapse/reference/collapse-documentation.md)
-  [`.COLLAPSE_ALL`](https://fastverse.org/collapse/reference/collapse-documentation.md)
-  [`.COLLAPSE_GENERIC`](https://fastverse.org/collapse/reference/collapse-documentation.md)
-  [`.COLLAPSE_DATA`](https://fastverse.org/collapse/reference/collapse-documentation.md)
+- [`collapse-documentation`](https://fastverse.org/collapse/reference/collapse-documentation.md)
   : Collapse Documentation & Overview
 
 ## Fast Statistical Functions
@@ -16,10 +11,7 @@
 Fast (grouped and weighted) statistical functions for vector, matrix,
 data frame and grouped tibble (class ‘grouped_df’, dplyr compatible).
 
-- [`A1-fast-statistical-functions`](https://fastverse.org/collapse/reference/fast-statistical-functions.md)
-  [`fast-statistical-functions`](https://fastverse.org/collapse/reference/fast-statistical-functions.md)
-  [`.FAST_STAT_FUN`](https://fastverse.org/collapse/reference/fast-statistical-functions.md)
-  [`.FAST_FUN`](https://fastverse.org/collapse/reference/fast-statistical-functions.md)
+- [`fast-statistical-functions`](https://fastverse.org/collapse/reference/fast-statistical-functions.md)
   : Fast (Grouped, Weighted) Statistical Functions for Matrix-Like
   Objects
 - [`fmean()`](https://fastverse.org/collapse/reference/fmean.md) : Fast
@@ -55,8 +47,7 @@ Fast (ordered) groupings from vectors, data.frames, lists. Fast
 ordering, matching, unique values/rows and counts, factor generation and
 interactions, run-length type grouping and grouping of time-sequences.
 
-- [`A2-fast-grouping-ordering`](https://fastverse.org/collapse/reference/fast-grouping-ordering.md)
-  [`fast-grouping-ordering`](https://fastverse.org/collapse/reference/fast-grouping-ordering.md)
+- [`fast-grouping-ordering`](https://fastverse.org/collapse/reference/fast-grouping-ordering.md)
   : Fast Grouping and Ordering
 
 - [`GRP()`](https://fastverse.org/collapse/reference/GRP.md)
@@ -70,7 +61,6 @@ interactions, run-length type grouping and grouping of time-sequences.
   [`greorder()`](https://fastverse.org/collapse/reference/GRP.md)
   [`fgroup_by()`](https://fastverse.org/collapse/reference/GRP.md)
   [`group_by_vars()`](https://fastverse.org/collapse/reference/GRP.md)
-  [`gby()`](https://fastverse.org/collapse/reference/GRP.md)
   [`fgroup_vars()`](https://fastverse.org/collapse/reference/GRP.md)
   [`fungroup()`](https://fastverse.org/collapse/reference/GRP.md)
   [`print(`*`<GRP>`*`)`](https://fastverse.org/collapse/reference/GRP.md)
@@ -108,9 +98,8 @@ interactions, run-length type grouping and grouping of time-sequences.
   [`qG()`](https://fastverse.org/collapse/reference/qF.md)
   [`is_qG()`](https://fastverse.org/collapse/reference/qF.md)
   [`as_factor_qG()`](https://fastverse.org/collapse/reference/qF.md)
-  [`finteraction()`](https://fastverse.org/collapse/reference/qF.md)
-  [`itn()`](https://fastverse.org/collapse/reference/qF.md) : Fast
-  Factor Generation, Interactions and Vector Grouping
+  [`finteraction()`](https://fastverse.org/collapse/reference/qF.md) :
+  Fast Factor Generation, Interactions and Vector Grouping
 
 - [`fdroplevels()`](https://fastverse.org/collapse/reference/fdroplevels.md)
   : Fast Removal of Unused Factor Levels
@@ -130,27 +119,16 @@ Fast and flexible select, replace, add, subset, slice, transform,
 sort/reorder, rename/relabel, bind, join and pivot/reshape data / data
 frame columns.
 
-- [`A3-fast-data-manipulation`](https://fastverse.org/collapse/reference/fast-data-manipulation.md)
-  [`fast-data-manipulation`](https://fastverse.org/collapse/reference/fast-data-manipulation.md)
+- [`fast-data-manipulation`](https://fastverse.org/collapse/reference/fast-data-manipulation.md)
   : Fast Data Manipulation
 - [`fselect()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
   [`` `fselect<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
-  [`slt()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
-  [`` `slt<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
   [`get_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
-  [`gv()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
-  [`gvr()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
   [`` `get_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
-  [`` `gv<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
-  [`` `gvr<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
   [`add_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
   [`` `add_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
-  [`av()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
-  [`` `av<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
   [`num_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
   [`` `num_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
-  [`nv()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
-  [`` `nv<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
   [`cat_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
   [`` `cat_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
   [`char_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
@@ -163,7 +141,6 @@ frame columns.
   [`` `date_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
   : Fast Select, Replace or Add Data Frame Columns
 - [`fsubset()`](https://fastverse.org/collapse/reference/fsubset.md)
-  [`sbt()`](https://fastverse.org/collapse/reference/fsubset.md)
   [`ss()`](https://fastverse.org/collapse/reference/fsubset.md) : Fast
   Subsetting Matrix-Like Objects
 - [`fslice()`](https://fastverse.org/collapse/reference/fslice.md)
@@ -171,20 +148,13 @@ frame columns.
   Fast Slicing of Matrix-Like Objects
 - [`fsummarise()`](https://fastverse.org/collapse/reference/fsummarise.md)
   [`fsummarize()`](https://fastverse.org/collapse/reference/fsummarise.md)
-  [`smr()`](https://fastverse.org/collapse/reference/fsummarise.md) :
-  Fast Summarise
+  : Fast Summarise
 - [`fmutate()`](https://fastverse.org/collapse/reference/ftransform.md)
-  [`mtt()`](https://fastverse.org/collapse/reference/ftransform.md)
   [`ftransform()`](https://fastverse.org/collapse/reference/ftransform.md)
   [`ftransformv()`](https://fastverse.org/collapse/reference/ftransform.md)
-  [`tfm()`](https://fastverse.org/collapse/reference/ftransform.md)
-  [`tfmv()`](https://fastverse.org/collapse/reference/ftransform.md)
   [`settransform()`](https://fastverse.org/collapse/reference/ftransform.md)
   [`settransformv()`](https://fastverse.org/collapse/reference/ftransform.md)
-  [`settfm()`](https://fastverse.org/collapse/reference/ftransform.md)
-  [`settfmv()`](https://fastverse.org/collapse/reference/ftransform.md)
   [`` `ftransform<-`() ``](https://fastverse.org/collapse/reference/ftransform.md)
-  [`` `tfm<-`() ``](https://fastverse.org/collapse/reference/ftransform.md)
   [`fcompute()`](https://fastverse.org/collapse/reference/ftransform.md)
   [`fcomputev()`](https://fastverse.org/collapse/reference/ftransform.md)
   : Fast Transform and Compute Columns on a Data Frame
@@ -197,7 +167,6 @@ frame columns.
   [`colorderv()`](https://fastverse.org/collapse/reference/colorder.md)
   : Fast Reordering of Data Frame Columns
 - [`frename()`](https://fastverse.org/collapse/reference/frename.md)
-  [`rnm()`](https://fastverse.org/collapse/reference/frename.md)
   [`setrename()`](https://fastverse.org/collapse/reference/frename.md)
   [`relabel()`](https://fastverse.org/collapse/reference/frename.md)
   [`setrelabel()`](https://fastverse.org/collapse/reference/frename.md)
@@ -229,9 +198,8 @@ dispatch or extensive checks.
   [`qG()`](https://fastverse.org/collapse/reference/qF.md)
   [`is_qG()`](https://fastverse.org/collapse/reference/qF.md)
   [`as_factor_qG()`](https://fastverse.org/collapse/reference/qF.md)
-  [`finteraction()`](https://fastverse.org/collapse/reference/qF.md)
-  [`itn()`](https://fastverse.org/collapse/reference/qF.md) : Fast
-  Factor Generation, Interactions and Vector Grouping
+  [`finteraction()`](https://fastverse.org/collapse/reference/qF.md) :
+  Fast Factor Generation, Interactions and Vector Grouping
 
 ## Advanced Data Aggregation
 
@@ -251,9 +219,7 @@ and sweeping out of statistics, scaling/standardizing,
 (quasi-)centering, higher-dimensional centering, linear
 prediction/partialling-out.
 
-- [`A6-data-transformations`](https://fastverse.org/collapse/reference/data-transformations.md)
-  [`data-transformations`](https://fastverse.org/collapse/reference/data-transformations.md)
-  [`.OPERATOR_FUN`](https://fastverse.org/collapse/reference/data-transformations.md)
+- [`data-transformations`](https://fastverse.org/collapse/reference/data-transformations.md)
   : Data Transformations
 - [`` `%rr%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
   [`` `%r+%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
@@ -306,25 +272,14 @@ and (compounded) growth rates on (irregular) time series and panel data.
 Auto-, partial- and cross-correlation functions for panel data. Panel
 data to (ts-)array conversion.
 
-- [`A7-time-series-panel-series`](https://fastverse.org/collapse/reference/time-series-panel-series.md)
-  [`time-series-panel-series`](https://fastverse.org/collapse/reference/time-series-panel-series.md)
+- [`time-series-panel-series`](https://fastverse.org/collapse/reference/time-series-panel-series.md)
   : Time Series and Panel Series
 - [`findex_by()`](https://fastverse.org/collapse/reference/indexing.md)
-  [`iby()`](https://fastverse.org/collapse/reference/indexing.md)
   [`findex()`](https://fastverse.org/collapse/reference/indexing.md)
-  [`ix()`](https://fastverse.org/collapse/reference/indexing.md)
   [`unindex()`](https://fastverse.org/collapse/reference/indexing.md)
   [`reindex()`](https://fastverse.org/collapse/reference/indexing.md)
   [`is_irregular()`](https://fastverse.org/collapse/reference/indexing.md)
   [`to_plm()`](https://fastverse.org/collapse/reference/indexing.md)
-  [`` `[`( ``*`<indexed_series>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
-  [`` `[`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
-  [`` `[<-`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
-  [`` `$`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
-  [`` `$<-`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
-  [`` `[[`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
-  [`` `[[<-`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
-  [`` `[`( ``*`<index_df>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
   [`print(`*`<index_df>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
   : Fast Indexed Time Series and Panels
 - [`timeid()`](https://fastverse.org/collapse/reference/timeid.md) :
@@ -355,8 +310,7 @@ data to (ts-)array conversion.
 Recursive list search, splitting, extraction/subsetting, apply, and
 generalized row-binding / unlisting to data frame.
 
-- [`A8-list-processing`](https://fastverse.org/collapse/reference/list-processing.md)
-  [`list-processing`](https://fastverse.org/collapse/reference/list-processing.md)
+- [`list-processing`](https://fastverse.org/collapse/reference/list-processing.md)
   : List Processing
 - [`is_unlistable()`](https://fastverse.org/collapse/reference/is_unlistable.md)
   : Unlistable Lists
@@ -385,8 +339,7 @@ generalized row-binding / unlisting to data frame.
 Fast (grouped, weighted, panel-decomposed) summary statistics and
 descriptive tools.
 
-- [`A9-summary-statistics`](https://fastverse.org/collapse/reference/summary-statistics.md)
-  [`summary-statistics`](https://fastverse.org/collapse/reference/summary-statistics.md)
+- [`summary-statistics`](https://fastverse.org/collapse/reference/summary-statistics.md)
   : Summary Statistics
 - [`qsu()`](https://fastverse.org/collapse/reference/qsu.md)
   [`as.data.frame(`*`<qsu>`*`)`](https://fastverse.org/collapse/reference/qsu.md)
@@ -418,9 +371,7 @@ range of vector.
 - [`fdist()`](https://fastverse.org/collapse/reference/fdist.md) : Fast
   and Flexible Distance Computations
 - [`fquantile()`](https://fastverse.org/collapse/reference/fquantile.md)
-  [`.quantile()`](https://fastverse.org/collapse/reference/fquantile.md)
-  [`frange()`](https://fastverse.org/collapse/reference/fquantile.md)
-  [`.range()`](https://fastverse.org/collapse/reference/fquantile.md) :
+  [`frange()`](https://fastverse.org/collapse/reference/fquantile.md) :
   Fast (Weighted) Sample Quantiles and Range
 
 ## Recode and Replace Values

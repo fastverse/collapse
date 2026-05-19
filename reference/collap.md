@@ -341,7 +341,6 @@ collap(iris, iris$Species, w = weights,
 #> 3     6.530104    2.968984     5.520582   2.0136350  virginica
 
 
-
 ## Multi-Type Aggregation --------------------------------------
 head(wlddev)                                                    # World Development Panel Data
 #>       country iso3c       date year decade     region     income  OECD PCGDP

@@ -8,7 +8,7 @@ very similar to
 [`dplyr::across`](https://dplyr.tidyverse.org/reference/across.html),
 but does not support some `rlang` features, has some additional features
 (arguments), and is optimized to work with *collapse*'s,
-[`.FAST_FUN`](https://fastverse.org/collapse/reference/fast-statistical-functions.md),
+[`.FAST_FUN`](https://fastverse.org/collapse/reference/fast-statistical-functions.html),
 yielding much faster computations.
 
 ## Usage

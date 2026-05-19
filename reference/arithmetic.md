@@ -12,19 +12,19 @@ by reference.
 ``` r
 ## Perform the operation with v and each row of X
 
-X %rr% v
-X %r+% v
-X %r-% v
-X %r*% v
-X %r/% v
+X %rr% v    # Replace rows of X with v
+X %r+% v    # Add v to each row of X
+X %r-% v    # Subtract v from each row of X
+X %r*% v    # Multiply each row of X with v
+X %r/% v    # Divide each row of X by v
 
 ## Perform a column-wise operation between V and X
 
-X %cr% V
-X %c+% V
-X %c-% V
-X %c*% V
-X %c/% V
+X %cr% V    # Replace columns of X with V
+X %c+% V    # Add V to columns of X
+X %c-% V    # Subtract V from columns of X
+X %c*% V    # Multiply columns of X with V
+X %c/% V    # Divide columns of X by V
 ```
 
 ## Arguments

@@ -1,0 +1,884 @@
+# collapse
+
+*collapse* is a large C/C++-based package for data transformation and
+statistical computing in R. It aims to:
+
+- Facilitate complex data transformation, exploration and computing
+  tasks in R.
+- Help make R code fast, flexible, parsimonious and programmer friendly.
+
+Its novel [class-agnostic
+architecture](https://fastverse.org/collapse/articles/collapse_object_handling.html)
+supports all basic R objects and their popular extensions, including
+*units*, *integer64*, *xts*/*zoo*, *tibble*, *grouped_df*, *data.table*,
+*sf*, *pseries* and *pdata.frame*.
+
+**Key Features:**
+
+- **Advanced statistical programming**: A full set of fast statistical
+  functions supporting grouped and weighted computations on vectors,
+  matrices and data frames. Fast and programmable grouping, ordering,
+  matching, deduplication, factor generation and interactions.
+
+- **Fast data manipulation**: Fast and flexible functions for data
+  manipulation, data object conversions and memory efficient R
+  programming.
+
+- **Advanced aggregation**: Fast and easy multi-type, weighted and
+  parallelized data aggregation.
+
+- **Advanced transformations**: Fast row/column arithmetic, (grouped)
+  sweeping out of statistics (by reference), (grouped, weighted) scaling
+  and (higher-dimensional) centering and averaging.
+
+- **Advanced time-computations**: Fast and flexible indexed time series
+  and panel data classes, lags/leads, differences and (compound) growth
+  rates on (irregular) time series and panels, panel-autocorrelation
+  functions and panel data to array conversions.
+
+- **List processing**: Recursive list search, filtering, splitting,
+  apply and unlisting to data frame.
+
+- **Advanced data exploration**: Fast (grouped, weighted, multi-level)
+  descriptive statistical tools.
+
+*collapse* is written in C and C++, with algorithms much faster than
+base R’s, has extremely low evaluation overheads, scales well
+(benchmarks: [linux](https://duckdblabs.github.io/db-benchmark/) \|
+[windows](https://github.com/AdrianAntico/Benchmarks?tab=readme-ov-file#benmark-results)),
+and excels on complex statistical tasks.
+
+## Installation
+
+``` r
+
+# Install the current version on CRAN
+install.packages("collapse")
+
+# Install a stable development version (Windows/Mac binaries) from R-universe
+install.packages("collapse", repos = "https://fastverse.r-universe.dev")
+
+# Install a stable development version from GitHub (requires compilation)
+remotes::install_github("fastverse/collapse")
+
+# Install previous versions from the CRAN Archive (requires compilation)
+install.packages("https://cran.r-project.org/src/contrib/Archive/collapse/collapse_2.0.19.tar.gz", 
+                 repos = NULL, type = "source") 
+# Older stable versions: 1.9.6, 1.8.9, 1.7.6, 1.6.5, 1.5.3, 1.4.2, 1.3.2, 1.2.1
+```
+
+## Documentation
+
+*collapse* installs with a built-in structured
+[documentation](https://fastverse.org/collapse/reference/collapse-documentation.html),
+implemented via a set of separate help pages. Calling
+[`help('collapse-documentation')`](https://fastverse.org/collapse/reference/collapse-documentation.md)
+brings up the the top-level documentation page, providing an overview of
+the entire package and links to all other documentation pages.
+
+In addition there are several
+[vignettes](https://fastverse.org/collapse/articles/index.html), among
+them one on [Documentation and
+Resources](https://fastverse.org/collapse/articles/collapse_documentation.html).
+
+### Cheatsheet
+
+[![](https://raw.githubusercontent.com/fastverse/collapse/master/misc/collapse%20cheat%20sheet/preview/page1.png)](https://raw.githubusercontent.com/fastverse/collapse/master/misc/collapse%20cheat%20sheet/collapse_cheat_sheet.pdf)
+[![](https://raw.githubusercontent.com/fastverse/collapse/master/misc/collapse%20cheat%20sheet/preview/page2.png)](https://raw.githubusercontent.com/fastverse/collapse/master/misc/collapse%20cheat%20sheet/collapse_cheat_sheet.pdf)
+
+### JSS Article
+
+The [**collapse** article](https://doi.org/10.18637/jss.v116.i01) is
+published in the [Journal of Statistical
+Software](https://www.jstatsoft.org/) (volume 116, issue 1). It is the
+primary reference for academic use of the package and a concise
+introduction to its design and capabilities.
+
+### Presentation at [useR 2022](https://user2022.r-project.org)
+
+[**Video Recording**](https://www.youtube.com/watch?v=OwWT1-dSEts) \|
+[**Slides**](https://raw.githubusercontent.com/fastverse/collapse/master/misc/useR2022%20presentation/collapse_useR2022_final.pdf)
+
+## Example Usage
+
+This provides a simple set of examples introducing some important
+features of *collapse*. It should be easy to follow for readers familiar
+with R.
+
+**Click here to expand**
+
+``` r
+
+library(collapse)
+data("iris")            # iris dataset in base R
+v <- iris$Sepal.Length  # Vector
+d <- num_vars(iris)     # Saving numeric variables (could also be a matrix, statistical functions are S3 generic)
+g <- iris$Species       # Grouping variable (could also be a list of variables)
+
+## Advanced Statistical Programming -----------------------------------------------------------------------------
+
+# Simple (column-wise) statistics...
+fmedian(v)                       # Vector
+fsd(qM(d))                       # Matrix (qM is a faster as.matrix)
+fmode(d)                         # data.frame
+fmean(qM(d), drop = FALSE)       # Still a matrix
+fmax(d, drop = FALSE)            # Still a data.frame
+
+# Fast grouped and/or weighted statistics
+w <- abs(rnorm(fnrow(iris)))
+fmedian(d, w = w)                 # Simple weighted statistics
+fnth(d, 0.75, g)                  # Grouped statistics (grouped third quartile)
+fmedian(d, g, w)                  # Groupwise-weighted statistics
+fsd(v, g, w)                      # Similarly for vectors
+fmode(qM(d), g, w, ties = "max")  # Or matrices (grouped and weighted maximum mode) ...
+
+# A fast set of data manipulation functions allows complex piped programming at high speeds
+library(magrittr)                            # Pipe operators
+iris %>% fgroup_by(Species) %>% fndistinct   # Grouped distinct value counts
+iris %>% fgroup_by(Species) %>% fmedian(w)   # Weighted group medians 
+iris %>% add_vars(w) %>%                     # Adding weight vector to dataset
+  fsubset(Sepal.Length < fmean(Sepal.Length), Species, Sepal.Width:w) %>% # Fast selecting and subsetting
+  fgroup_by(Species) %>%                     # Grouping (efficiently creates a grouped tibble)
+  fvar(w) %>%                                # Frequency-weighted group-variance, default (keep.w = TRUE)  
+  roworder(sum.w)                            # also saves group weights in a column called 'sum.w'
+
+# Can also use dplyr (but dplyr manipulation verbs are a lot slower)
+library(dplyr)
+iris %>% add_vars(w) %>% 
+  filter(Sepal.Length < fmean(Sepal.Length)) %>% 
+  select(Species, Sepal.Width:w) %>% 
+  group_by(Species) %>% 
+  fvar(w) %>% arrange(sum.w)
+  
+## Fast Data Manipulation ---------------------------------------------------------------------------------------
+
+head(GGDC10S)
+
+# Pivot Wider: Only SUM (total)
+SUM <- GGDC10S |> pivot(c("Country", "Year"), "SUM", "Variable", how = "wider")
+head(SUM)
+
+# Joining with data from wlddev
+wlddev |>
+    join(SUM, on = c("iso3c" = "Country", "year" = "Year"), how = "inner")
+
+# Recast pivoting + supplying new labels for generated columns
+pivot(GGDC10S, values = 6:16, names = list("Variable", "Sectorcode"),
+      labels = list(to = "Sector",
+                    new = c(Sectorcode = "GGDC10S Sector Code",
+                            Sector = "Long Sector Description",
+                            VA = "Value Added",
+                            EMP = "Employment")), 
+      how = "recast", na.rm = TRUE)
+
+## Advanced Aggregation -----------------------------------------------------------------------------------------
+
+collap(iris, Sepal.Length + Sepal.Width ~ Species, fmean)  # Simple aggregation using the mean..
+collap(iris, ~ Species, list(fmean, fmedian, fmode))       # Multiple functions applied to each column
+add_vars(iris) <- w                                        # Adding weights, return in long format..
+collap(iris, ~ Species, list(fmean, fmedian, fmode), w = ~ w, return = "long")
+
+# Generate some additional logical data
+settransform(iris, AWMSL = Sepal.Length > fmedian(Sepal.Length, w = w), 
+                   AWMSW = Sepal.Width > fmedian(Sepal.Width, w = w))
+
+# Multi-type data aggregation: catFUN applies to all categorical columns (here AMWSW)
+collap(iris, ~ Species + AWMSL, list(fmean, fmedian, fmode), 
+       catFUN = fmode, w = ~ w, return = "long")
+
+# Custom aggregation gives the greatest possible flexibility: directly mapping functions to columns
+collap(iris, ~ Species + AWMSL, 
+       custom = list(fmean = 2:3, fsd = 3:4, fmode = "AWMSL"), w = ~ w, 
+       wFUN = list(fsum, fmin, fmax), # Here also aggregating the weight vector with 3 different functions
+       keep.col.order = FALSE)        # Column order not maintained -> grouping and weight variables first
+
+# Can also use grouped tibble: weighted median for numeric, weighted mode for categorical columns
+iris %>% fgroup_by(Species, AWMSL) %>% collapg(fmedian, fmode, w = w)
+
+## Advanced Transformations -------------------------------------------------------------------------------------
+
+# All Fast Statistical Functions have a TRA argument, supporting 10 different replacing and sweeping operations
+fmode(d, TRA = "replace")     # Replacing values with the mode
+fsd(v, TRA = "/")             # dividing by the overall standard deviation (scaling)
+fsum(d, TRA = "%")            # Computing percentages
+fsd(d, g, TRA = "/")          # Grouped scaling
+fmin(d, g, TRA = "-")         # Setting the minimum value in each species to 0
+ffirst(d, g, TRA = "%%")      # Taking modulus of first value in each species
+fmedian(d, g, w, "-")         # Groupwise centering by the weighted median
+fnth(d, 0.95, g, w, "%")      # Expressing data in percentages of the weighted species-wise 95th percentile
+fmode(d, g, w, "replace",     # Replacing data by the species-wise weighted minimum-mode
+      ties = "min")
+
+# TRA() can also be called directly to replace or sweep with a matching set of computed statistics
+TRA(v, sd(v), "/")                       # Same as fsd(v, TRA = "/")
+TRA(d, fmedian(d, g, w), "-", g)         # Same as fmedian(d, g, w, "-")
+TRA(d, BY(d, g, quantile, 0.95), "%", g) # Same as fnth(d, 0.95, g, TRA = "%") (apart from quantile algorithm)
+
+# For common uses, there are some faster and more advanced functions
+fbetween(d, g)                           # Grouped averaging [same as fmean(d, g, TRA = "replace") but faster]
+fwithin(d, g)                            # Grouped centering [same as fmean(d, g, TRA = "-") but faster]
+fwithin(d, g, w)                         # Grouped and weighted centering [same as fmean(d, g, w, "-")]
+fwithin(d, g, w, theta = 0.76)           # Quasi-centering i.e. d - theta*fbetween(d, g, w)
+fwithin(d, g, w, mean = "overall.mean")  # Preserving the overall weighted mean of the data
+
+fscale(d)                                # Scaling and centering (default mean = 0, sd = 1)
+fscale(d, mean = 5, sd = 3)              # Custom scaling and centering
+fscale(d, mean = FALSE, sd = 3)          # Mean preserving scaling
+fscale(d, g, w)                          # Grouped and weighted scaling and centering
+fscale(d, g, w, mean = "overall.mean",   # Setting group means to overall weighted mean,
+       sd = "within.sd")                 # and group sd's to fsd(fwithin(d, g, w), w = w)
+
+get_vars(iris, 1:2)                      # Use get_vars for fast selecting data.frame columns, gv is shortcut
+fhdbetween(gv(iris, 1:2), gv(iris, 3:5)) # Linear prediction with factors and continuous covariates
+fhdwithin(gv(iris, 1:2), gv(iris, 3:5))  # Linear partialling out factors and continuous covariates
+
+# This again opens up new possibilities for data manipulation...
+iris %>%  
+  ftransform(ASWMSL = Sepal.Length > fmedian(Sepal.Length, Species, w, "replace")) %>%
+  fgroup_by(ASWMSL) %>% collapg(w = w, keep.col.order = FALSE)
+
+iris %>% fgroup_by(Species) %>% num_vars %>% fwithin(w)  # Weighted demeaning
+
+
+## Time Series and Panel Series ---------------------------------------------------------------------------------
+
+flag(AirPassengers, -1:3)                      # A sequence of lags and leads
+EuStockMarkets %>%                             # A sequence of first and second seasonal differences
+  fdiff(0:1 * frequency(.), 1:2)  
+fdiff(EuStockMarkets, rho = 0.95)              # Quasi-difference [x - rho*flag(x)]
+fdiff(EuStockMarkets, log = TRUE)              # Log-difference [log(x/flag(x))]
+EuStockMarkets %>% fgrowth(c(1, frequency(.))) # Ordinary and seasonal growth rate
+EuStockMarkets %>% fgrowth(logdiff = TRUE)     # Log-difference growth rate [log(x/flag(x))*100]
+
+# Creating panel data
+pdata <- EuStockMarkets %>% list(`A` = ., `B` = .) %>% 
+         unlist2d(idcols = "Id", row.names = "Time")  
+
+L(pdata, -1:3, ~Id, ~Time)                   # Sequence of fully identified panel-lags (L is operator for flag) 
+pdata %>% fgroup_by(Id) %>% flag(-1:3, Time) # Same thing..
+
+# collapse also supports indexed series and data frames (and plm panel data classes)
+pdata <- findex_by(pdata, Id, Time)         
+L(pdata, -1:3)          # Same as above, ...
+psacf(pdata)            # Multivariate panel-ACF
+psmat(pdata) %>% plot   # 3D-array of time series from panel data + plotting
+
+HDW(pdata)              # This projects out id and time fixed effects.. (HDW is operator for fhdwithin)
+W(pdata, effect = "Id") # Only Id effects.. (W is operator for fwithin)
+
+## List Processing ----------------------------------------------------------------------------------------------
+
+# Some nested list of heterogenous data objects..
+l <- list(a = qM(mtcars[1:8]),                                   # Matrix
+          b = list(c = mtcars[4:11],                             # data.frame
+                   d = list(e = mtcars[2:10], 
+                            f = fsd(mtcars))))                   # Vector
+
+ldepth(l)                       # List has 4 levels of nesting (considering that mtcars is a data.frame)
+is_unlistable(l)                # Can be unlisted
+has_elem(l, "f")                # Contains an element by the name of "f"
+has_elem(l, is.matrix)          # Contains a matrix
+
+get_elem(l, "f")                # Recursive extraction of elements..
+get_elem(l, c("c","f"))         
+get_elem(l, c("c","f"), keep.tree = TRUE)
+unlist2d(l, row.names = TRUE)   # Intelligent recursive row-binding to data.frame   
+rapply2d(l, fmean) %>% unlist2d # Taking the mean of all elements and repeating
+
+# Application: extracting and tidying results from (potentially nested) lists of model objects
+list(mod1 = lm(mpg ~ carb, mtcars), 
+     mod2 = lm(mpg ~ carb + hp, mtcars)) %>%
+  lapply(summary) %>% 
+  get_elem("coef", regex = TRUE) %>%   # Regular expression search and extraction
+  unlist2d(idcols = "Model", row.names = "Predictor")
+
+## Summary Statistics -------------------------------------------------------------------------------------------
+
+irisNA <- na_insert(iris, prop = 0.15)  # Randmonly set 15% missing
+fnobs(irisNA)                           # Observation count
+pwnobs(irisNA)                          # Pairwise observation count
+fnobs(irisNA, g)                        # Grouped observation count
+fndistinct(irisNA)                      # Same with distinct values... (default na.rm = TRUE skips NA's)
+fndistinct(irisNA, g)  
+
+descr(iris)                                   # Detailed statistical description of data
+
+varying(iris, ~ Species)                      # Show which variables vary within Species
+varying(pdata)                                # Which are time-varying ? 
+qsu(iris, w = ~ w)                            # Fast (one-pass) summary (with weights)
+qsu(iris, ~ Species, w = ~ w, higher = TRUE)  # Grouped summary + higher moments
+qsu(pdata, higher = TRUE)                     # Panel-data summary (between and within entities)
+pwcor(num_vars(irisNA), N = TRUE, P = TRUE)   # Pairwise correlations with p-value and observations
+pwcor(W(pdata, keep.ids = FALSE), P = TRUE)   # Within-correlations
+```
+
+Evaluated and more extensive sets of examples are provided on the
+[package
+page](https://fastverse.org/collapse/reference/collapse-package.html)
+(also accessible from R by calling `example('collapse-package')`), and
+further in the
+[vignettes](https://fastverse.org/collapse/articles/index.html) and
+[documentation](https://fastverse.org/collapse/reference/index.html).
+
+## Citation
+
+If *collapse* was instrumental for your research project, please
+consider citing it using `citation("collapse")`.
+
+# Package index
+
+- [`collapse-package`](https://fastverse.org/collapse/reference/collapse-package.md)
+  [`collapse`](https://fastverse.org/collapse/reference/collapse-package.md)
+  : Advanced and Fast Data Transformation
+- [`A0-collapse-documentation`](https://fastverse.org/collapse/reference/collapse-documentation.md)
+  [`collapse-documentation`](https://fastverse.org/collapse/reference/collapse-documentation.md)
+  [`.COLLAPSE_TOPICS`](https://fastverse.org/collapse/reference/collapse-documentation.md)
+  [`.COLLAPSE_ALL`](https://fastverse.org/collapse/reference/collapse-documentation.md)
+  [`.COLLAPSE_GENERIC`](https://fastverse.org/collapse/reference/collapse-documentation.md)
+  [`.COLLAPSE_DATA`](https://fastverse.org/collapse/reference/collapse-documentation.md)
+  : Collapse Documentation & Overview
+
+## Fast Statistical Functions
+
+Fast (grouped and weighted) statistical functions for vector, matrix,
+data frame and grouped tibble (class ‘grouped_df’, dplyr compatible).
+
+- [`A1-fast-statistical-functions`](https://fastverse.org/collapse/reference/fast-statistical-functions.md)
+  [`fast-statistical-functions`](https://fastverse.org/collapse/reference/fast-statistical-functions.md)
+  [`.FAST_STAT_FUN`](https://fastverse.org/collapse/reference/fast-statistical-functions.md)
+  [`.FAST_FUN`](https://fastverse.org/collapse/reference/fast-statistical-functions.md)
+  : Fast (Grouped, Weighted) Statistical Functions for Matrix-Like
+  Objects
+- [`fmean()`](https://fastverse.org/collapse/reference/fmean.md) : Fast
+  (Grouped, Weighted) Mean for Matrix-Like Objects
+- [`fnth()`](https://fastverse.org/collapse/reference/fnth_fmedian.md)
+  [`fmedian()`](https://fastverse.org/collapse/reference/fnth_fmedian.md)
+  : Fast (Grouped, Weighted) N'th Element/Quantile for Matrix-Like
+  Objects
+- [`fmode()`](https://fastverse.org/collapse/reference/fmode.md) : Fast
+  (Grouped, Weighted) Statistical Mode for Matrix-Like Objects
+- [`fsum()`](https://fastverse.org/collapse/reference/fsum.md) : Fast
+  (Grouped, Weighted) Sum for Matrix-Like Objects
+- [`fprod()`](https://fastverse.org/collapse/reference/fprod.md) : Fast
+  (Grouped, Weighted) Product for Matrix-Like Objects
+- [`fvar()`](https://fastverse.org/collapse/reference/fvar_fsd.md)
+  [`fsd()`](https://fastverse.org/collapse/reference/fvar_fsd.md) : Fast
+  (Grouped, Weighted) Variance and Standard Deviation for Matrix-Like
+  Objects
+- [`fmax()`](https://fastverse.org/collapse/reference/fmin_fmax.md)
+  [`fmin()`](https://fastverse.org/collapse/reference/fmin_fmax.md) :
+  Fast (Grouped) Maxima and Minima for Matrix-Like Objects
+- [`ffirst()`](https://fastverse.org/collapse/reference/ffirst_flast.md)
+  [`flast()`](https://fastverse.org/collapse/reference/ffirst_flast.md)
+  : Fast (Grouped) First and Last Value for Matrix-Like Objects
+- [`fnobs()`](https://fastverse.org/collapse/reference/fnobs.md) : Fast
+  (Grouped) Observation Count for Matrix-Like Objects
+- [`fndistinct()`](https://fastverse.org/collapse/reference/fndistinct.md)
+  : Fast (Grouped) Distinct Value Count for Matrix-Like Objects
+
+## Fast Grouping and Ordering
+
+Fast (ordered) groupings from vectors, data.frames, lists. Fast
+ordering, matching, unique values/rows and counts, factor generation and
+interactions, run-length type grouping and grouping of time-sequences.
+
+- [`A2-fast-grouping-ordering`](https://fastverse.org/collapse/reference/fast-grouping-ordering.md)
+  [`fast-grouping-ordering`](https://fastverse.org/collapse/reference/fast-grouping-ordering.md)
+  : Fast Grouping and Ordering
+
+- [`GRP()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`is_GRP()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`length(`*`<GRP>`*`)`](https://fastverse.org/collapse/reference/GRP.md)
+  [`GRPN()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`GRPid()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`GRPnames()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`as_factor_GRP()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`gsplit()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`greorder()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`fgroup_by()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`group_by_vars()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`gby()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`fgroup_vars()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`fungroup()`](https://fastverse.org/collapse/reference/GRP.md)
+  [`print(`*`<GRP>`*`)`](https://fastverse.org/collapse/reference/GRP.md)
+  [`plot(`*`<GRP>`*`)`](https://fastverse.org/collapse/reference/GRP.md)
+  :
+
+  Fast Grouping / *collapse* Grouping Objects
+
+- [`radixorder()`](https://fastverse.org/collapse/reference/radixorder.md)
+  [`radixorderv()`](https://fastverse.org/collapse/reference/radixorder.md)
+  : Fast Radix-Based Ordering
+
+- [`group()`](https://fastverse.org/collapse/reference/group.md)
+  [`groupv()`](https://fastverse.org/collapse/reference/group.md) : Fast
+  Hash-Based Grouping
+
+- [`fmatch()`](https://fastverse.org/collapse/reference/fmatch.md)
+  [`ckmatch()`](https://fastverse.org/collapse/reference/fmatch.md)
+  [`` `%!in%` ``](https://fastverse.org/collapse/reference/fmatch.md)
+  [`` `%iin%` ``](https://fastverse.org/collapse/reference/fmatch.md)
+  [`` `%!iin%` ``](https://fastverse.org/collapse/reference/fmatch.md) :
+  Fast Matching
+
+- [`funique()`](https://fastverse.org/collapse/reference/funique.md)
+  [`fnunique()`](https://fastverse.org/collapse/reference/funique.md)
+  [`fduplicated()`](https://fastverse.org/collapse/reference/funique.md)
+  [`any_duplicated()`](https://fastverse.org/collapse/reference/funique.md)
+  : Fast Unique Elements / Rows
+
+- [`fcount()`](https://fastverse.org/collapse/reference/fcount.md)
+  [`fcountv()`](https://fastverse.org/collapse/reference/fcount.md) :
+  Efficiently Count Observations by Group
+
+- [`qF()`](https://fastverse.org/collapse/reference/qF.md)
+  [`qG()`](https://fastverse.org/collapse/reference/qF.md)
+  [`is_qG()`](https://fastverse.org/collapse/reference/qF.md)
+  [`as_factor_qG()`](https://fastverse.org/collapse/reference/qF.md)
+  [`finteraction()`](https://fastverse.org/collapse/reference/qF.md)
+  [`itn()`](https://fastverse.org/collapse/reference/qF.md) : Fast
+  Factor Generation, Interactions and Vector Grouping
+
+- [`fdroplevels()`](https://fastverse.org/collapse/reference/fdroplevels.md)
+  : Fast Removal of Unused Factor Levels
+
+- [`groupid()`](https://fastverse.org/collapse/reference/groupid.md) :
+  Generate Run-Length Type Group-Id
+
+- [`seqid()`](https://fastverse.org/collapse/reference/seqid.md) :
+  Generate Group-Id from Integer Sequences
+
+- [`timeid()`](https://fastverse.org/collapse/reference/timeid.md) :
+  Generate Integer-Id From Time/Date Sequences
+
+## Fast Data Manipulation
+
+Fast and flexible select, replace, add, subset, slice, transform,
+sort/reorder, rename/relabel, bind, join and pivot/reshape data / data
+frame columns.
+
+- [`A3-fast-data-manipulation`](https://fastverse.org/collapse/reference/fast-data-manipulation.md)
+  [`fast-data-manipulation`](https://fastverse.org/collapse/reference/fast-data-manipulation.md)
+  : Fast Data Manipulation
+- [`fselect()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `fselect<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`slt()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `slt<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`get_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`gv()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`gvr()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `get_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `gv<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `gvr<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`add_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `add_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`av()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `av<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`num_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `num_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`nv()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `nv<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`cat_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `cat_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`char_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `char_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`fact_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `fact_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`logi_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `logi_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`date_vars()`](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  [`` `date_vars<-`() ``](https://fastverse.org/collapse/reference/select_replace_vars.md)
+  : Fast Select, Replace or Add Data Frame Columns
+- [`fsubset()`](https://fastverse.org/collapse/reference/fsubset.md)
+  [`sbt()`](https://fastverse.org/collapse/reference/fsubset.md)
+  [`ss()`](https://fastverse.org/collapse/reference/fsubset.md) : Fast
+  Subsetting Matrix-Like Objects
+- [`fslice()`](https://fastverse.org/collapse/reference/fslice.md)
+  [`fslicev()`](https://fastverse.org/collapse/reference/fslice.md) :
+  Fast Slicing of Matrix-Like Objects
+- [`fsummarise()`](https://fastverse.org/collapse/reference/fsummarise.md)
+  [`fsummarize()`](https://fastverse.org/collapse/reference/fsummarise.md)
+  [`smr()`](https://fastverse.org/collapse/reference/fsummarise.md) :
+  Fast Summarise
+- [`fmutate()`](https://fastverse.org/collapse/reference/ftransform.md)
+  [`mtt()`](https://fastverse.org/collapse/reference/ftransform.md)
+  [`ftransform()`](https://fastverse.org/collapse/reference/ftransform.md)
+  [`ftransformv()`](https://fastverse.org/collapse/reference/ftransform.md)
+  [`tfm()`](https://fastverse.org/collapse/reference/ftransform.md)
+  [`tfmv()`](https://fastverse.org/collapse/reference/ftransform.md)
+  [`settransform()`](https://fastverse.org/collapse/reference/ftransform.md)
+  [`settransformv()`](https://fastverse.org/collapse/reference/ftransform.md)
+  [`settfm()`](https://fastverse.org/collapse/reference/ftransform.md)
+  [`settfmv()`](https://fastverse.org/collapse/reference/ftransform.md)
+  [`` `ftransform<-`() ``](https://fastverse.org/collapse/reference/ftransform.md)
+  [`` `tfm<-`() ``](https://fastverse.org/collapse/reference/ftransform.md)
+  [`fcompute()`](https://fastverse.org/collapse/reference/ftransform.md)
+  [`fcomputev()`](https://fastverse.org/collapse/reference/ftransform.md)
+  : Fast Transform and Compute Columns on a Data Frame
+- [`across()`](https://fastverse.org/collapse/reference/across.md) :
+  Apply Functions Across Multiple Columns
+- [`roworder()`](https://fastverse.org/collapse/reference/roworder.md)
+  [`roworderv()`](https://fastverse.org/collapse/reference/roworder.md)
+  : Fast Reordering of Data Frame Rows
+- [`colorder()`](https://fastverse.org/collapse/reference/colorder.md)
+  [`colorderv()`](https://fastverse.org/collapse/reference/colorder.md)
+  : Fast Reordering of Data Frame Columns
+- [`frename()`](https://fastverse.org/collapse/reference/frename.md)
+  [`rnm()`](https://fastverse.org/collapse/reference/frename.md)
+  [`setrename()`](https://fastverse.org/collapse/reference/frename.md)
+  [`relabel()`](https://fastverse.org/collapse/reference/frename.md)
+  [`setrelabel()`](https://fastverse.org/collapse/reference/frename.md)
+  : Fast Renaming and Relabelling Objects
+- [`rowbind()`](https://fastverse.org/collapse/reference/rowbind.md) :
+  Row-Bind Lists / Data Frame-Like Objects
+- [`join()`](https://fastverse.org/collapse/reference/join.md) : Fast
+  and Verbose Table Joins
+- [`pivot()`](https://fastverse.org/collapse/reference/pivot.md) : Fast
+  and Easy Data Reshaping
+
+## Quick Data Conversion
+
+Quick conversions between data.frame’s, data.table’s, tibbles, matrices,
+arrays, lists, vectors and factors - fast and flexible, without method
+dispatch or extensive checks.
+
+- [`qDF()`](https://fastverse.org/collapse/reference/quick-conversion.md)
+  [`qDT()`](https://fastverse.org/collapse/reference/quick-conversion.md)
+  [`qTBL()`](https://fastverse.org/collapse/reference/quick-conversion.md)
+  [`qM()`](https://fastverse.org/collapse/reference/quick-conversion.md)
+  [`mctl()`](https://fastverse.org/collapse/reference/quick-conversion.md)
+  [`mrtl()`](https://fastverse.org/collapse/reference/quick-conversion.md)
+  [`as_numeric_factor()`](https://fastverse.org/collapse/reference/quick-conversion.md)
+  [`as_integer_factor()`](https://fastverse.org/collapse/reference/quick-conversion.md)
+  [`as_character_factor()`](https://fastverse.org/collapse/reference/quick-conversion.md)
+  : Quick Data Conversion
+- [`qF()`](https://fastverse.org/collapse/reference/qF.md)
+  [`qG()`](https://fastverse.org/collapse/reference/qF.md)
+  [`is_qG()`](https://fastverse.org/collapse/reference/qF.md)
+  [`as_factor_qG()`](https://fastverse.org/collapse/reference/qF.md)
+  [`finteraction()`](https://fastverse.org/collapse/reference/qF.md)
+  [`itn()`](https://fastverse.org/collapse/reference/qF.md) : Fast
+  Factor Generation, Interactions and Vector Grouping
+
+## Advanced Data Aggregation
+
+Fast and easy multi-data-type, multi-function, weighted and parallelized
+data aggregation.
+
+- [`collap()`](https://fastverse.org/collapse/reference/collap.md)
+  [`collapv()`](https://fastverse.org/collapse/reference/collap.md)
+  [`collapg()`](https://fastverse.org/collapse/reference/collap.md) :
+  Advanced Data Aggregation
+
+## Data Transformations
+
+Fast row/column arithmetic, efficient row/column apply to data objects
+and Split-Apply-Combine computing. Fast (grouped, weighted) replacing
+and sweeping out of statistics, scaling/standardizing,
+(quasi-)centering, higher-dimensional centering, linear
+prediction/partialling-out.
+
+- [`A6-data-transformations`](https://fastverse.org/collapse/reference/data-transformations.md)
+  [`data-transformations`](https://fastverse.org/collapse/reference/data-transformations.md)
+  [`.OPERATOR_FUN`](https://fastverse.org/collapse/reference/data-transformations.md)
+  : Data Transformations
+- [`` `%rr%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
+  [`` `%r+%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
+  [`` `%r-%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
+  [`` `%r*%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
+  [`` `%r/%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
+  [`` `%cr%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
+  [`` `%c+%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
+  [`` `%c-%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
+  [`` `%c*%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
+  [`` `%c/%` ``](https://fastverse.org/collapse/reference/arithmetic.md)
+  : Fast Row/Column Arithmetic for Matrix-Like Objects
+- [`dapply()`](https://fastverse.org/collapse/reference/dapply.md) :
+  Data Apply
+- [`BY()`](https://fastverse.org/collapse/reference/BY.md) :
+  Split-Apply-Combine Computing
+- [`TRA()`](https://fastverse.org/collapse/reference/TRA.md)
+  [`setTRA()`](https://fastverse.org/collapse/reference/TRA.md) :
+  Transform Data by (Grouped) Replacing or Sweeping out Statistics
+- [`fscale()`](https://fastverse.org/collapse/reference/fscale.md)
+  [`STD()`](https://fastverse.org/collapse/reference/fscale.md) : Fast
+  (Grouped, Weighted) Scaling and Centering of Matrix-like Objects
+- [`fbetween()`](https://fastverse.org/collapse/reference/fbetween_fwithin.md)
+  [`fwithin()`](https://fastverse.org/collapse/reference/fbetween_fwithin.md)
+  [`B()`](https://fastverse.org/collapse/reference/fbetween_fwithin.md)
+  [`W()`](https://fastverse.org/collapse/reference/fbetween_fwithin.md)
+  : Fast Between (Averaging) and (Quasi-)Within (Centering)
+  Transformations
+- [`fhdbetween()`](https://fastverse.org/collapse/reference/fhdbetween_fhdwithin.md)
+  [`fhdwithin()`](https://fastverse.org/collapse/reference/fhdbetween_fhdwithin.md)
+  [`HDB()`](https://fastverse.org/collapse/reference/fhdbetween_fhdwithin.md)
+  [`HDW()`](https://fastverse.org/collapse/reference/fhdbetween_fhdwithin.md)
+  : Higher-Dimensional Centering and Linear Prediction
+
+## Linear Models
+
+Fast (weighted) linear model fitting. A fast F-test for high-dimensional
+linear models.
+
+- [`flm()`](https://fastverse.org/collapse/reference/flm.md) : Fast
+  (Weighted) Linear Model Fitting
+- [`fFtest()`](https://fastverse.org/collapse/reference/fFtest.md) :
+  Fast (Weighted) F-test for Linear Models (with Factors)
+
+## Time Series and Panel Series
+
+Fast and flexible indexed time series and panel data classes, (sequences
+of) lags/leads, and (lagged/leaded, iterated, quasi-, log-) differences
+and (compounded) growth rates on (irregular) time series and panel data.
+Auto-, partial- and cross-correlation functions for panel data. Panel
+data to (ts-)array conversion.
+
+- [`A7-time-series-panel-series`](https://fastverse.org/collapse/reference/time-series-panel-series.md)
+  [`time-series-panel-series`](https://fastverse.org/collapse/reference/time-series-panel-series.md)
+  : Time Series and Panel Series
+- [`findex_by()`](https://fastverse.org/collapse/reference/indexing.md)
+  [`iby()`](https://fastverse.org/collapse/reference/indexing.md)
+  [`findex()`](https://fastverse.org/collapse/reference/indexing.md)
+  [`ix()`](https://fastverse.org/collapse/reference/indexing.md)
+  [`unindex()`](https://fastverse.org/collapse/reference/indexing.md)
+  [`reindex()`](https://fastverse.org/collapse/reference/indexing.md)
+  [`is_irregular()`](https://fastverse.org/collapse/reference/indexing.md)
+  [`to_plm()`](https://fastverse.org/collapse/reference/indexing.md)
+  [`` `[`( ``*`<indexed_series>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
+  [`` `[`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
+  [`` `[<-`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
+  [`` `$`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
+  [`` `$<-`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
+  [`` `[[`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
+  [`` `[[<-`( ``*`<indexed_frame>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
+  [`` `[`( ``*`<index_df>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
+  [`print(`*`<index_df>`*`)`](https://fastverse.org/collapse/reference/indexing.md)
+  : Fast Indexed Time Series and Panels
+- [`timeid()`](https://fastverse.org/collapse/reference/timeid.md) :
+  Generate Integer-Id From Time/Date Sequences
+- [`flag()`](https://fastverse.org/collapse/reference/flag.md)
+  [`L()`](https://fastverse.org/collapse/reference/flag.md) : Fast Lags
+  and Leads for Time Series and Panel Data
+- [`fdiff()`](https://fastverse.org/collapse/reference/fdiff.md)
+  [`D()`](https://fastverse.org/collapse/reference/fdiff.md)
+  [`Dlog()`](https://fastverse.org/collapse/reference/fdiff.md) : Fast
+  (Quasi-, Log-) Differences for Time Series and Panel Data
+- [`fgrowth()`](https://fastverse.org/collapse/reference/fgrowth.md)
+  [`G()`](https://fastverse.org/collapse/reference/fgrowth.md) : Fast
+  Growth Rates for Time Series and Panel Data
+- [`fcumsum()`](https://fastverse.org/collapse/reference/fcumsum.md) :
+  Fast (Grouped, Ordered) Cumulative Sum for Matrix-Like Objects
+- [`psacf()`](https://fastverse.org/collapse/reference/psacf.md)
+  [`pspacf()`](https://fastverse.org/collapse/reference/psacf.md)
+  [`psccf()`](https://fastverse.org/collapse/reference/psacf.md) : Auto-
+  and Cross- Covariance and Correlation Function Estimation for Panel
+  Series
+- [`psmat()`](https://fastverse.org/collapse/reference/psmat.md)
+  [`plot(`*`<psmat>`*`)`](https://fastverse.org/collapse/reference/psmat.md)
+  : Matrix / Array from Panel Series
+
+## List Processing
+
+Recursive list search, splitting, extraction/subsetting, apply, and
+generalized row-binding / unlisting to data frame.
+
+- [`A8-list-processing`](https://fastverse.org/collapse/reference/list-processing.md)
+  [`list-processing`](https://fastverse.org/collapse/reference/list-processing.md)
+  : List Processing
+- [`is_unlistable()`](https://fastverse.org/collapse/reference/is_unlistable.md)
+  : Unlistable Lists
+- [`ldepth()`](https://fastverse.org/collapse/reference/ldepth.md) :
+  Determine the Depth / Level of Nesting of a List
+- [`atomic_elem()`](https://fastverse.org/collapse/reference/extract_list.md)
+  [`` `atomic_elem<-`() ``](https://fastverse.org/collapse/reference/extract_list.md)
+  [`list_elem()`](https://fastverse.org/collapse/reference/extract_list.md)
+  [`` `list_elem<-`() ``](https://fastverse.org/collapse/reference/extract_list.md)
+  [`reg_elem()`](https://fastverse.org/collapse/reference/extract_list.md)
+  [`irreg_elem()`](https://fastverse.org/collapse/reference/extract_list.md)
+  [`get_elem()`](https://fastverse.org/collapse/reference/extract_list.md)
+  [`has_elem()`](https://fastverse.org/collapse/reference/extract_list.md)
+  : Find and Extract / Subset List Elements
+- [`rsplit()`](https://fastverse.org/collapse/reference/rsplit.md) :
+  Fast (Recursive) Splitting
+- [`t_list()`](https://fastverse.org/collapse/reference/t_list.md) :
+  Efficient List Transpose
+- [`rapply2d()`](https://fastverse.org/collapse/reference/rapply2d.md) :
+  Recursively Apply a Function to a List of Data Objects
+- [`unlist2d()`](https://fastverse.org/collapse/reference/unlist2d.md) :
+  Recursive Row-Binding / Unlisting in 2D - to Data Frame
+
+## Summary Statistics
+
+Fast (grouped, weighted, panel-decomposed) summary statistics and
+descriptive tools.
+
+- [`A9-summary-statistics`](https://fastverse.org/collapse/reference/summary-statistics.md)
+  [`summary-statistics`](https://fastverse.org/collapse/reference/summary-statistics.md)
+  : Summary Statistics
+- [`qsu()`](https://fastverse.org/collapse/reference/qsu.md)
+  [`as.data.frame(`*`<qsu>`*`)`](https://fastverse.org/collapse/reference/qsu.md)
+  [`print(`*`<qsu>`*`)`](https://fastverse.org/collapse/reference/qsu.md)
+  : Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and
+  Panel Data
+- [`qtab()`](https://fastverse.org/collapse/reference/qtab.md)
+  [`qtable()`](https://fastverse.org/collapse/reference/qtab.md) : Fast
+  (Weighted) Cross Tabulation
+- [`descr()`](https://fastverse.org/collapse/reference/descr.md)
+  [`as.data.frame(`*`<descr>`*`)`](https://fastverse.org/collapse/reference/descr.md)
+  [`print(`*`<descr>`*`)`](https://fastverse.org/collapse/reference/descr.md)
+  : Detailed Statistical Description of Data Frame
+- [`pwcor()`](https://fastverse.org/collapse/reference/pwcor_pwcov_pwnobs.md)
+  [`pwcov()`](https://fastverse.org/collapse/reference/pwcor_pwcov_pwnobs.md)
+  [`pwnobs()`](https://fastverse.org/collapse/reference/pwcor_pwcov_pwnobs.md)
+  [`print(`*`<pwcor>`*`)`](https://fastverse.org/collapse/reference/pwcor_pwcov_pwnobs.md)
+  [`print(`*`<pwcov>`*`)`](https://fastverse.org/collapse/reference/pwcor_pwcov_pwnobs.md)
+  : (Pairwise, Weighted) Correlations, Covariances and Observation
+  Counts
+- [`varying()`](https://fastverse.org/collapse/reference/varying.md) :
+  Fast Check of Variation in Data
+
+## Other Statistical
+
+Fast euclidean distance computations, (weighted) sample quantiles, and
+range of vector.
+
+- [`fdist()`](https://fastverse.org/collapse/reference/fdist.md) : Fast
+  and Flexible Distance Computations
+- [`fquantile()`](https://fastverse.org/collapse/reference/fquantile.md)
+  [`.quantile()`](https://fastverse.org/collapse/reference/fquantile.md)
+  [`frange()`](https://fastverse.org/collapse/reference/fquantile.md)
+  [`.range()`](https://fastverse.org/collapse/reference/fquantile.md) :
+  Fast (Weighted) Sample Quantiles and Range
+
+## Recode and Replace Values
+
+Efficiently recode and replace values in matrix-like objects.
+
+- [`recode_num()`](https://fastverse.org/collapse/reference/recode-replace.md)
+  [`recode_char()`](https://fastverse.org/collapse/reference/recode-replace.md)
+  [`replace_na()`](https://fastverse.org/collapse/reference/recode-replace.md)
+  [`replace_inf()`](https://fastverse.org/collapse/reference/recode-replace.md)
+  [`replace_outliers()`](https://fastverse.org/collapse/reference/recode-replace.md)
+  : Recode and Replace Values in Matrix-Like Objects
+- [`pad()`](https://fastverse.org/collapse/reference/pad.md) : Pad
+  Matrix-Like Objects with a Value
+
+## (Memory) Efficient Programming
+
+Functions to make R programming more efficient.
+
+- [`anyv()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`allv()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`allNA()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`whichv()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`whichNA()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`` `%==%` ``](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`` `%!=%` ``](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`alloc()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`copyv()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`setv()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`setop()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`` `%+=%` ``](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`` `%-=%` ``](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`` `%*=%` ``](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`` `%/=%` ``](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`na_rm()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`na_locf()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`na_focb()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`na_omit()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`na_insert()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`missing_cases()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`vlengths()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`vtypes()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`vgcd()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`fnlevels()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`fnrow()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`fncol()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`fdim()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`seq_row()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`seq_col()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`vec()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  [`cinv()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  : Small Functions to Make R Programming More Efficient
+
+## Small (Helper) Functions
+
+Convenience functions to perform multiple-assignment, nonstandard
+concatenation, and deal with variable names, labels, other attributes,
+object checking, and help with metaprogramming.
+
+- [`.c()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`` `%=%` ``](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`massign()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`vlabels()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`` `vlabels<-`() ``](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`setLabels()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`vclasses()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`namlab()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`add_stub()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`rm_stub()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`all_identical()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`all_obj_equal()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`all_funs()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`setRownames()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`setColnames()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`setDimnames()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`unattrib()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`setAttrib()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`setattrib()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`copyAttrib()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`copyMostAttrib()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`is_categorical()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  [`is_date()`](https://fastverse.org/collapse/reference/small-helpers.md)
+  : Small (Helper) Functions
+
+## Data
+
+Groningen Growth and Development Centre 10-Sector Database and World
+Bank World Development dataset.
+
+- [`GGDC10S`](https://fastverse.org/collapse/reference/GGDC10S.md) :
+  Groningen Growth and Development Centre 10-Sector Database
+- [`wlddev`](https://fastverse.org/collapse/reference/wlddev.md) : World
+  Development Dataset
+
+## Package Options
+
+Global options affecting package operation.
+
+- [`set_collapse()`](https://fastverse.org/collapse/reference/collapse-options.md)
+  [`get_collapse()`](https://fastverse.org/collapse/reference/collapse-options.md)
+  :
+
+  *collapse* Package Options
+
+# Articles
+
+### Updated
+
+Vignettes that are up to date with versions 2.0 and onwards
+
+- [collapse Documentation and
+  Resources](https://fastverse.org/collapse/articles/collapse_documentation.md):
+- [collapse for tidyverse
+  Users](https://fastverse.org/collapse/articles/collapse_for_tidyverse_users.md):
+- [collapse and
+  sf](https://fastverse.org/collapse/articles/collapse_and_sf.md):
+- [collapse's Handling of R
+  Objects](https://fastverse.org/collapse/articles/collapse_object_handling.md):
+- [Developing with
+  collapse](https://fastverse.org/collapse/articles/developing_with_collapse.md):
+
+### Legacy (Pre v1.7)
+
+Vignettes that cover functionality of versions \<1.7. These remain very
+useful, but do not cover newer features.
+
+- [Introduction to
+  collapse](https://fastverse.org/collapse/articles/collapse_intro.md):
+- [collapse and
+  dplyr](https://fastverse.org/collapse/articles/collapse_and_dplyr.md):
+- [collapse and
+  data.table](https://fastverse.org/collapse/articles/collapse_and_data.table.md):
+- [collapse and
+  plm](https://fastverse.org/collapse/articles/collapse_and_plm.md):

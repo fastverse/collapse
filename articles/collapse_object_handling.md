@@ -1,0 +1,412 @@
+# collapse's Handling of R Objects
+
+This much-requested vignette provides some details about how *collapse*
+deals with various R objects. It is principally a digest of cumulative
+details provided in the
+[NEWS](https://fastverse.org/collapse/news/index.html) for various
+releases since v1.4.0.
+
+## Overview
+
+*collapse* provides a class-agnostic architecture permitting
+computations on a very broad range of R objects. It provides explicit
+support for base R classes and data types (*logical*, *integer*,
+*double*, *character*, *list*, *data.frame*, *matrix*, *factor*, *Date*,
+*POSIXct*, *ts*) and their popular extensions, including *integer64*,
+*data.table*, *tibble*, *grouped_df*, *xts*/*zoo*, *pseries*,
+*pdata.frame*, *units*, and *sf* (no geometric operations).
+
+It also introduces
+[*GRP_df*](https://fastverse.org/collapse/reference/GRP.html) as a more
+performant and class-agnostic grouped data frame, and [*indexed_series*
+and
+*indexed_frame*](https://fastverse.org/collapse/reference/indexing.html)
+classes as modern class-agnostic successors of *pseries*, *pdata.frame*.
+These objects inherit the classes they succeed and are handled through
+`.pseries`, `.pdata.frame`, and `.grouped_df` methods, which also
+support the original (*plm* / *dplyr*) implementations (details below).
+
+All other objects are handled internally at the C or R level using
+general principles extended by specific considerations for some of the
+above classes. I start with summarizing the general principles, which
+enable the usage of *collapse* with further classes it does not
+explicitly support.
+
+## General Principles
+
+In general, *collapse* preserves attributes and classes of R objects in
+statistical and data manipulation operations unless their preservation
+involves a **high-risk** of yielding something wrong/useless. Risky
+operations change the dimensions or internal data type
+([`typeof()`](https://rdrr.io/r/base/typeof.html)) of an R object.
+
+To *collapse*’s R and C code, there exist 3 principal types of R
+objects: atomic vectors, matrices, and lists - which are often assumed
+to be data frames. Most data manipulation functions in *collapse*, like
+[`fmutate()`](https://fastverse.org/collapse/reference/ftransform.md),
+only support lists, whereas statistical functions - like the S3 generic
+[*Fast Statistical
+Functions*](https://fastverse.org/collapse/reference/fast-statistical-functions.html)
+like [`fmean()`](https://fastverse.org/collapse/reference/fmean.md) -
+generally support all 3 types of objects.
+
+S3 generic functions initially dispatch to `.default`, `.matrix`,
+`.data.frame`, and (hidden) `.list` methods. The `.list` method
+generally dispatches to the `.data.frame` method. These basic methods,
+and other non-generic functions in *collapse*, then decide how exactly
+to handle the object based on the statistical operation performed and
+attribute handling principles mostly implemented in C.
+
+The simplest case arises when an operation preserves the dimensions of
+the object, such as `fscale(x)` or `fmutate(data, across(a:c, log))`. In
+this case, all attributes of `x / data` are fully preserved[^1].
+
+Another simple case for matrices and lists arises when a statistical
+operation reduces them to a single dimension such as `fmean(x)`, where,
+under the `drop = TRUE` default of [*Fast Statistical
+Functions*](https://fastverse.org/collapse/reference/fast-statistical-functions.html),
+all attributes apart from (column-)names are dropped and a (named)
+vector of means is returned.
+
+For atomic vectors, a statistical operation like `fmean(x)` will
+preserve the attributes (except for *ts* objects), as the object could
+have useful properties such as labels or units.
+
+More complex cases involve changing the dimensions of an object. If the
+number of rows is preserved e.g. `fmutate(data, a_b = a / b)` or
+`flag(x, -1:1)`, only the (column-)names attribute of the object is
+modified. If the number of rows is reduced e.g. `fmean(x, g)`, all
+attributes are also retained under suitable modifications of the
+(row-)names attribute. However, if `x` is a matrix, other attributes
+than row- or column-names are only retained if `!is.object(x)`, that is,
+if the matrix does not have a ‘class’ attribute. For atomic vectors,
+attributes are retained if `!inherits(x, "ts")`, as aggregating a time
+series will break the class. This also applies to columns in a data
+frame being aggregated.
+
+When data is transformed using statistics as provided by the [`TRA()`
+function](https://fastverse.org/collapse/reference/TRA.html)
+e.g. `TRA(x, STATS, operation, groups)` and the like-named argument to
+the [*Fast Statistical
+Functions*](https://fastverse.org/collapse/reference/fast-statistical-functions.html),
+operations that simply modify the input (`x`) in a statistical sense
+(`"replace_na"`, `"-"`, `"-+"`, `"/"`, `"+"`, `"*"`, `"%%"`, `"-%%"`)
+just copy the attributes to the transformed object. Operations `"fill"`
+and `"replace"` are more tricky, since here `x` is replaced with
+`STATS`, which could be of a different class or data type. The following
+rules apply: (1) the result has the same data type as `STATS`; (2) if
+`is.object(STATS)`, the attributes of `STATS` are preserved; (3)
+otherwise the attributes of `x` are preserved unless
+`is.object(x) && typeof(x) != typeof(STATS)`; (4) an exemption to this
+rule is made if `x` is a factor and an integer replacement is offered to
+STATS e.g. `fnobs(factor, group, TRA = "fill")`. In that case, the
+attributes of `x` are copied except for the ‘class’ and ‘levels’
+attributes. These rules were devised considering the possibility that
+`x` may have important information attached to it which should be
+preserved in data transformations, such as a `"label"` attribute.
+
+So to summarize the general principles: *collapse* just tries to
+preserve attributes in all cases except where it is likely to break
+something, beholding the way most commonly used R classes and objects
+behave. The most likely operations that break something are when
+aggregating matrices which have a class (such as *mts*/*xts*) or
+univariate time series (*ts*), or when data is to be replaced by another
+object. In the latter case, particular attention is paid to integer
+vectors and factors, as we often count something generating integers,
+and malformed factors need to be avoided.
+
+The following section provides some further details for some *collapse*
+functions and supported classes.
+
+## Specific Functions and Classes
+
+#### Object Conversions
+
+[Quick conversion
+functions](https://fastverse.org/collapse/reference/quick-conversion.html)
+`qDF`, `qDT`,
+[`qTBL()`](https://fastverse.org/collapse/reference/quick-conversion.md)
+and `qM` (to create data.frame’s, *data.table*’s, *tibble*’s and
+matrices from arbitrary R objects) by default (`keep.attr = FALSE`)
+perform very strict conversions, where all attributes non-essential to
+the class are dropped from the input object. This is to ensure that,
+following conversion, objects behave exactly the way users expect. This
+is different from the behavior of functions like
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html),
+[`as.data.table()`](https://rdrr.io/pkg/data.table/man/as.data.table.html),
+[`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
+or [`as.matrix()`](https://rdrr.io/r/base/matrix.html)
+e.g. `as.matrix(EuStockMarkets)` just returns `EuStockMarkets` whereas
+`qM(EuStockMarkets)` returns a plain matrix without time series
+attributes. This behavior can be changed by setting `keep.attr = TRUE`,
+i.e. `qM(EuStockMarkets, keep.attr = TRUE)`.
+
+#### Selecting Columns by Data Type
+
+Functions [`num_vars()`, `cat_vars()` (the opposite of `num_vars()`),
+`char_vars()`
+etc.](https://fastverse.org/collapse/reference/select_replace_vars.html)
+are implemented in C to avoid the need to check data frame columns by
+applying an R function such as
+[`is.numeric()`](https://rdrr.io/r/base/numeric.html). For `is.numeric`,
+the C implementation is equivalent to
+`is_numeric_C <- function(x) typeof(x) %in% c("integer", "double") && !inherits(x, c("factor", "Date", "POSIXct", "yearmon", "yearqtr"))`.
+This of course does not respect the behavior of other classes that
+define methods for `is.numeric`
+e.g. `is.numeric.foo <- function(x) FALSE`, then for
+`y = structure(rnorm(100), class = "foo")`, `is.numeric(y)` is `FALSE`
+but `num_vars(data.frame(y))` still returns it. Correct behavior in this
+case requires `get_vars(data.frame(y), is.numeric)`. A particular case
+to be aware of is when using
+[`collap()`](https://fastverse.org/collapse/reference/collap.md) with
+the `FUN` and `catFUN` arguments, where the C code (`is_numeric_C`) is
+used internally to decide whether a column is numeric or categorical.
+*collapse* does not support statistical operations on complex data.
+
+#### Parsing of Time-IDs
+
+[*Time Series
+Functions*](https://fastverse.org/collapse/reference/time-series-panel-series.html)
+`flag`, `fdiff`, `fgrowth` and `psacf/pspacf/psccf` (and the operators
+`L/F/D/Dlog/G`) have a `t` argument to pass time-ids for fully
+identified temporal operations on time series and panel data. If `t` is
+a plain numeric vector or a factor, it is coerced to integer using
+[`as.integer()`](https://rdrr.io/r/base/integer.html), and the integer
+steps are used as time steps. This is premised on the observation that
+the most common form of temporal identifier is a numeric variable
+denoting calendar years. If on the other hand `t` is a numeric time
+object such that `is.object(t) && is.numeric(unclass(t))` (e.g. Date,
+POSIXct, etc.), then it is passed through
+[`timeid()`](https://fastverse.org/collapse/reference/timeid.md) which
+computes the greatest common divisor of the vector and generates an
+integer time-id in that way. Users are therefore advised to use
+appropriate classes to represent time steps e.g. for monthly data
+[`zoo::yearmon`](https://rdrr.io/pkg/zoo/man/yearmon.html) would be
+appropriate. It is also possible to pass non-numeric `t`, such as
+character or list/data.frame. In such cases ordered grouping is applied
+to generate an integer time-id, but this should rather be avoided.
+
+#### *xts*/*zoo* Time Series
+
+*xts*/*zoo* time series are handled through `.zoo` methods to all
+relevant functions. These methods are simple and all follow this
+pattern:
+`FUN.zoo <- function(x, ...) if(is.matrix(x)) FUN.matrix(x, ...) else FUN.default(x, ....)`.
+Thus the general principles apply. Time-Series function do not
+automatically use the index for indexed computations, partly for
+consistency with native methods where this is also not the case
+(e.g. `lag.xts` does not perform an indexed lag), and partly because, as
+outlined above, the index does not necessarily accurately reflect the
+time structure. Thus the user must exercise discretion to perform an
+indexed lag on *xts*/*zoo*. For example:
+`flag(xts_daily, 1:3, t = index(xts_daily))` or
+`flag(xts_monthly, 1:3, t = zoo::as.yearmon(index(xts_monthly)))`.
+
+#### Support for *sf* and *units*
+
+*collapse* internally supports *sf* data frames by seeking to avoid
+their undue destruction through removal of the ‘geometry’ column in data
+manipulation operations. This is simply implemented through an
+additional check in the C programs used to subset columns of data: if
+the object is an *sf* data frame, the ‘geometry’ column is added to the
+column selection. Other functions like
+[`funique()`](https://fastverse.org/collapse/reference/funique.md) or
+[`roworder()`](https://fastverse.org/collapse/reference/roworder.md)
+have internal facilities to avoid sorting or grouping on the ‘geometry’
+column. Again other functions like
+[`descr()`](https://fastverse.org/collapse/reference/descr.md) and
+[`qsu()`](https://fastverse.org/collapse/reference/qsu.md) simply omit
+the geometry column in their statistical calculations. A short
+[vignette](https://fastverse.org/collapse/articles/collapse_and_sf.html)
+describes the integration of *collapse* and *sf* in a bit more detail.
+In summary: *collapse* supports *sf* by seeking to appropriately deal
+with the ‘geometry’ column. It cannot perform geometrical operations.
+For example, after subsetting with
+[`fsubset()`](https://fastverse.org/collapse/reference/fsubset.md), the
+bounding box attribute of the geometry is unaltered and likely too
+large.
+
+To preserve *units* objects used in the *sf* ecosystem, all relevant
+functions also have simple methods of the form
+`FUN.units <- function(x, ...) if(is.matrix(x)) copyMostAttrib(FUN.matrix(x, ...), x) else FUN.default(x, ....)`.
+According to the general principles, the default method preserves the
+units class, whereas the matrix method does not if `FUN` aggregates the
+data. The use of
+[`copyMostAttrib()`](https://fastverse.org/collapse/reference/small-helpers.md),
+which copies all attributes apart from `"dim"`, `"dimnames"`, and
+`"names"`, ensures that the returned objects are still *units*.
+
+#### Support for *data.table*
+
+*collapse* provides quite thorough support for *data.table*. The
+simplest level of support is that it avoids assigning descriptive
+(character) row names to *data.table*’s e.g. `fmean(mtcars, mtcars$cyl)`
+has row-names corresponding to the groups but
+`fmean(qDT(mtcars), mtcars$cyl)` does not.
+
+*collapse* further supports *data.table*’s reference semantics (`set*`,
+`:=`). To be able to add columns by reference (e.g. `DT[, new := 1]`),
+*data.table*’s are implemented as overallocated lists[^2]. *collapse*
+copied some C code from *data.table* to do the overallocation and
+generate the `".internal.selfref"` attribute, so that
+[`qDT()`](https://fastverse.org/collapse/reference/quick-conversion.md)
+creates a valid and fully functional *data.table*. To enable seamless
+data manipulation combining *collapse* and *data.table*, all data
+manipulation functions in *collapse* call this C code at the end and
+return a valid (overallocated) *data.table*. However, because this
+overallocation comes at a computational cost of 2-3 microseconds, I have
+opted against also adding it to the `.data.frame` methods of statistical
+functions. Concretely, this means that
+`res <- DT |> fgroup_by(id) |> fsummarise(mu_a = fmean(a))` gives a
+fully functional *data.table* i.e. `res[, new := 1]` works, but
+`res2 <- DT |> fgroup_by(id) |> fmean()` gives a non-overallocated
+*data.table* such that `res2[, new := 1]` will still work but issue a
+warning. In this case, `res2 <- DT |> fgroup_by(id) |> fmean() |> qDT()`
+can be used to avoid the warning. This, to me, seems a reasonable
+trade-off between flexibility and performance. More details and examples
+are provided in the [*collapse* and *data.table*
+vignette](https://fastverse.org/collapse/articles/collapse_and_data.table.html).
+
+#### Class-Agnostic Grouped and Indexed Data Frames
+
+As indicated in the introductory remarks, *collapse* provides a fast
+[class-agnostic grouped data
+frame](https://fastverse.org/collapse/reference/GRP.html) created with
+[`fgroup_by()`](https://fastverse.org/collapse/reference/GRP.md), and
+fast [class-agnostic indexed time series and panel
+data](https://fastverse.org/collapse/reference/indexing.html), created
+with
+[`findex_by()`](https://fastverse.org/collapse/reference/indexing.md)/[`reindex()`](https://fastverse.org/collapse/reference/indexing.md).
+Class-agnostic means that the object that is grouped/indexed continues
+to behave as before except in *collapse* operations utilizing the
+‘groups’/‘index_df’ attributes.
+
+The grouped data frame is implemented as follows:
+[`fgroup_by()`](https://fastverse.org/collapse/reference/GRP.md) saves
+the class of the input data, calls
+[`GRP()`](https://fastverse.org/collapse/reference/GRP.md) on the
+columns being grouped, and attaches the resulting ‘GRP’ object in a
+`"groups"` attribute. It then assigns a class attribute as follows
+
+``` r
+
+clx <- class(.X) # .X is the data frame being grouped, clx is its class
+m <- match(c("GRP_df", "grouped_df", "data.frame"), clx, nomatch = 0L)
+class(.X) <- c("GRP_df",  if(length(mp <- m[m != 0L])) clx[-mp] else clx, "grouped_df", if(m[3L]) "data.frame") 
+```
+
+In words: a class `"GRP_df"` is added in front, followed by the classes
+of the original object[^3], followed by `"grouped_df"` and finally
+`"data.frame"`, if present. The `"GRP_df"` class is for dealing
+appropriately with the object through methods for
+[`print()`](https://rdrr.io/r/base/print.html) and subsetting (`[`,
+`[[`), e.g. `print.GRP_df` fetches the grouping object, prints
+`fungroup(.X)`[^4], and then prints a summary of the grouping.
+`[.GRP_df` works similarly: it saves the groups, calls `[` on
+`fungroup(.X)`, and attaches the groups again if the result is a list
+with the same number of rows. So *collapse* has no issues printing and
+handling grouped *data.table*’s, *tibbles*, *sf* data frames, etc. -
+they continue to behave as usual. Now *collapse* has various functions
+with a `.grouped_df` method to deal with grouped data frames. For
+example `fmean.grouped_df`, in a nutshell, fetches the attached ‘GRP’
+object using `GRP.grouped_df`, and calls `fmean.data.frame` on
+`fungroup(data)`, passing the ‘GRP’ object to the `g` argument for
+grouped computation. Here the general principles outlined above apply so
+that the resulting object has the same attributes as the input.
+
+This architecture has an additional advantage: it allows
+`GRP.grouped_df` to examine the grouping object and check if it was
+created by *collapse* (class ‘GRP’) or by *dplyr*. If the latter is the
+case, an efficient C routine is called to convert the *dplyr* grouping
+object to a ‘GRP’ object so that all `.grouped_df` methods in *collapse*
+apply to data frames created with either
+[`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
+or [`fgroup_by()`](https://fastverse.org/collapse/reference/GRP.md).
+
+The *indexed_frame* works similarly. It inherits from *pdata.frame* so
+that `.pdata.frame` methods in *collapse* deal with both
+*indexed_frame*’s of arbitrary classes and *pdata.frame*’s created with
+*plm*.
+
+A notable difference to both *grouped_df* and *pdata.frame* is that
+*indexed_frame* is a deeply indexed data structure: each variable inside
+an *indexed_frame* is an *indexed_series* which contains in its
+*index_df* attribute an external pointer to the *index_df* attribute of
+the frame. Functions with *pseries* methods operating on
+*indexed_series* stored inside the frame (such as
+`with(data, flag(column))`) can fetch the index from this pointer. This
+allows worry-free application inside arbitrary data masking environments
+(`with`, `%$%`, `attach`, etc..) and estimation commands (`glm`,
+`feols`, `lmrob` etc..) without duplication of the index in memory. As
+you may have guessed, *indexed_series* are also class-agnostic and
+inherit from *pseries*. Any vector or matrix of any class can become an
+*indexed_series*.
+
+Further levels of generality are that indexed series and frames allow
+one, two or more variables in the index to support both time series and
+complex panels, natively deal with irregularity in time[^5], and provide
+a rich set of methods for subsetting and manipulation which also subset
+the *index_df* attribute, including internal methods for
+[`fsubset()`](https://fastverse.org/collapse/reference/fsubset.md),
+[`funique()`](https://fastverse.org/collapse/reference/funique.md),
+`roworder(v)` and
+[`na_omit()`](https://fastverse.org/collapse/reference/efficient-programming.md).
+So *indexed_frame* and *indexed_series* is a rich and general structure
+permitting fully time-aware computations on nearly any R object. See
+[`?indexing`](https://fastverse.org/collapse/reference/indexing.html)
+for more information.
+
+## Conclusion
+
+*collapse* handles R objects in a preserving and fairly intelligent
+manner, allowing seamless compatibility with many common data classes in
+R, and statistical workflows that preserve attributes (labels, units,
+etc.) of the data. This is implemented through general principles and
+some specific considerations/exemptions mostly implemented in C - as
+detailed in this vignette.
+
+The main benefits of this design are generality and execution speed:
+*collapse* has much fewer R-level method dispatches and function calls
+than other frameworks used to perform statistical or data manipulation
+operations, it behaves predictably, and may also work well with your
+simple new class.
+
+The main disadvantage is that the general principles and exemptions are
+hard-coded in C and thus may not work with specific classes. A prominent
+example where *collapse* simply fails is *lubridate*’s *interval* class
+([\#186](https://github.com/fastverse/collapse/issues/186),
+[\#418](https://github.com/fastverse/collapse/issues/418)), which has a
+`"starts"` attribute of the same length as the data that is preserved
+but not subset in *collapse* operations.
+
+[^1]: Preservation implies a shallow copy of the attribute lists from
+    the original object to the result object. A shallow copy is
+    memory-efficient and means we are copying the list containing the
+    attributes in memory, but not the attributes themselves. Whenever I
+    talk about copying attributes, I mean a shallow copy, not a deep
+    copy. You can perform shallow copies with [helper
+    functions](https://fastverse.org/collapse/reference/small-helpers.html)
+    [`copyAttrib()`](https://fastverse.org/collapse/reference/small-helpers.md)
+    or
+    [`copyMostAttrib()`](https://fastverse.org/collapse/reference/small-helpers.md),
+    and directly set attribute lists using
+    [`setAttrib()`](https://fastverse.org/collapse/reference/small-helpers.md)
+    or
+    [`setattrib()`](https://fastverse.org/collapse/reference/small-helpers.md).
+
+[^2]: Notably, additional (hidden) column pointers are allocated to be
+    able to add columns without taking a shallow copy of the
+    *data.table*, and an `".internal.selfref"` attribute containing an
+    external pointer is used to check if any shallow copy was made using
+    base R commands like `<-`.
+
+[^3]: Removing `c("GRP_df", "grouped_df", "data.frame")` if present to
+    avoid duplicate classes and allowing grouped data to be re-grouped.
+
+[^4]: Which reverses the changes of
+    [`fgroup_by()`](https://fastverse.org/collapse/reference/GRP.md) so
+    that the print method for the original object `.X` is called.
+
+[^5]: This is done through the creation of a time-factor in the
+    *index_df* attribute whose levels represent time steps, i.e., the
+    factor will have unused levels for gaps in time.

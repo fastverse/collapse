@@ -1,0 +1,144 @@
+# collapse Documentation and Resources
+
+*collapse* is a C/C++ based package for data transformation and
+statistical computing in R. It’s aims are:
+
+1.  To facilitate complex data transformation, exploration and computing
+    tasks in R.
+2.  To help make R code fast, flexible, parsimonious and programmer
+    friendly.
+
+Documentation comes in 7 different forms:
+
+## Built-In Structured Documentation
+
+After installing *collapse*, you can call
+[`help("collapse-documentation")`](https://fastverse.org/collapse/reference/collapse-documentation.md)
+which will produce a central help page providing a broad overview of the
+entire functionality of the package, including direct links to all
+function documentation pages and links to 13 further topical
+documentation pages (names in `.COLLAPSE_TOPICS`) describing how
+clusters of related functions work together.
+
+Thus *collapse* comes with a fully structured hierarchical documentation
+which you can browse within R - and that provides everything necessary
+to fully understand the package. The Documentation is also available
+[online](https://fastverse.org/collapse/reference/collapse-documentation.html).
+
+The package page under
+[`help("collapse-package")`](https://fastverse.org/collapse/reference/collapse-package.md)
+provides some general information about the package and its design
+philosophy, as well as a compact set of examples covering important
+functionality.
+
+Reading
+[`help("collapse-package")`](https://fastverse.org/collapse/reference/collapse-package.md)
+and
+[`help("collapse-documentation")`](https://fastverse.org/collapse/reference/collapse-documentation.md)
+is the most comprehensive way to get acquainted with the package.
+[`help("collapse-documentation")`](https://fastverse.org/collapse/reference/collapse-documentation.md)
+is always the most up-to-date resource.
+
+## DeepWiki
+
+[DeepWiki](https://deepwiki.com/) is an AI-powered platform designed to
+automatically generate structured, interactive documentation for
+software repositories, primarily on GitHub. Developed by [Cognition
+AI](https://cognition.ai/)—the same laboratory behind the autonomous AI
+engineer [Devin](https://devin.ai/)—it serves as a dynamic,
+“Wikipedia-like” encyclopedia for codebases.
+
+While not more comprehensive or accurate than the structured
+documentation, it is great to learn more about the internal structure of
+*collapse* and use a chatbot (Devin) to ask questions about or write
+code using *collapse*.
+
+You can access the *collapse* DeepWiki
+[here](https://deepwiki.com/fastverse/collapse).
+
+## JSS Article
+
+The [collapse article](https://doi.org/10.18637/jss.v116.i01) is
+published in the [Journal of Statistical
+Software](https://www.jstatsoft.org/) (volume 116, issue 1). If you want
+to ‘read something concise’ about *collapse*, this is the best place to
+start.
+
+## Cheatsheet
+
+A fairly up-to-date (v2.0)
+[cheatsheet](https://raw.githubusercontent.com/fastverse/collapse/master/misc/collapse%20cheat%20sheet/collapse_cheat_sheet.pdf)
+compactly summarizes the package.
+
+## Vignettes
+
+Updated vignettes are
+
+- [***collapse* for *tidyverse*
+  Users**](https://fastverse.org/collapse/articles/collapse_for_tidyverse_users.html):
+  A quick introduction to *collapse* for *tidyverse* users
+
+- [***collapse* and
+  *sf***](https://fastverse.org/collapse/articles/collapse_and_sf.html):
+  Shows how collapse can be used to efficiently manipulate *sf* data
+  frames
+
+- [***collapse*’s Handling of R
+  Objects**](https://fastverse.org/collapse/articles/collapse_object_handling.html):
+  A quick view behind the scenes of class-agnostic R programming
+
+- [**Developing with
+  *collapse***](https://fastverse.org/collapse/articles/developing_with_collapse.html):
+  How to write efficient statistical packages using R and *collapse*
+
+The other vignettes (only available
+[online](https://fastverse.org/collapse/articles/index.html)) do not
+cover major features introduced in versions \>= 1.7, but contain much
+useful information and examples:
+
+- [**Introduction to
+  *collapse***](https://fastverse.org/collapse/articles/collapse_intro.html)
+  : Introduces key features in a structured way
+
+- [***collapse* and
+  *dplyr***](https://fastverse.org/collapse/articles/collapse_and_dplyr.html)
+  : Demonstrates the integration of collapse with *dplyr* / *tidyverse*
+  workflows and associated performance improvements
+
+- [***collapse* and
+  *plm***](https://fastverse.org/collapse/articles/collapse_and_plm.html):
+  Demonstrates the integration of collapse with *plm* and shows examples
+  of efficient programming with panel data
+
+- [***collapse* and
+  *data.table***](https://fastverse.org/collapse/articles/collapse_and_data.table.html):
+  Shows how collapse and *data.table* may be used together in a
+  harmonious way
+
+## Blog
+
+I maintain a [blog](https://sebkrantz.github.io/Rblog/) linked to
+[Rbloggers.com](https://www.r-bloggers.com/) where I introduced
+*collapse* with some compact posts covering central functionality. Among
+these, the post about [programming with
+*collapse*](https://sebkrantz.github.io/Rblog/2020/09/13/programming-with-collapse/)
+is useful for developers.
+
+## Presentations and Slides
+
+- I have presented *collapse* (v1.8) in some level of detail at
+  useR 2022. A 2h video recording that provides a quite comprehensive
+  introduction is available
+  [here](https://www.youtube.com/watch?v=OwWT1-dSEts). The corresponding
+  slides are available
+  [here](https://raw.githubusercontent.com/fastverse/collapse/master/misc/useR2022%20presentation/collapse_useR2022_final.pdf).
+
+- I have recently presented *collapse* (v2.1) and the *fastverse* at a
+  workshop on “[Speeding Up Empirical Research: Tools and Techniques for
+  Fast
+  Computing](https://www.bportugal.pt/en/evento/workshop-speeding-empirical-research-tools-and-techniques-fast-computing-bplim)”
+  organized by the Bank of Portugal in December 2025. My 45-minute talk
+  focused on two advanced applications in international trade and
+  spatial network analysis/package development. You can find the
+  materials (slides and recording)
+  [here](https://github.com/BPLIM/Workshops/tree/master/BPLIM2025).

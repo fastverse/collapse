@@ -1,6 +1,6 @@
 citHeader("To cite collapse in publications, please use:")
 
-bibentry(bibtype = "misc",
+bibentry(bibtype = "article",
          key = "krantz2026collapse",
          title        = "{collapse}: Advanced and Fast Statistical Computing and Data Transformation in {R}",
          author       = person(given = "Sebastian",

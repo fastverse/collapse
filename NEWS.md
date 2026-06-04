@@ -2,7 +2,7 @@
 
 * The *collapse* article is now published in the Journal of Statistical Software: https://doi.org/10.18637/jss.v116.i01. This article is now the primary citation for academic use of *collapse*. It is also a great reference to quickly and thoroughly understand the package. `citation("collapse")` was also updated in this regard. The APA-style citation is:
 
-  Krantz, S. (2026). **collapse**: Advanced and fast statistical computing and data transformation in R. *Journal of Statistical Software, 116*(1), 1–38. [https://doi.org/10.18637/jss.v116.i01](https://doi.org/10.18637/jss.v116.i01)
+  Krantz, S. (2026). **collapse**: Advanced and fast statistical computing and data transformation in R. *Journal of Statistical Software, 116*(1), 1–38. [https://doi.org/10.18637/jss.v116.i01](https://doi.org/10.18637/jss.v116.i01).
 
 
 * Performance improvements to `fsum()` and `fmean()` in the non-grouped case through multiple-accumulator SIMD optimizations, particularly benefiting systems without OpenMP support. `fsum()` sees ~2x speedup and `fmean()` ~7x speedup on such systems, with smaller but notable gains on systems with OpenMP. Thanks @TylerSagendorf for the implementation and benchmarking (#824, #828, #832, #833).

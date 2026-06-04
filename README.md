@@ -83,10 +83,10 @@ In addition there are several [vignettes](<https://fastverse.org/collapse/articl
 
 The [**collapse** article](https://doi.org/10.18637/jss.v116.i01) is published in the [Journal of Statistical Software](https://www.jstatsoft.org/) (volume 116, issue 1). It is the primary reference for academic use of the package and a concise introduction to its design and capabilities.
 
-### Presentation at [useR 2022](https://user2022.r-project.org)
+### Presentations
 
-[**Video Recording**](<https://www.youtube.com/watch?v=OwWT1-dSEts>) | 
-[**Slides**](<https://raw.githubusercontent.com/fastverse/collapse/master/misc/useR2022%20presentation/collapse_useR2022_final.pdf>)
+* [**useR 2022**](https://user2022.r-project.org): [Video Recording](<https://www.youtube.com/watch?v=OwWT1-dSEts>) | [Slides](<https://raw.githubusercontent.com/fastverse/collapse/master/misc/useR2022%20presentation/collapse_useR2022_final.pdf>)
+* [**BPLIM Workshop 2025**](https://www.bportugal.pt/en/evento/workshop-speeding-empirical-research-tools-and-techniques-fast-computing-bplim): [Video Recording](<https://www.youtube.com/watch?v=qO5dHIPsfK8>) | [Slides](<https://raw.githubusercontent.com/BPLIM/Workshops/master/BPLIM2025/Day2_03_Sebastian_Krantz.pdf>)
 
 ## Example Usage
 This provides a simple set of examples introducing some important features of *collapse*. It should be easy to follow for readers familiar with R. 
@@ -305,7 +305,23 @@ Evaluated and more extensive sets of examples are provided on the [package page]
 
 ## Citation
 
-If *collapse* was instrumental for your research project, please consider citing it using `citation("collapse")`.
+If *collapse* was instrumental for your research project, please consider citing it using:
 
+Krantz, S. (2026). **collapse**: Advanced and fast statistical computing and data transformation in R. *Journal of Statistical Software, 116*(1), 1–38. [https://doi.org/10.18637/jss.v116.i01](https://doi.org/10.18637/jss.v116.i01).
+  
+```
+@article{krantz2026collapse,
+  title = {{collapse}: Advanced and Fast Statistical Computing and Data Transformation in {R}},
+  author = {Sebastian Krantz},
+  journal = {Journal of Statistical Software},
+  year = {2026},
+  volume = {116},
+  number = {1},
+  pages = {1--38},
+  doi = {10.18637/jss.v116.i01},
+}
+```
+
+For a full proper citation also cite the current R package version using `citation("collapse")`.
 
 

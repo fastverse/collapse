@@ -13,7 +13,7 @@ CRAN release: 2026-05-19
 
   Krantz, S. (2026). **collapse**: Advanced and fast statistical
   computing and data transformation in R. *Journal of Statistical
-  Software, 116*(1), 1–38. <https://doi.org/10.18637/jss.v116.i01>
+  Software, 116*(1), 1–38. <https://doi.org/10.18637/jss.v116.i01>.
 
 - Performance improvements to
   [`fsum()`](https://fastverse.org/collapse/reference/fsum.md) and

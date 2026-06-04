@@ -556,12 +556,12 @@ gsplit efficiently splits a vector based on a 'GRP' object, and greorder helps t
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/microbenchmark/man/microbenchmark.html" class="external-link">microbenchmark</a></span><span class="op">(</span><span class="fu"><a href="https://fastverse.org/collapse/reference/GRP.html">gby</a></span><span class="op">(</span><span class="va">GGDC10S</span>, <span class="va">Variable</span>, <span class="va">Country</span><span class="op">)</span>, <span class="fu"><a href="https://fastverse.org/collapse/reference/GRP.html">gby</a></span><span class="op">(</span><span class="va">GGDC10S</span>, <span class="va">Variable</span>, <span class="va">Country</span>, sort <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>less accurate nanosecond times to avoid potential integer overflows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unit: microseconds</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                           expr    min      lq      mean  median</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                gby(GGDC10S, Variable, Country) 85.526 95.4685 152.34821 128.617</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  gby(GGDC10S, Variable, Country, sort = FALSE) 29.192 32.0825  62.69269  39.934</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                           expr    min      lq     mean  median</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                gby(GGDC10S, Variable, Country) 77.695 78.2895 80.53630 78.6585</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  gby(GGDC10S, Variable, Country, sort = FALSE) 26.445 27.1215 27.76069 27.5520</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       uq     max neval</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  182.573 695.032   100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   76.588 705.692   100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  79.1300 237.431   100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  27.9005  39.565   100</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

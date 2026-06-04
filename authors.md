@@ -36,7 +36,7 @@ Krantz, S. (2026). collapse: Advanced and fast statistical computing and
 data transformation in R. Journal of Statistical Software, 116(1), 1–38.
 https://doi.org/10.18637/jss.v116.i01
 
-    @Misc{krantz2026collapse,
+    @Article{krantz2026collapse,
       title = {{collapse}: Advanced and Fast Statistical Computing and Data Transformation in {R}},
       author = {Sebastian Krantz},
       journal = {Journal of Statistical Software},

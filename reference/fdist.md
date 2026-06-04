@@ -111,14 +111,14 @@ microbenchmark::microbenchmark(
   fdist(x, y, nthreads = 2),
   sqrt(sum((x-y)^2))
 )
-#> Unit: milliseconds
-#>                       expr      min       lq     mean   median       uq
-#>                fdist(x, y) 1.008805 1.041011 1.604960 1.109440 1.591907
-#>  fdist(x, y, nthreads = 2) 1.005566 1.041257 1.329227 1.158148 1.590882
-#>       sqrt(sum((x - y)^2)) 3.254949 3.637786 6.299320 4.888471 7.332481
-#>        max neval
-#>  16.921233   100
-#>   2.611331   100
-#>  49.425418   100
+#> Unit: microseconds
+#>                       expr      min       lq      mean   median       uq
+#>                fdist(x, y)  925.862  930.208  970.0083  945.952 1009.482
+#>  fdist(x, y, nthreads = 2)  925.698  927.871  962.0912  938.244 1000.236
+#>       sqrt(sum((x - y)^2)) 2644.746 2762.887 3612.0131 3146.217 3547.279
+#>       max neval
+#>  1166.122   100
+#>  1111.346   100
+#>  7441.787   100
 # }
 ```

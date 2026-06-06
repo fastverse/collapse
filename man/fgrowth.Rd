@@ -74,7 +74,7 @@ fgrowth(x, n = 1, diff = 1, \dots)
   \item{cols}{\emph{data.frame method}: Select columns to compute growth rates using a function, column names, indices or a logical vector. Default: All numeric variables. \emph{Note}: \code{cols} is ignored if a two-sided formula is passed to \code{by}.}
   \item{fill}{value to insert when vectors are shifted. Default is \code{NA}. }
   \item{logdiff}{logical. Compute log-difference growth rates instead of exact growth rates. See Details.}
-  \item{scale}{logical. Scale factor post-applied to growth rates, default is 100 which gives growth rates in percentage terms. See Details.}
+  \item{scale}{numeric. Scale factor post-applied to growth rates, default is 100 which gives growth rates in percentage terms. See Details.}
   \item{power}{numeric. Apply a power to annualize or compound growth rates e.g. \code{fgrowth(AirPassengers, 12, power = 1/12)} is equivalent to \code{((AirPassengers/flag(AirPassengers, 12))^(1/12)-1)*100}.}
   \item{stubs}{logical. \code{TRUE} (default) will rename all computed columns by adding a prefix "L\code{n}G\code{diff}." / "F\code{n}G\code{diff}.", or "L\code{n}Dlog\code{diff}." / "F\code{n}Dlog\code{diff}." if \code{logdiff = TRUE}.}
     \item{shift}{\emph{pseries / pdata.frame methods}: character. \code{"time"} or \code{"row"}. See \code{\link{flag}} for details.}

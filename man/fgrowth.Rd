@@ -67,7 +67,7 @@ fgrowth(x, n = 1, diff = 1, \dots)
 \arguments{
   \item{x}{a numeric vector / time series, (time series) matrix, data frame, 'indexed_series' ('pseries'), 'indexed_frame' ('pdata.frame') or grouped data frame ('grouped_df').}
   \item{n}{integer. A vector indicating the number of lags or leads.}
-  \item{diff}{integer. A vector of integers > 1 indicating the order of taking growth rates, e.g. \code{diff = 2} means computing the growth rate of the growth rate.}
+  \item{diff}{integer. A vector of positive integers indicating the order of taking growth rates, e.g. \code{diff = 2} means computing the growth rate of the growth rate.}
   \item{g}{a factor, \code{\link{GRP}} object, or atomic vector / list of vectors (internally grouped with \code{\link{group}}) used to group \code{x}. \emph{Note} that without \code{t}, all values in a group need to be consecutive and in the right order. See Details of \code{\link{flag}}.}
   \item{by}{\emph{data.frame method}: Same as \code{g}, but also allows one- or two-sided formulas i.e. \code{~ group1} or \code{var1 + var2 ~ group1 + group2}. See Examples.}
   \item{t}{a time vector or list of vectors. See \code{\link{flag}}.}

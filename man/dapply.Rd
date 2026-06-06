@@ -23,7 +23,7 @@ dapply(X, FUN, \dots, MARGIN = 2, parallel = FALSE, mc.cores = 1L,
   \item{drop}{logical. If the result has only one row or one column, \code{drop = TRUE} will drop dimensions and return a (named) atomic vector.}
 }
 \details{
-\code{dapply} is an efficient command to apply functions to rows or columns of data without loosing information (attributes) about the data or changing the classes or format of the data. It is principally an efficient wrapper around \code{\link{lapply}} and works as follows:
+\code{dapply} is an efficient command to apply functions to rows or columns of data without losing information (attributes) about the data or changing the classes or format of the data. It is principally an efficient wrapper around \code{\link{lapply}} and works as follows:
 
 \itemize{
 \item Save the attributes of \code{X}.

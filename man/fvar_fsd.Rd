@@ -81,7 +81,7 @@ The weighted variance is computed with frequency weights as \code{(sum(x^2*w)-su
 For further computational detail see \code{\link{fsum}}.
 }
 \value{
-\code{fvar} returns the (\code{w} weighted) variance of \code{x}, grouped by \code{g}, or (if \code{\link{TRA}} is used) \code{x} transformed by its (grouped, weighted) variance. \code{fsd} computes the standard deviation of \code{x} in like manor.
+\code{fvar} returns the (\code{w} weighted) variance of \code{x}, grouped by \code{g}, or (if \code{\link{TRA}} is used) \code{x} transformed by its (grouped, weighted) variance. \code{fsd} computes the standard deviation of \code{x} in like manner.
 }
 \references{
 Welford, B. P. (1962). Note on a method for calculating corrected sums of squares and products. \emph{Technometrics}. 4 (3): 419-420. doi:10.2307/1266577.

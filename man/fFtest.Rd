@@ -35,7 +35,7 @@ Factors and continuous regressors are efficiently projected out using \code{\lin
 \emph{Note} that an intercept is always added by \code{\link{fhdwithin}}, so it is not necessary to include an intercept in data supplied to \code{exc} / \code{X}.
 }
 \value{
-A 5 x 3 numeric matrix of statistics. The columns contain statistics:
+A 3 x 5 numeric matrix of statistics. The columns contain statistics:
 \enumerate{
 \item the R-squared of the model
 \item the numerator degrees of freedom i.e. the number of variables (k) and used factor levels if \code{full.df = TRUE}

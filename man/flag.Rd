@@ -62,7 +62,7 @@ flag(x, n = 1, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{a vector / time series, (time series) matrix, data frame, 'indexed_series' ('pseries'), 'indexed_frame' ('pdata.frame') or grouped data frame ('grouped_df'). Data must not be numeric.}
+  \item{x}{a vector / time series, (time series) matrix, data frame, 'indexed_series' ('pseries'), 'indexed_frame' ('pdata.frame') or grouped data frame ('grouped_df'). Data need not be numeric.}
   \item{n}{integer. A vector indicating the lags / leads to compute (passing negative integers to \code{flag} or \code{L} computes leads, passing negative integers to \code{F} computes lags).}
   \item{g}{a factor, \code{\link{GRP}} object, or atomic vector / list of vectors (internally grouped with \code{\link{group}}) used to group \code{x}. \emph{Note} that without \code{t}, all values in a group need to be consecutive and in the right order. See Details.}
   \item{by}{\emph{data.frame method}: Same as \code{g}, but also allows one- or two-sided formulas i.e. \code{~ group1} or \code{var1 + var2 ~ group1 + group2}. See Examples.}

@@ -76,7 +76,7 @@ qsu(x, \dots)
   \item{print.gap}{integer. Spacing between printed columns. Passed to \code{print.default}.}
 }
 \details{
-The algorithm used to compute statistics is well described \href{https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance}{here} [see sections \emph{Welford's online algorithm}, \emph{Weighted incremental algorithm} and \emph{Higher-order statistics}. Skewness and kurtosis are calculated as described in \emph{Higher-order statistics} and are mathematically identical to those implemented in the \emph{moments} package. Just note that \code{qsu} computes the kurtosis (like \code{momens::kurtosis}), not the excess-kurtosis (=  kurtosis - 3) defined in \emph{Higher-order statistics}. The \emph{Weighted incremental algorithm} described can easily be generalized to higher-order statistics].
+The algorithm used to compute statistics is well described \href{https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance}{here} [see sections \emph{Welford's online algorithm}, \emph{Weighted incremental algorithm} and \emph{Higher-order statistics}. Skewness and kurtosis are calculated as described in \emph{Higher-order statistics} and are mathematically identical to those implemented in the \emph{moments} package. Just note that \code{qsu} computes the kurtosis (like \code{moments::kurtosis}), not the excess-kurtosis (=  kurtosis - 3) defined in \emph{Higher-order statistics}. The \emph{Weighted incremental algorithm} described can easily be generalized to higher-order statistics].
 
 Grouped computations specified with \code{g/by} are carried out extremely efficiently as in \code{fsum} (in a single pass, without splitting the data).
 

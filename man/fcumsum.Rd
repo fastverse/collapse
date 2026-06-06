@@ -53,7 +53,7 @@ By default the cumulative sum is computed in the order in which elements appear 
 
 The \emph{pseries} and \emph{pdata.frame} methods assume that the last factor in the \link[=findex]{index} is the time-variable and the rest are grouping variables. The time-variable is passed to \code{radixorderv} and used for ordered computation, so that cumulative sums are accurately computed regardless of whether the panel-data is ordered or balanced.
 
-\code{fcumsum} explicitly supports integers. Integers in R are bounded at bounded at +-2,147,483,647, and an integer overflow error will be provided if the cumulative sum (within any group) exceeds +-2,147,483,647. In that case data should be converted to double beforehand.
+\code{fcumsum} explicitly supports integers. Integers in R are bounded at +-2,147,483,647, and an integer overflow error will be provided if the cumulative sum (within any group) exceeds +-2,147,483,647. In that case data should be converted to double beforehand.
 
 }
 \value{

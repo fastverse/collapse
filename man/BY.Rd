@@ -84,7 +84,7 @@ ml
 unlist2d(ml, idcols = "Variable", row.names = "Species")
 
 ## data.frame method
-BY(num_vars(iris), g, sum)             # Also returns a data.fram
+BY(num_vars(iris), g, sum)             # Also returns a data.frame
 BY(num_vars(iris), g, sum, return = 2) # Return as matrix.. also works for computations below
 head(BY(num_vars(iris), g, scale))
 BY(num_vars(iris), g, fquantile)

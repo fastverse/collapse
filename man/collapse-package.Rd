@@ -253,7 +253,7 @@ microbenchmark(TRA(mtcars, sds, "/"), sweep(mtcars, 2, sds, "/")) # A remarkable
 sds <- fsd(mtcars, f2)
 head(TRA(mtcars, sds, "/", f2)) # Groupd scaling (if sd's not needed: fsd(mtcars, f2, TRA = "/"))
 
-# All functions above perserve the structure of matrices / data frames
+# All functions above preserve the structure of matrices / data frames
 # If conversions are required, use these efficient functions:
 mtcarsM <- qM(mtcars)                      # Matrix from data.frame
 head(qDF(mtcarsM))                         # data.frame from matrix columns
@@ -264,7 +264,7 @@ head(qDT(mtcars, "cars"))                  # Same use a data.frame
 ## Now let's get some real data and see how we can use this power for data manipulation
 head(wlddev) # World Bank World Development Data: 216 countries, 61 years, 5 series (columns 9-13)
 
-# Starting with some discriptive tools...
+# Starting with some descriptive tools...
 namlab(wlddev, class = TRUE)           # Show variable names, labels and classes
 fnobs(wlddev)                          # Observation count
 pwnobs(wlddev)                         # Pairwise observation count

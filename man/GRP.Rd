@@ -109,7 +109,7 @@ fungroup(X, \dots)
 
   \item{return.order}{logical. If \code{sort = TRUE}, include the output from \code{\link{radixorder}} in the created GRP object. This brings performance improvements in \code{gsplit} (and thus also benefits grouped execution of base R functions). }
 
-  \item{method}{character. The algorithm to use for grouping: either \code{"radix"}, \code{"hash"} or \code{"auto"}. \code{"auto"} will chose \code{"radix"} when \code{sort = TRUE}, yielding ordered grouping via \code{\link{radixorder}}, and \code{"hash"}-based grouping in first-appearance order via \code{\link{group}} otherwise. It is possibly to put \code{method = "radix"} and \code{sort = FALSE}, which will group character data in first appearance order but sort numeric data (a good hybrid option). \code{method = "hash"} currently does not support any sorting, thus putting \code{sort = TRUE} will simply be ignored.}
+  \item{method}{character. The algorithm to use for grouping: either \code{"radix"}, \code{"hash"} or \code{"auto"}. \code{"auto"} will choose \code{"radix"} when \code{sort = TRUE}, yielding ordered grouping via \code{\link{radixorder}}, and \code{"hash"}-based grouping in first-appearance order via \code{\link{group}} otherwise. It is possible to put \code{method = "radix"} and \code{sort = FALSE}, which will group character data in first appearance order but sort numeric data (a good hybrid option). \code{method = "hash"} currently does not support any sorting, thus putting \code{sort = TRUE} will simply be ignored.}
 
   \item{group.sizes}{logical. \code{TRUE} tabulates factor levels using \code{\link{tabulate}} to create a vector of group sizes; \code{FALSE} leaves that slot empty when converting from factors.}
 

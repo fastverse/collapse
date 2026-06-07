@@ -55,7 +55,7 @@ This vignette demonstrates these two points and introduces all main features of 
 ## Why *collapse*?
 *collapse* is a high-performance package that extends and enhances the data-manipulation capabilities of R and existing popular packages (such as *dplyr*, *data.table*, and matrix packages). It's main focus is on grouped and weighted statistical programming, complex aggregations and transformations, time series and panel data operations, and programming with lists of data objects. The lead author is an applied economist and created the package mainly to facilitate advanced computations on varied and complex data, in particular surveys, (multivariate) time series, multilevel / panel data, and lists / model objects.
 
-A secondary aspect to applied work is that data is often imported into R from richer data structures (such as STATA, SPSS or SAS files imported with *haven*). This called for an intelligent suite of data manipulation functions that can both utilize aspects of the richer data structure (such as variable labels), and preserve the data structure / attributes in computations. Sometimes specialized classes like *xts*, *pdata.frame* and *grouped_df* can also become very useful to manipulate certain types of data. Thus *collapse* was built to explicitly supports these classes, while preserving most other classes / data structures in R.
+A secondary aspect to applied work is that data is often imported into R from richer data structures (such as Stata, SPSS or SAS files imported with *haven*). This called for an intelligent suite of data manipulation functions that can both utilize aspects of the richer data structure (such as variable labels), and preserve the data structure / attributes in computations. Sometimes specialized classes like *xts*, *pdata.frame* and *grouped_df* can also become very useful to manipulate certain types of data. Thus *collapse* was built to explicitly supports these classes, while preserving most other classes / data structures in R.
 <!-- , enabling flexible, efficient and non-destructive workflows with complex data.  -->
 
 Another objective was to radically improve the speed of R code by extensively relying on efficient algorithms in C/C++ and the faster components of base R. *collapse* ranks among the fastest R packages, and performs many grouped and/or weighted computations noticeably faster than *dplyr* or *data.table*.
@@ -65,7 +65,7 @@ A final development objective was to channel this performance through a stable a
 <!--
 *collapse* also provides exemplary documentation (built-in, vignettes, website) and testing. Testing currently covers all core features of the package, amounting to > 7700 unit tests, with extensive testing of statistical functions and computations.
 
-The name of the package derives from the 'collapse' command for multi-type aggregation in the STATA statistical software. This was the first function in this package (later renamed to `collap` to avoid naming conflicts with *dplyr*). -->
+The name of the package derives from the 'collapse' command for multi-type aggregation in the Stata statistical software. This was the first function in this package (later renamed to `collap` to avoid naming conflicts with *dplyr*). -->
 
 
 ## 1. Data and Summary Tools
@@ -350,7 +350,7 @@ head(fndistinct(wlddev, wlddev$iso3c))
 ```
 
 Note that `varying` is more efficient than `fndistinct`, although both functions are very fast.
-Even more powerful summary methods for multilevel / panel data are provided by `qsu` (shorthand for *quick-summary*). It is modeled after *STATA*'s *summarize* and *xtsummarize* commands. Calling `qsu` on the data gives a concise summary. We can subset columns internally using the `cols` argument:
+Even more powerful summary methods for multilevel / panel data are provided by `qsu` (shorthand for *quick-summary*). It is modeled after *Stata*'s *summarize* and *xtsummarize* commands. Calling `qsu` on the data gives a concise summary. We can subset columns internally using the `cols` argument:
 
 
 ```r

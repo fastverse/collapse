@@ -14,7 +14,7 @@
 Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and Panel Data
 }
 \description{
-\code{qsu}, shorthand for quick-summary, is an extremely fast summary command inspired by the (xt)summarize command in the STATA statistical software.
+\code{qsu}, shorthand for quick-summary, is an extremely fast summary command inspired by the (xt)summarize command in the Stata statistical software.
 
 It computes a set of 7 statistics (nobs, mean, sd, min, max, skewness and kurtosis) using a numerically stable one-pass method generalized from Welford's Algorithm. Statistics can be computed weighted, by groups, and also within-and between entities (for panel data, see Details).
 }

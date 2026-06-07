@@ -1240,7 +1240,7 @@ head(round(fsd(pwlddev$GINI, index(pwlddev, "iso3c")), 2), 20)
 
 ### 2.2 Summary Statistics for Panel Data
 
-Efficient summary statistics for panel data have long been implemented in other statistical softwares. The command `qsu`, shorthand for 'quick-summary', is a very efficient summary statistics command inspired by the *xtsummarize* command in the Stata statistical software. It computes a default set of 5 statistics (N, mean, sd, min and max) and can also computed higher moments (skewness and kurtosis) in a single pass through the data (using a numerically stable online algorithm generalized from Welford's Algorithm for variance computations). With panel data, `qsu` computes these statistics not just on the raw data, but also on the between-transformed and within-transformed data:
+Efficient summary statistics for panel data have long been implemented in other statistical softwares. The command `qsu`, shorthand for 'quick-summary', is a very efficient summary statistics command inspired by the *xtsummarize* command in the Stata statistical software. It computes a default set of 5 statistics (N, mean, sd, min and max) and can also compute higher moments (skewness and kurtosis) in a single pass through the data (using a numerically stable online algorithm generalized from Welford's Algorithm for variance computations). With panel data, `qsu` computes these statistics not just on the raw data, but also on the between-transformed and within-transformed data:
 
 
 ```r

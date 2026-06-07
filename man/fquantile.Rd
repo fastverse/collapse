@@ -92,7 +92,7 @@ for (i in 5:9) print(all_obj_equal(fquantile(mtcars$mpg, type = i),
                                    fquantile(mtcars$mpg, type = i, w = w, o = o),
                                     quantile(mtcars$mpg, type = i)))
 
-## Demonstaration: weighted quantiles type 7 in R
+## Demonstration: weighted quantiles type 7 in R
 wquantile7R <- function(x, w, probs = c(0.25, 0.5, 0.75), na.rm = TRUE, names = TRUE) {
   if(na.rm && anyNA(x)) {             # Removing missing values (only in x)
     cc = whichNA(x, invert = TRUE)    # The C code first calls radixorder(x), which places

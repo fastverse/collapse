@@ -30,7 +30,7 @@ Higher-Dimensional Centering and Linear Prediction
 \description{
 \code{fhdbetween} is a generalization of \code{fbetween} to efficiently predict with multiple factors and linear models (i.e. predict with vectors/factors, matrices, or data frames/lists where the latter may contain multiple factor variables). Similarly, \code{fhdwithin} is a generalization of \code{fwithin} to center on multiple factors and partial-out linear models.
 
-The corresponding operators \code{HDB} and \code{HDW} additionally allow to predict / partial out full \code{lm()} formulas with interactions between variables.
+The corresponding operators \code{HDB} and \code{HDW} additionally allow predicting / partialing out full \code{lm()} formulas with interactions between variables.
 
 }
 \usage{

@@ -97,7 +97,7 @@ replace_outliers(mtcars, 100, single.limit = "max") # Replace all value larger t
 replace_outliers(mtcars, 2)                         # Replace all values above or below 2 column-
                                                     # standard-deviations from the column-mean w. NA
 replace_outliers(fgroup_by(iris, Species), 2)       # Passing a grouped_df, pseries or pdata.frame
-                                                    # allows to remove outliers according to
+                                                    # allows removing outliers according to
                                                     # in-group standard-deviation. see ?fscale
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

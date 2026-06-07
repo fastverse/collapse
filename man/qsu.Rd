@@ -144,7 +144,7 @@ qsu(wlddev, pid = ~ iso3c, labels = TRUE)   # Adding between and within countrie
 x <- wlddev$PCGDP
 g <- wlddev$iso3c
 
-# This is the exact variance decomposion
+# This is the exact variance decomposition
 all.equal(fvar(x), fvar(B(x, g)) + fvar(W(x, g)))
 
 # What qsu does is calculate

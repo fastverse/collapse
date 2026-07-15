@@ -89,6 +89,26 @@ test_that("fslice works with grouping", {
   }
 })
 
+test_that("fslice does not crash with all-missing order.by in a group (#867)", {
+  data <- data.frame(group_var = c("a", "a", "b", "b", "c", "c"),
+                      order_var = c(1, 2, 3, NA, NA, NA))
+
+  expect_equal(
+    fslice(data, "group_var", order.by = "order_var", how = "min", n = 1),
+    data.frame(group_var = c("a", "b", "c"), order_var = c(1, 3, NA))
+  )
+
+  expect_equal(
+    fslice(data, "group_var", order.by = "order_var", how = "max", n = 1),
+    data.frame(group_var = c("a", "b", "c"), order_var = c(2, 3, NA))
+  )
+
+  expect_equal(
+    fslice(data, "group_var", order.by = "order_var", how = "min", n = 1, with.ties = TRUE),
+    data.frame(group_var = c("a", "b", "c", "c"), order_var = c(1, 3, NA, NA))
+  )
+})
+
 test_that("fslice works with ties", {
   N <- 1 # c(1, 5, 17)
   for (n in N) {

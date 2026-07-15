@@ -179,7 +179,7 @@ SEXP gwhich_first(SEXP x, SEXP g, SEXP target) {
     }
     case REALSXP: {
       const double *px = REAL_RO(x), *pt = REAL_RO(target)-1;
-      for(int i = 0; i != l; ++i) if(pres[pg[i]] == 0 && px[i] == pt[pg[i]]) pres[pg[i]] = i+1;
+      for(int i = 0; i != l; ++i) if(pres[pg[i]] == 0 && (px[i] == pt[pg[i]] || (ISNAN(px[i]) && ISNAN(pt[pg[i]])))) pres[pg[i]] = i+1;
       break;
     }
     case STRSXP: {

@@ -1,5 +1,7 @@
 # collapse 2.1.7
 
+* Fixed a bug in `fslice()` (grouped, `n = 1`, `with.ties = FALSE`) that caused R to crash with a fatal error when a group had only missing values in `order.by`. Thanks @chihyunkim for reporting (#867).
+
 * The *collapse* article is now published in the Journal of Statistical Software: https://doi.org/10.18637/jss.v116.i01. This article is now the primary citation for academic use of *collapse*. It is also a great reference to quickly and thoroughly understand the package. `citation("collapse")` was also updated in this regard. The APA-style citation is:
 
   Krantz, S. (2026). **collapse**: Advanced and fast statistical computing and data transformation in R. *Journal of Statistical Software, 116*(1), 1–38. [https://doi.org/10.18637/jss.v116.i01](https://doi.org/10.18637/jss.v116.i01).

@@ -178,3 +178,26 @@ test_that("fmatch works with logical data", {
   expect_equal(fmatch(FALSE, x), 2L)
 })
 
+test_that("fmatch does not match logical NA in x to non-logical values in table (#870)", {
+  x <- c(FALSE, TRUE, NA)
+  table <- c(0L, 1L, 2L)
+  expect_identical(fmatch(x, table), match(x, table))
+  expect_identical(fmatch(x, table, nomatch = 0L), match(x, table, nomatch = 0L))
+  expect_identical(NA %iin% table, NA_integer_)
+
+  # Reverse direction (already worked before the fix)
+  expect_identical(fmatch(table, x), match(table, x))
+
+  # Larger table values should not collide with the NA sentinel bucket
+  table2 <- c(0L, 1L, 2L, 3L, 4L, 5L)
+  x2 <- c(TRUE, FALSE, NA)
+  expect_identical(fmatch(x2, table2), match(x2, table2))
+
+  # Genuine logical x and table still work (fast path retained)
+  expect_identical(fmatch(c(TRUE, FALSE, NA), c(FALSE, TRUE, NA)),
+                    match(c(TRUE, FALSE, NA), c(FALSE, TRUE, NA)))
+
+  # Double table
+  expect_identical(fmatch(x, c(0, 1, 2)), match(x, c(0, 1, 2)))
+})
+

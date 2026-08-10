@@ -1,5 +1,7 @@
 # collapse 2.1.7
 
+* Fixed a bug in `fmatch()` (and thus `%in%`/`%iin%` and joins) where a logical `NA` in `x` could spuriously match a non-logical integer value in `table` (e.g., `2L`), instead of yielding `NA` as in `base::match()`. Thanks @LJ-Jenkins for reporting (#870).
+
 * Fixed a bug in `fslice()` (grouped, `n = 1`, `with.ties = FALSE`) that caused R to crash with a fatal error when a group had only missing values in `order.by`. Thanks @chihyunkim for reporting (#867).
 
 * The *collapse* article is now published in the Journal of Statistical Software: https://doi.org/10.18637/jss.v116.i01. This article is now the primary citation for academic use of *collapse*. It is also a great reference to quickly and thoroughly understand the package. `citation("collapse")` was also updated in this regard. The APA-style citation is:

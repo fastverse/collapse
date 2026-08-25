@@ -11,14 +11,20 @@ fsum.default <- function(x, g = NULL, w = NULL, TRA = NULL, na.rm = .op[["na.rm"
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`names<-`(.Call(C_fsum,x,length(lev),g,w,na.rm,fill,nthreads), lev))
+        res <- .Call(C_fsum,x,length(lev),g,w,na.rm,fill,nthreads)
+        names(res) <- lev
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_fsum,x,fnlevels(g),g,w,na.rm,fill,nthreads))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_fsum,x,attr(g,"N.groups"),g,w,na.rm,fill,nthreads))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`names<-`(.Call(C_fsum,x,g[[1L]],g[[2L]],w,na.rm,fill,nthreads), GRPnames(g)))
+    if(use.g.names) {
+      res <- .Call(C_fsum,x,g[[1L]],g[[2L]],w,na.rm,fill,nthreads)
+      names(res) <- GRPnames(g)
+      return(res)
+    }
     return(.Call(C_fsum,x,g[[1L]],g[[2L]],w,na.rm,fill,nthreads))
   }
   if(is.null(g)) return(TRAC(x,.Call(C_fsum,x,0L,0L,w,na.rm,fill,nthreads),0L,TRA, ...))
@@ -34,14 +40,20 @@ fsum.matrix <- function(x, g = NULL, w = NULL, TRA = NULL, na.rm = .op[["na.rm"]
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`dimnames<-`(.Call(C_fsumm,x,length(lev),g,w,na.rm,fill,FALSE,nthreads), list(lev, dimnames(x)[[2L]])))
+        res <- .Call(C_fsumm,x,length(lev),g,w,na.rm,fill,FALSE,nthreads)
+        dimnames(res) <- list(lev, dimnames(x)[[2L]])
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_fsumm,x,fnlevels(g),g,w,na.rm,fill,FALSE,nthreads))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_fsumm,x,attr(g,"N.groups"),g,w,na.rm,fill,FALSE,nthreads))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`dimnames<-`(.Call(C_fsumm,x,g[[1L]],g[[2L]],w,na.rm,fill,FALSE,nthreads), list(GRPnames(g), dimnames(x)[[2L]])))
+    if(use.g.names) {
+      res <- .Call(C_fsumm,x,g[[1L]],g[[2L]],w,na.rm,fill,FALSE,nthreads)
+      dimnames(res) <- list(GRPnames(g), dimnames(x)[[2L]])
+      return(res)
+    }
     return(.Call(C_fsumm,x,g[[1L]],g[[2L]],w,na.rm,fill,FALSE,nthreads))
   }
   if(is.null(g)) return(TRAmC(x,.Call(C_fsumm,x,0L,0L,w,na.rm,fill,TRUE,nthreads),0L,TRA, ...))
@@ -95,7 +107,10 @@ fsum.grouped_df <- function(x, w = NULL, TRA = NULL, na.rm = .op[["na.rm"]], use
       if(any(gn %in% wn)) stop("Weights coincide with grouping variables!")
       gn <- c(gn, wn)
       if(keep.w) {
-        if(nTRAl) sumw <- `names<-`(list(fsumC(w,g[[1L]],g[[2L]],NULL,na.rm,fill)), do_stub(stub, if(length(wsym) == 1L) as.character(wsym) else deparse(wsym), "sum.")) else if(keep.group_vars)
+        if(nTRAl) {
+          sumw <- list(fsumC(w,g[[1L]],g[[2L]],NULL,na.rm,fill))
+          names(sumw) <- do_stub(stub, if(length(wsym) == 1L) as.character(wsym) else deparse(wsym), "sum.")
+        } else if(keep.group_vars)
           gn2 <- gn else sumw <- gn2 <- wn
       }
     }

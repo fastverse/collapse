@@ -34,7 +34,11 @@ roworder <- function(X, ..., na.last = TRUE, verbose = .op[["verbose"]]) {
 posord <- function(sq, o, pos) switch(pos,
                                       front = c(o, sq[-o]),
                                       end = c(sq[-o], o),
-                                      exchange = `[<-`(sq, o[forder.int(o)], value = o),
+                                      exchange = {
+                                        sqx <- sq
+                                        sqx[o[forder.int(o)]] <- o
+                                        sqx
+                                      },
                                       after = {
                                         if(length(o) == 1L) stop('Need o supply at least 2 columns if pos = "after"')
                                         om1 <- o[-1L]

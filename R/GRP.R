@@ -358,15 +358,21 @@ GRP.qG <- function(X, ..., group.sizes = TRUE, return.groups = TRUE, call = TRUE
   ordered <- is.ordered(X)
   attributes(X) <- NULL
 
-  return(`oldClass<-`(list(N.groups = ng,
-                        group.id = X,
-                        group.sizes = if(group.sizes) .Call(C_fwtabulate, X, NULL, ng, FALSE) else NULL, # tabulate(X, ng)  # .Internal(tabulate(X, ng))
-                        groups = if(grl) `names<-`(list(groups), gvars) else NULL,
-                        group.vars = gvars,
-                        ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(X)),
-                        order = NULL, # starts = NULL, maxgrpn = NULL,
-                        group.starts = st,
-                        call = if(call) match.call() else NULL), "GRP"))
+  if(grl) {
+    groups <- list(groups)
+    names(groups) <- gvars
+  } else groups <- NULL
+  g <- list(N.groups = ng,
+            group.id = X,
+            group.sizes = if(group.sizes) .Call(C_fwtabulate, X, NULL, ng, FALSE) else NULL, # tabulate(X, ng)  # .Internal(tabulate(X, ng))
+            groups = groups,
+            group.vars = gvars,
+            ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(X)),
+            order = NULL, # starts = NULL, maxgrpn = NULL,
+            group.starts = st,
+            call = if(call) match.call() else NULL)
+  oldClass(g) <- "GRP"
+  return(g)
 }
 
 GRP.factor <- function(X, ..., group.sizes = TRUE, drop = FALSE, return.groups = TRUE, call = TRUE) {
@@ -378,15 +384,21 @@ GRP.factor <- function(X, ..., group.sizes = TRUE, drop = FALSE, return.groups =
   nl <- length(lev)
   ordered <- is.ordered(X)
   attributes(X) <- NULL
-  return(`oldClass<-`(list(N.groups = nl,
-                        group.id = X,
-                        group.sizes = if(group.sizes) .Call(C_fwtabulate, X, NULL, nl, FALSE) else NULL, # tabulate(X, nl) # .Internal(tabulate(X, nl))
-                        groups = if(return.groups) `names<-`(list(lev), nam) else NULL,
-                        group.vars = nam,
-                        ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(X)),
-                        order = NULL, # starts = NULL, maxgrpn = NULL,
-                        group.starts = NULL,
-                        call = if(call) match.call() else NULL), "GRP"))
+  if(return.groups) {
+    groups <- list(lev)
+    names(groups) <- nam
+  } else groups <- NULL
+  g <- list(N.groups = nl,
+            group.id = X,
+            group.sizes = if(group.sizes) .Call(C_fwtabulate, X, NULL, nl, FALSE) else NULL, # tabulate(X, nl) # .Internal(tabulate(X, nl))
+            groups = groups,
+            group.vars = nam,
+            ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(X)),
+            order = NULL, # starts = NULL, maxgrpn = NULL,
+            group.starts = NULL,
+            call = if(call) match.call() else NULL)
+  oldClass(g) <- "GRP"
+  return(g)
 }
 
 GRP.pseries <- function(X, effect = 1L, ..., group.sizes = TRUE, return.groups = TRUE, call = TRUE) {
@@ -406,15 +418,21 @@ GRP.pseries <- function(X, effect = 1L, ..., group.sizes = TRUE, return.groups =
   ordered <- is.ordered(g)
   attributes(g) <- NULL
 
-  return(`oldClass<-`(list(N.groups = nl,
-                        group.id = g,
-                        group.sizes = if(group.sizes) .Call(C_fwtabulate, g, NULL, nl, FALSE) else NULL, # tabulate(g, nl) # .Internal(tabulate(g, nl))
-                        groups = if(return.groups) `names<-`(list(lev), nam) else NULL,
-                        group.vars = nam,
-                        ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(g)),
-                        order = NULL, # starts = NULL, maxgrpn = NULL,
-                        group.starts = NULL,
-                        call = if(call) match.call() else NULL), "GRP"))
+  if(return.groups) {
+    groups <- list(lev)
+    names(groups) <- nam
+  } else groups <- NULL
+  gr <- list(N.groups = nl,
+             group.id = g,
+             group.sizes = if(group.sizes) .Call(C_fwtabulate, g, NULL, nl, FALSE) else NULL, # tabulate(g, nl) # .Internal(tabulate(g, nl))
+             groups = groups,
+             group.vars = nam,
+             ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(g)),
+             order = NULL, # starts = NULL, maxgrpn = NULL,
+             group.starts = NULL,
+             call = if(call) match.call() else NULL)
+  oldClass(gr) <- "GRP"
+  return(gr)
 }
 GRP.pdata.frame <- function(X, effect = 1L, ..., group.sizes = TRUE, return.groups = TRUE, call = TRUE)
   GRP.pseries(X, effect, ..., group.sizes = group.sizes, return.groups = return.groups, call = call)
@@ -622,15 +640,17 @@ GRP.grouped_df <- function(X, ..., return.groups = TRUE, call = TRUE) {
   ng <- length(gr)
   gs <- vlengths(gr, FALSE)
   id <- .Call(C_groups2GRP, gr, fnrow(X), gs)
-  return(`oldClass<-`(list(N.groups = ng, # The C code here speeds up things a lot !!
-                        group.id = id,  # Old: rep(seq_len(ng), gs)[order(funlist(gr))], # .Internal(radixsort(TRUE, FALSE, FALSE, TRUE, .Internal(unlist(gr, FALSE, FALSE))))
-                        group.sizes = gs,
-                        groups = if(return.groups) g[-lg] else NULL, # better reclass afterwards ? -> Nope, this is only used in internal codes...
-                        group.vars = names(g)[-lg],
-                        ordered = c(ordered = TRUE, sorted = issorted(id)), # Important to have NA here, otherwise wrong result in gsplit (wrong optimization)
-                        order = NULL, # starts = NULL, maxgrpn = NULL,
-                        group.starts = NULL,
-                        call = if(call) match.call() else NULL), "GRP"))
+  res <- list(N.groups = ng, # The C code here speeds up things a lot !!
+              group.id = id,  # Old: rep(seq_len(ng), gs)[order(funlist(gr))], # .Internal(radixsort(TRUE, FALSE, FALSE, TRUE, .Internal(unlist(gr, FALSE, FALSE))))
+              group.sizes = gs,
+              groups = if(return.groups) g[-lg] else NULL, # better reclass afterwards ? -> Nope, this is only used in internal codes...
+              group.vars = names(g)[-lg],
+              ordered = c(ordered = TRUE, sorted = issorted(id)), # Important to have NA here, otherwise wrong result in gsplit (wrong optimization)
+              order = NULL, # starts = NULL, maxgrpn = NULL,
+              group.starts = NULL,
+              call = if(call) match.call() else NULL)
+  oldClass(res) <- "GRP"
+  return(res)
 }
 
 is_qG <- function(x) is.integer(x) && inherits(x, "qG")

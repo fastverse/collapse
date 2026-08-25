@@ -259,7 +259,10 @@ BY.matrix <- function(x, g, FUN, ..., use.g.names = TRUE, sort = .op[["sort"]], 
       namr <- rep(dimnames(x)[[2L]], each = ncol(res)/ncol(x))
       dn <- list(if(use.g.names) GRPnames(g) else NULL,
                  if(length(cn)) paste(namr, cn, sep = ".") else namr)
-      if(return == 2L) return(`dimnames<-`(res, dn))
+      if(return == 2L) {
+        dimnames(res) <- dn
+        return(res)
+      }
       ax <- attributes(x)
       ax[["dim"]] <- dim(res)
       ax[["dimnames"]] <- dn
@@ -322,7 +325,10 @@ BY.matrix <- function(x, g, FUN, ..., use.g.names = TRUE, sort = .op[["sort"]], 
   }
 
   if(matl) {
-    if(return == 2L) return(`dimnames<-`(res, dn))
+    if(return == 2L) {
+      dimnames(res) <- dn
+      return(res)
+    }
     ax <- attributes(x)
     ax[["dim"]] <- dim(res)
     ax[["dimnames"]] <- dn

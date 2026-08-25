@@ -23,11 +23,11 @@ fsd.default <- function(x, g = NULL, w = NULL, TRA = NULL, na.rm = .op[["na.rm"]
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
     if(use.g.names) {
-      res <- .Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,FALSE)
+      res <- .Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,TRUE)
       names(res) <- GRPnames(g)
       return(res)
     }
-    return(.Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,FALSE))
+    return(.Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,TRUE))
   }
   if(is.null(g)) return(TRAC(x,.Call(Cpp_fvarsd,x,0L,0L,NULL,w,na.rm,stable.algo,TRUE),0L,TRA, ...))
   g <- G_guo(g)
@@ -170,11 +170,11 @@ fvar.default <- function(x, g = NULL, w = NULL, TRA = NULL, na.rm = .op[["na.rm"
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
     if(use.g.names) {
-      res <- .Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,TRUE)
+      res <- .Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,FALSE)
       names(res) <- GRPnames(g)
       return(res)
     }
-    return(.Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,TRUE))
+    return(.Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,FALSE))
   }
   if(is.null(g)) return(TRAC(x,.Call(Cpp_fvarsd,x,0L,0L,NULL,w,na.rm,stable.algo,FALSE),0L,TRA, ...))
   g <- G_guo(g)

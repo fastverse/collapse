@@ -32,8 +32,9 @@ corr.pmat <- function(cm, nm) {
   df <- nm - 2L
   acm <- abs(cm)
   diag(acm) <- NA_real_ # tiny bit faster here vs below..
-  `attributes<-`(2 * pt(sqrt(df) * acm/sqrt(1 - acm^2), df, lower.tail = FALSE),
-                 attributes(cm))
+  pmat <- 2 * pt(sqrt(df) * acm/sqrt(1 - acm^2), df, lower.tail = FALSE)
+  attributes(pmat) <- attributes(cm)
+  pmat
   # n <- ncol(cm)
   # p.mat <- matrix(NA, n, n, dimnames = dimnames(cm))
   # for (i in 1:(n - 1)) {
@@ -100,7 +101,10 @@ pwcor <- function(X, ..., w = NULL, N = FALSE, P = FALSE, array = TRUE, use = "p
       r <- cov2cor(crossprod(sqrt(w) * BWmCpp(X, w = w, narm = FALSE))) # all.equal(cov2cor(crossprod(sqrt(w) * BWmCpp(X, w = w, narm = FALSE))), weights::wtd.cors(X, weight = w))
     } else r <- switch(use, complete.obs = stop("no complete element pairs"), namat(X))
   }
-  if(!(N || P)) return(`oldClass<-`(r, c("pwcor", "matrix")))
+  if(!(N || P)) {
+    oldClass(r) <- c("pwcor", "matrix")
+    return(r)
+  }
   n <- if(lcc) nmat(lcc, X) else switch(use, pairwise.complete.obs = pwnobs(X), complpwnobs(X)) # TODO: what about weights paiwrise ? # what if using ... to supply y ???
   if(N) {
     res <- if(P) list(r = r, N = n, P = corr.pmat(r, n)) else list(r = r, N = n)
@@ -140,7 +144,10 @@ pwcov <- function(X, ..., w = NULL, N = FALSE, P = FALSE, array = TRUE, use = "p
       # r <- crossprod(sqrt(w) * BWmCpp(X, w = w, narm = FALSE)) / (1 - bsum(w^2))
     } else r <- switch(use, complete.obs = stop("no complete element pairs"), namat(X)) # namat correct ??
   }
-  if(!(N || P)) return(`oldClass<-`(r, c("pwcov", "matrix")))
+  if(!(N || P)) {
+    oldClass(r) <- c("pwcov", "matrix")
+    return(r)
+  }
   n <- if(lcc) nmat(lcc, X) else switch(use, pairwise.complete.obs = pwnobs(X), complpwnobs(X)) # TODO: what about weights paiwrise ?
   if(N) {                                           # good ??? // cov(X) / outer(fsd(X), fsd(X))
     res <- if(P) list(cov = r, N = n, P = corr.pmat(cov2cor(r), n)) else list(cov = r, N = n) # what about x and y here ??
@@ -268,6 +275,10 @@ print.pwcov <- function(x, digits = .op[["digits"]], sig.level = 0.05, show = c(
 #                         digits = 9, big.mark = "'", big.interval = 6), quote = FALSE, right = TRUE, ...)
 
 
-`[.pwcor` <- `[.pwcov` <- function(x, i, j, ..., drop = TRUE) `oldClass<-`(NextMethod(), oldClass(x))
+`[.pwcor` <- `[.pwcov` <- function(x, i, j, ..., drop = TRUE) {
+  r <- NextMethod()
+  oldClass(r) <- oldClass(x)
+  r
+}
 
 

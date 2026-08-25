@@ -124,7 +124,15 @@ descr_core <- function(X, nam, by = NULL, w = NULL, Ndistinct = TRUE, higher = T
       tabstats <- if(Ndistinct && is.null(w))
         function(tab) c(N = fsumC(tab), Ndist = length(tab)) else if(Ndistinct)
         function(tab) c(WeightSum = fsumC(tab), Ndist = length(tab)) else if(is.null(w))
-        function(tab) `names<-`(fsumC(tab), "N") else function(tab) `names<-`(fsumC(tab), "WeightSum")
+        function(tab) {
+          out <- fsumC(tab)
+          names(out) <- "N"
+          out
+        } else function(tab) {
+          out <- fsumC(tab)
+          names(out) <- "WeightSum"
+          out
+        }
 
       descrcat <- function(x) {
         tab <- fsorttable(x, sort.table, w)
@@ -134,17 +142,35 @@ descr_core <- function(X, nam, by = NULL, w = NULL, Ndistinct = TRUE, higher = T
       }
     } else {
       descrcat <- function(x) list(Class = class(x), Label = attr(x, label.attr),
-                                   Stats = if(Ndistinct) c(N = fnobsC(x), Ndist = fndistinctC(x)) else `names<-`(fnobsC(x), "N"))
+                                   Stats = if(Ndistinct) c(N = fnobsC(x), Ndist = fndistinctC(x)) else {
+                                     out <- fnobsC(x)
+                                     names(out) <- "N"
+                                     out
+                                   })
     }
 
   }
 
-  descrdate <- if(is.null(by)) function(x) list(Class = class(x), Label = attr(x, label.attr),
-                                                Stats = `attr<-`(c(if(Ndistinct) c(N = fnobsC(x), Ndist = fndistinctC(x)) else `names<-`(fnobsC(x), "N"), `names<-`(.range(x), c("Min", "Max"))), "attrib", attributes(x))) else
-                               function(x) list(Class = class(x), Label = attr(x, label.attr),
-                                                Stats = `attr<-`(cbind(N = fnobs.default(x, by), Ndist = if(Ndistinct) fndistinctC(x, by) else NULL,
-                                                                       Min = fmin.default(x, by, na.rm = TRUE, use.g.names = FALSE),
-                                                                       Max = fmax.default(x, by, na.rm = TRUE, use.g.names = FALSE)), "attrib", attributes(x)))
+  descrdate <- if(is.null(by)) function(x) {
+    Stats <- c(if(Ndistinct) c(N = fnobsC(x), Ndist = fndistinctC(x)) else {
+                 out <- fnobsC(x)
+                 names(out) <- "N"
+                 out
+               }, {
+                 rng <- .range(x)
+                 names(rng) <- c("Min", "Max")
+                 rng
+               })
+    attr(Stats, "attrib") <- attributes(x)
+    list(Class = class(x), Label = attr(x, label.attr), Stats = Stats)
+  } else function(x) {
+    Stats <- cbind(N = fnobs.default(x, by),
+                   Ndist = if(Ndistinct) fndistinctC(x, by) else NULL,
+                   Min = fmin.default(x, by, na.rm = TRUE, use.g.names = FALSE),
+                   Max = fmax.default(x, by, na.rm = TRUE, use.g.names = FALSE))
+    attr(Stats, "attrib") <- attributes(x)
+    list(Class = class(x), Label = attr(x, label.attr), Stats = Stats)
+  }
 
   # Result vector and attributes
   res <- vector('list', length(X))
@@ -304,7 +330,8 @@ print_descr_default <- function(x, n = 14, perc = TRUE, digits = 2, t.table = TR
         } else {
           t1 <- t[seq_len(n)]
           st <- bsum(t)
-          rem <- `names<-`(st-bsum(t1), sprintf("... %s Others", length(t)-n))
+          rem <- st-bsum(t1)
+          names(rem) <- sprintf("... %s Others", length(t)-n)
           if(perc) {
             pct <- unattrib(t1)/st*100
             print.default(cb(c(t1, rem), round(c(pct, 100-bsum(pct)), digits)), right = TRUE, print.gap = 2, quote = FALSE)

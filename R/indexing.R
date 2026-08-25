@@ -227,7 +227,11 @@ findex_by <- function(.X, ..., single = "auto", interact.ids = TRUE) { # pid = N
   } else {
     if(length(nam)) {
       nonmiss <- nzchar(nam)
-      if(!all(nonmiss)) names(ids) <- `[<-`(as.character(dots[-1L]), nonmiss, value = nam[nonmiss])
+      if(!all(nonmiss)) {
+        nam_dots <- as.character(dots[-1L])
+        nam_dots[nonmiss] <- nam[nonmiss]
+        names(ids) <- nam_dots
+      }
     } else names(ids) <- vars
   }
 

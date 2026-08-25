@@ -74,7 +74,10 @@ vlabels <- function(X, attrn = "label", use.names = TRUE) .Call(C_vlabels, X, at
 # }
 
 "vlabels<-" <- function(X, attrn = "label", value) {
-  if(is.atomic(X)) return(`attr<-`(X, attrn, value))
+  if(is.atomic(X)) {
+    attr(X, attrn) <- value
+    return(X)
+  }
   .Call(C_setvlabels, X, attrn, value, NULL)
 }
 
@@ -95,7 +98,10 @@ vlabels <- function(X, attrn = "label", use.names = TRUE) .Call(C_vlabels, X, at
 
 # Note: Shallow copy does not work as it only copies the list, but the attribute is a feature of the atomic elements inside...
 setLabels <- function(X, value = NULL, attrn = "label", cols = NULL) { # , sc = TRUE
-  if(is.atomic(X)) return(`attr<-`(X, attrn, value))
+  if(is.atomic(X)) {
+    attr(X, attrn) <- value
+    return(X)
+  }
   .Call(C_setvlabels, X, attrn, value, as.integer(cols))
 }
 
@@ -238,7 +244,8 @@ setRownames <- function(object, nm = if(is.atomic(object)) seq_row(object) else 
   }
   if(!is.array(object)) stop("Setting row-names only supported on arrays and lists")
   dn <- dimnames(object)
- `dimnames<-`(object, c(list(nm), dn[-1L]))
+  dimnames(object) <- c(list(nm), dn[-1L])
+  object
 }
 
 setColnames <- function(object, nm) {
@@ -251,7 +258,10 @@ setColnames <- function(object, nm) {
 }
 
 setDimnames <- function(object, dn, which = NULL) {
-  if(is.null(which)) return(`dimnames<-`(object, dn))
+  if(is.null(which)) {
+    dimnames(object) <- dn
+    return(object)
+  }
   if(is.atomic(dn)) dimnames(object)[[which]] <- dn else
                     dimnames(object)[which] <- dn
   object
@@ -277,13 +287,20 @@ all_funs <- function(expr) .Call(C_all_funs, expr)
 cinv <- function(x) chol2inv(chol(x))
 
 vec <- function(X) {
-  if(is.atomic(X)) return(`attributes<-`(X, NULL))
+  if(is.atomic(X)) {
+    attributes(X) <- NULL
+    return(X)
+  }
   .Call(C_pivot_long, X, NULL, FALSE)
 }
 
 interact_names <- function(l) {
   oldClass(l) <- NULL
-  if(length(l) == 2L) return(`dim<-`(outer(l[[1L]], l[[2L]], paste, sep = "."), NULL))
+  if(length(l) == 2L) {
+    res <- outer(l[[1L]], l[[2L]], paste, sep = ".")
+    dim(res) <- NULL
+    return(res)
+  }
   do.call(paste, c(expand.grid(l, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE), list(sep = ".")))
 }
 
@@ -293,7 +310,10 @@ condalc <- function(x, DT) if(DT) .Call(C_alloccol, x) else x
 alcSA <- function(x, a) .Call(C_alloccol, .Call(C_setAttributes, x, a))
 condalcSA <- function(x, a, DT) if(DT) .Call(C_alloccol, .Call(C_setAttributes, x, a)) else .Call(C_setAttributes, x, a)
 
-unattrib <- function(object) `attributes<-`(object, NULL)
+unattrib <- function(object) {
+  attributes(object) <- NULL
+  object
+}
 
 # Both equally efficient and therefore redundant !
 # setAttr <- function(object, a, v) .Call(C_setAttr, object, a, v)

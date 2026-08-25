@@ -91,7 +91,8 @@ colorder <- function(.X, ..., pos = "front") { # This also takes names and indic
   oldClass(.X) <- NULL # attributes ?
   nam <- names(.X)
   iX <- seq_along(.X)
-  nl <- `names<-`(as.vector(iX, "list"), nam)
+  nl <- as.vector(iX, "list")
+  names(nl) <- nam
   vars <- eval(substitute(c(...)), nl, parent.frame())
   if(!is.integer(vars)) stop(paste0("Unknown columns: ", .c(...)))
   if(length(names(vars))) { # Allow renaming during selection

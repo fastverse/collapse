@@ -472,7 +472,11 @@ fgroup_by <- function(.X, ..., sort = .op[["sort"]], decreasing = FALSE, na.last
     } else {
       if(length(name)) {  # fgroup_by(mtcars, bla = round(mpg / cyl), vs, am)
         nonmiss <- nzchar(name) # -> using as.character(dots[-1L]) instead of vars
-        if(!all(nonmiss)) names(e) <- `[<-`(as.character(dots[-1L]), nonmiss, value = name[nonmiss])
+        if(!all(nonmiss)) {
+          nam_dots <- as.character(dots[-1L])
+          nam_dots[nonmiss] <- name[nonmiss]
+          names(e) <- nam_dots
+        }
       } else names(e) <- vars
     }
   }

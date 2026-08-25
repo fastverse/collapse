@@ -12,14 +12,20 @@ fnobs.default <- function(x, g = NULL, TRA = NULL, use.g.names = TRUE, ...) {
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`names<-`(.Call(C_fnobs,x,length(lev),g), lev))
+        res <- .Call(C_fnobs,x,length(lev),g)
+        names(res) <- lev
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_fnobs,x,fnlevels(g),g))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_fnobs,x,attr(g,"N.groups"),g))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`names<-`(.Call(C_fnobs,x,g[[1L]],g[[2L]]), GRPnames(g)))
+    if(use.g.names) {
+      res <- .Call(C_fnobs,x,g[[1L]],g[[2L]])
+      names(res) <- GRPnames(g)
+      return(res)
+    }
     return(.Call(C_fnobs,x,g[[1L]],g[[2L]]))
   }
   if(is.null(g)) return(TRAC(x,.Call(C_fnobs,x,0L,0L),0L,TRA, ...))
@@ -35,14 +41,20 @@ fnobs.matrix <- function(x, g = NULL, TRA = NULL, use.g.names = TRUE, drop = TRU
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`dimnames<-`(.Call(C_fnobsm,x,length(lev),g,FALSE), list(lev, dimnames(x)[[2L]])))
+        res <- .Call(C_fnobsm,x,length(lev),g,FALSE)
+        dimnames(res) <- list(lev, dimnames(x)[[2L]])
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_fnobsm,x,fnlevels(g),g,FALSE))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_fnobsm,x,attr(g,"N.groups"),g,FALSE))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`dimnames<-`(.Call(C_fnobsm,x,g[[1L]],g[[2L]],FALSE), list(GRPnames(g), dimnames(x)[[2L]])))
+    if(use.g.names) {
+      res <- .Call(C_fnobsm,x,g[[1L]],g[[2L]],FALSE)
+      dimnames(res) <- list(GRPnames(g), dimnames(x)[[2L]])
+      return(res)
+    }
     return(.Call(C_fnobsm,x,g[[1L]],g[[2L]],FALSE))
   }
   if(is.null(g)) return(TRAmC(x,.Call(C_fnobsm,x,0L,0L,TRUE),0L,TRA, ...))

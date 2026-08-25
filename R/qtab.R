@@ -14,8 +14,11 @@ qtab <- function(..., w = NULL, wFUN = NULL, wFUN.args = NULL,
       nam <- names(l)
       nam <- switch(dnn, auto =, namlab =
                if(ll) nam else if(is.null(nam)) .c(...) else
-               if(all(has_nam <- nzchar(nam))) nam else
-                 `[<-`(nam, !has_nam, value = .c(...)[!has_nam]), dnn)
+               if(all(has_nam <- nzchar(nam))) nam else {
+                 out <- nam
+                 out[!has_nam] <- .c(...)[!has_nam]
+                 out
+               }, dnn)
       if(dnn != "namlab") nam else paste(nam, setv(vlabels(l, use.names = FALSE), NA, ""), sep = ": ")
     }
   } else if(is.function(dnn)) dnn(l) else unlist(dnn, use.names = FALSE)

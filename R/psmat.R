@@ -148,7 +148,9 @@ plot.psmat <- function(x, legend = FALSE,
 # print.psmat <- print.qsu # nah, too expensive
 
 print.psmat <- function(x, digits = .op[["digits"]] + 1L, ...) {
-  print.default(`attr<-`(unclass(x), "transpose", NULL), digits = digits, ...)
+  xu <- unclass(x)
+  attr(xu, "transpose") <- NULL
+  print.default(xu, digits = digits, ...)
 }
 
 `[.psmat` <- function(x, i, j, ..., drop = TRUE) {

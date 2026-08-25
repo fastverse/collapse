@@ -12,14 +12,20 @@ fmin.default <- function(x, g = NULL, TRA = NULL, na.rm = .op[["na.rm"]], use.g.
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`names<-`(.Call(C_fmin,x,length(lev),g,na.rm), lev))
+        res <- .Call(C_fmin,x,length(lev),g,na.rm)
+        names(res) <- lev
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_fmin,x,fnlevels(g),g,na.rm))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_fmin,x,attr(g,"N.groups"),g,na.rm))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`names<-`(.Call(C_fmin,x,g[[1L]],g[[2L]],na.rm), GRPnames(g)))
+    if(use.g.names) {
+      res <- .Call(C_fmin,x,g[[1L]],g[[2L]],na.rm)
+      names(res) <- GRPnames(g)
+      return(res)
+    }
     return(.Call(C_fmin,x,g[[1L]],g[[2L]],na.rm))
   }
   if(is.null(g)) return(TRAC(x,.Call(C_fmin,x,0L,0L,na.rm),0L,TRA, ...))
@@ -35,14 +41,20 @@ fmin.matrix <- function(x, g = NULL, TRA = NULL, na.rm = .op[["na.rm"]], use.g.n
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`dimnames<-`(.Call(C_fminm,x,length(lev),g,na.rm,FALSE), list(lev, dimnames(x)[[2L]])))
+        res <- .Call(C_fminm,x,length(lev),g,na.rm,FALSE)
+        dimnames(res) <- list(lev, dimnames(x)[[2L]])
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_fminm,x,fnlevels(g),g,na.rm,FALSE))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_fminm,x,attr(g,"N.groups"),g,na.rm,FALSE))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`dimnames<-`(.Call(C_fminm,x,g[[1L]],g[[2L]],na.rm,FALSE), list(GRPnames(g), dimnames(x)[[2L]])))
+    if(use.g.names) {
+      res <- .Call(C_fminm,x,g[[1L]],g[[2L]],na.rm,FALSE)
+      dimnames(res) <- list(GRPnames(g), dimnames(x)[[2L]])
+      return(res)
+    }
     return(.Call(C_fminm,x,g[[1L]],g[[2L]],na.rm,FALSE))
   }
   if(is.null(g)) return(TRAmC(x,.Call(C_fminm,x,0L,0L,na.rm,TRUE),0L,TRA, ...))
@@ -126,14 +138,20 @@ fmax.default <- function(x, g = NULL, TRA = NULL, na.rm = .op[["na.rm"]], use.g.
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`names<-`(.Call(C_fmax,x,length(lev),g,na.rm), lev))
+        res <- .Call(C_fmax,x,length(lev),g,na.rm)
+        names(res) <- lev
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_fmax,x,fnlevels(g),g,na.rm))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_fmax,x,attr(g,"N.groups"),g,na.rm))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`names<-`(.Call(C_fmax,x,g[[1L]],g[[2L]],na.rm), GRPnames(g)))
+    if(use.g.names) {
+      res <- .Call(C_fmax,x,g[[1L]],g[[2L]],na.rm)
+      names(res) <- GRPnames(g)
+      return(res)
+    }
     return(.Call(C_fmax,x,g[[1L]],g[[2L]],na.rm))
   }
   if(is.null(g)) return(TRAC(x,.Call(C_fmax,x,0L,0L,na.rm),0L,TRA, ...))
@@ -149,14 +167,20 @@ fmax.matrix <- function(x, g = NULL, TRA = NULL, na.rm = .op[["na.rm"]], use.g.n
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`dimnames<-`(.Call(C_fmaxm,x,length(lev),g,na.rm,FALSE), list(lev, dimnames(x)[[2L]])))
+        res <- .Call(C_fmaxm,x,length(lev),g,na.rm,FALSE)
+        dimnames(res) <- list(lev, dimnames(x)[[2L]])
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_fmaxm,x,fnlevels(g),g,na.rm,FALSE))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_fmaxm,x,attr(g,"N.groups"),g,na.rm,FALSE))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`dimnames<-`(.Call(C_fmaxm,x,g[[1L]],g[[2L]],na.rm,FALSE), list(GRPnames(g), dimnames(x)[[2L]])))
+    if(use.g.names) {
+      res <- .Call(C_fmaxm,x,g[[1L]],g[[2L]],na.rm,FALSE)
+      dimnames(res) <- list(GRPnames(g), dimnames(x)[[2L]])
+      return(res)
+    }
     return(.Call(C_fmaxm,x,g[[1L]],g[[2L]],na.rm,FALSE))
   }
   if(is.null(g)) return(TRAmC(x,.Call(C_fmaxm,x,0L,0L,na.rm,TRUE),0L,TRA, ...))

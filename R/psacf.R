@@ -21,7 +21,8 @@ psacf.default <- function(x, g, t = NULL, lag.max = NULL, type = c("correlation"
     dim(acf) <- d
     lag <- array(0:lag.max, d)
   }
-  acf.out <- `oldClass<-`(list(acf = acf, type = type[1L], n.used = length(x), lag = lag, series = series, snames = NULL), "acf")
+  acf.out <- list(acf = acf, type = type[1L], n.used = length(x), lag = lag, series = series, snames = NULL)
+  oldClass(acf.out) <- "acf"
   if(plot) {
     plot(acf.out, ylab = if(typei == 3L) "Panel Series Partial ACF" else "Panel Series ACF", ...)
     invisible(acf.out)
@@ -78,9 +79,10 @@ psacf.data.frame <- function(x, by, t = NULL, cols = is.numeric, lag.max = NULL,
             coefs = zvec, pacf = zvec, var = zvec, aic = double(1L+lag.max), order = 0L, 1L)
     acf <- aperm(array(z$pacf, dim = c(lx, lx, lag.max + 1L)), 3:1)[-1L, , , drop = FALSE]
   }
-  acf.out <- `oldClass<-`(list(acf = acf, type = type[1L], n.used = nrx,
-                            lag = if(typei == 3L) outer(1L:lag.max, lag) else outer(0L:lag.max, lag),
-                            series = series, snames = snames), "acf")
+  acf.out <- list(acf = acf, type = type[1L], n.used = nrx,
+                                lag = if(typei == 3L) outer(1L:lag.max, lag) else outer(0L:lag.max, lag),
+                                series = series, snames = snames)
+  oldClass(acf.out) <- "acf"
   if(plot) {
     plot(acf.out, ylab = if(typei == 3L) "Panel Series Partial ACF" else "Panel Series ACF",
          mar = if(lx > 2) c(3, 2.4, 2, 0.8) else par("mar"), ...)
@@ -113,7 +115,8 @@ psacf.pseries <- function(x, lag.max = NULL, type = c("correlation", "covariance
     dim(acf) <- d
     lag <- array(0:lag.max, d)
   }
-  acf.out <- `oldClass<-`(list(acf = acf, type = type[1L], n.used = length(x), lag = lag, series = series, snames = NULL), "acf")
+  acf.out <- list(acf = acf, type = type[1L], n.used = length(x), lag = lag, series = series, snames = NULL)
+  oldClass(acf.out) <- "acf"
   if (plot) {
     plot(acf.out, ylab = if(typei == 3L) "Panel Series Partial ACF" else "Panel Series ACF", ...)
     invisible(acf.out)
@@ -154,9 +157,10 @@ psacf.pdata.frame <- function(x, cols = is.numeric, lag.max = NULL, type = c("co
             coefs = zvec, pacf = zvec, var = zvec, aic = double(1L+lag.max), order = 0L, 1L)
     acf <- aperm(array(z$pacf, dim = c(lx, lx, lag.max + 1L)), 3:1)[-1L, , , drop = FALSE]
   }
-  acf.out <- `oldClass<-`(list(acf = acf, type = type[1L], n.used = nrx,
-                            lag = if(typei == 3L) outer(1L:lag.max, lag) else outer(0L:lag.max, lag),
-                            series = series, snames = snames), "acf")
+  acf.out <- list(acf = acf, type = type[1L], n.used = nrx,
+                                lag = if(typei == 3L) outer(1L:lag.max, lag) else outer(0L:lag.max, lag),
+                                series = series, snames = snames)
+  oldClass(acf.out) <- "acf"
   if(plot) {
     plot(acf.out, ylab = if(typei == 3L) "Panel Series Partial ACF" else "Panel Series ACF",
          mar = if(lx > 2) c(3, 2.4, 2, 0.8) else par("mar"), ...)
@@ -213,8 +217,9 @@ psccf.default <- function(x, y, g, t = NULL, lag.max = NULL, type = c("correlati
   acf <- getccf(g[[1L]], g[[2L]])
   d <- c(2*lag.max+1,1,1)
   dim(acf) <- d
-  acf.out <- `oldClass<-`(list(acf = acf, type = type[1L], n.used = lx,
-                            lag = array(-lag.max:lag.max, d), series = snames, snames = snames), "acf")
+  acf.out <- list(acf = acf, type = type[1L], n.used = lx,
+                                lag = array(-lag.max:lag.max, d), series = snames, snames = snames)
+  oldClass(acf.out) <- "acf"
   if (plot) {
     plot(acf.out, ylab = "Panel Series CCF", ...)
     invisible(acf.out)
@@ -248,8 +253,9 @@ psccf.pseries <- function(x, y, lag.max = NULL, type = c("correlation", "covaria
     drop(cov(x, .Call(Cpp_flaglead,y,l_seq,NA,ng,g,t,FALSE), use = "pairwise.complete.obs")/(fsd.default(x)*fsd.default(y))) # or complete obs ?
   d <- c(2*lag.max+1,1,1)
   dim(acf) <- d
-  acf.out <- `oldClass<-`(list(acf = acf, type = type[1L], n.used = lx,
-                            lag = array(l_seq, d), series = snames, snames = snames), "acf")
+  acf.out <- list(acf = acf, type = type[1L], n.used = lx,
+                                lag = array(l_seq, d), series = snames, snames = snames)
+  oldClass(acf.out) <- "acf"
   if (plot) {
     plot(acf.out, ylab = "Panel Series CCF", ...)
     invisible(acf.out)

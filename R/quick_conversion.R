@@ -27,20 +27,23 @@ qDF <- function(X, row.names.col = FALSE, keep.attr = FALSE, class = "data.frame
     nam <- names(X)
     if(is.null(nam) || isFALSE(row.names.col)) {
       if(is.null(nam)) {
-        res <- `names<-`(list(X), l1orlst(as.character(substitute(X))))
+        res <- list(X)
+        names(res) <- l1orlst(as.character(substitute(X)))
         attr(res, "row.names") <- .set_row_names(length(X))
       } else {
-        res <- `names<-`(list(`names<-`(X, NULL)), l1orlst(as.character(substitute(X))))
+        res <- list(unname(X))
+        names(res) <- l1orlst(as.character(substitute(X)))
         attr(res, "row.names") <- nam
       }
     } else {
-      res <- list(nam, `names<-`(X, NULL))
+      res <- list(nam, unname(X))
       names(res) <- if(length(row.names.col) == 2L) row.names.col else c(
                     if(is.character(row.names.col)) row.names.col[1L] else "row.names",
                     l1orlst(as.character(substitute(X))))
       attr(res, "row.names") <- .set_row_names(length(X))
     }
-    return(`oldClass<-`(res, if(length(class)) class else "data.frame"))
+    oldClass(res) <- if(length(class)) class else "data.frame"
+    return(res)
   }
   if(keep.attr) {
     # if(all(class(X) == class)) return(X) # better adjust rows ? -> yes, row.names.col should always work !
@@ -54,9 +57,13 @@ qDF <- function(X, row.names.col = FALSE, keep.attr = FALSE, class = "data.frame
       ax[["names"]] <- c(if(is.character(row.names.col)) row.names.col[1L] else "row.names", ax[["names"]])
       setattributes(X, ax)
     }
-    if(length(class)) return(`oldClass<-`(X, class))
+    if(length(class)) {
+      oldClass(X) <- class
+      return(X)
+    }
     if(inherits(X, "data.frame")) return(X)
-    return(`oldClass<-`(X, "data.frame"))
+    oldClass(X) <- "data.frame"
+    return(X)
   }
   nam <- attr(X, "names")
   rn <- attr(X, "row.names")
@@ -102,14 +109,16 @@ qDT_raw <- function(X, row.names.col, keep.attr, DT_class, X_nam) {
       return(if(any(axoth)) addAttributes(res, ax[axoth]) else res)
     }
     if(isFALSE(row.names.col) || is.null(nam <- names(X))) {
-      res <- `names<-`(list(X), X_nam)
+      res <- list(X)
+      names(res) <- X_nam
     } else {
-      res <- list(nam, `names<-`(X, NULL))
+      res <- list(nam, unname(X))
       names(res) <- if(length(row.names.col) == 2L) row.names.col else c(
         if(is.character(row.names.col)) row.names.col[1L] else "row.names", X_nam)
     }
     attr(res, "row.names") <- .set_row_names(length(X))
-    return(`oldClass<-`(res, DT_class))
+    oldClass(res) <- DT_class
+    return(res)
   }
   if(keep.attr) {
     # if(all(class(X) == DT_class)) return(X) # better adjust rows ? -> yes, row.names.col should always work !
@@ -134,7 +143,8 @@ qDT_raw <- function(X, row.names.col, keep.attr, DT_class, X_nam) {
     names(X) <- nam
     attr(X, "row.names") <- .set_row_names(.Call(C_fnrow, X))
   }
-  return(`oldClass<-`(X, DT_class))
+  oldClass(X) <- DT_class
+  return(X)
 }
 
 qDT <- function(X, row.names.col = FALSE, keep.attr = FALSE, class = c("data.table", "data.frame")) {
@@ -192,7 +202,8 @@ qM <- function(X, row.names.col = NULL, keep.attr = FALSE, class = NULL, sep = "
   if(is.atomic(X)) {
     if(!is.array(X)) {
       r <- matrix(X, ncol = 1, dimnames = list(names(X), l1orlst(as.character(substitute(X)))))
-      if(is.null(class)) return(r) else return(`oldClass<-`(r, class))
+      if(!is.null(class)) oldClass(r) <- class
+      return(r)
     }
     d <- dim(X)
     dn <- dimnames(X)

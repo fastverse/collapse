@@ -13,7 +13,8 @@ fsubset.default <- function(.x, subset, ...) {
 
 fsubset.matrix <- function(.x, subset, ..., drop = FALSE) {
   if(missing(...)) return(.x[subset, , drop = drop])  # better row subsetting ? (like df, method? use mctl ?)
-  nl <- `names<-`(as.vector(1L:ncol(.x), "list"), dimnames(.x)[[2L]])
+  nl <- as.vector(1L:ncol(.x), "list")
+  names(nl) <- dimnames(.x)[[2L]]
   vars <- eval(substitute(c(...)), nl, parent.frame())
   if(missing(subset)) return(.x[, vars, drop = drop])
   .x[subset, vars, drop = drop]
@@ -60,7 +61,8 @@ fsubset.data.frame <- function(.x, subset, ...) {
   r <- eval(substitute(subset), .x, parent.frame()) # Needs to be placed above any column renaming
   if(missing(...)) vars <- seq_along(unclass(.x)) else {
     ix <- seq_along(unclass(.x))
-    nl <- `names<-`(as.vector(ix, "list"), attr(.x, "names"))
+    nl <- as.vector(ix, "list")
+    names(nl) <- attr(.x, "names")
     vars <- eval(substitute(c(...)), nl, parent.frame())
     nam_vars <- names(vars)
     if(is.integer(vars)) {
@@ -116,7 +118,8 @@ fsubset.pdata.frame <- function(.x, subset, ..., drop.index.levels = "id") {
   r <- eval(substitute(subset), .x, parent.frame()) # Needs to be placed above any column renaming
   if(missing(...)) vars <- seq_along(unclass(.x)) else {
     ix <- seq_along(unclass(.x))
-    nl <- `names<-`(as.vector(ix, "list"), attr(.x, "names"))
+    nl <- as.vector(ix, "list")
+    names(nl) <- attr(.x, "names")
     vars <- eval(substitute(c(...)), nl, parent.frame())
     nam_vars <- names(vars)
     if(is.integer(vars)) {
@@ -176,7 +179,8 @@ ftransform_core <- function(X, value) { # value is unclassed, X has all attribut
       if(any(le0 & !matched)) stop(paste("Can only delete existing columns, unknown columns:", paste(nam[le0 & !matched], collapse = ", ")))
       if(all(le0)) {
         X[inx[le0]] <- NULL
-        return(`oldClass<-`(X, ax[["class"]]))
+        oldClass(X) <- ax[["class"]]
+        return(X)
       }
       matched <- matched[!le0]
       value <- value[!le0] # value[le0] <- NULL
@@ -184,7 +188,10 @@ ftransform_core <- function(X, value) { # value is unclassed, X has all attribut
       X[inx[le0]] <- NULL
     } else if(any(matched)) X[inx[matched]] <- value[matched] # NULL assignment ... -> Nope !
   }
-  if(all(matched)) return(`oldClass<-`(X, ax[["class"]]))
+  if(all(matched)) {
+    oldClass(X) <- ax[["class"]]
+    return(X)
+  }
   ax[["names"]] <- c(names(X), names(value)[!matched])
   setAttributes(c(X, value[!matched]), ax)
 }
@@ -209,7 +216,8 @@ tfm <- ftransform
 # ftransform(mtcars, cyl = cyl + 10, vs2 = 1, mpg = NULL)
 
 eval_exp <- function(nam, exp, pe) {
-  nl <- `names<-`(as.vector(seq_along(nam), "list"), nam)
+  nl <- as.vector(seq_along(nam), "list")
+  names(nl) <- nam
   eval(exp, nl, pe)
 }
 
@@ -222,7 +230,8 @@ ftransformv <- function(.data, vars, FUN, ..., apply = TRUE) {
     oldClass(.data) <- NULL
     if(is.null(vs)) vs <- eval_exp(names(.data), substitute(vars), parent.frame())
     vars <- cols2int(vs, .data, names(.data), FALSE)
-    value <- `names<-`(.data[vars], NULL)
+    value <- .data[vars]
+    names(value) <- NULL
     value <- if(missing(...)) lapply(value, FUN) else
       eval(substitute(lapply(value, FUN, ...)), .data, parent.frame())
   } else {
@@ -243,7 +252,8 @@ ftransformv <- function(.data, vars, FUN, ..., apply = TRUE) {
       if(apply) names(value) <- names(.data)[vars]
       .data <- ftransform_core(.data, value)
   }
-  return(condalc(`oldClass<-`(.data, clx), any(clx == "data.table")))
+  oldClass(.data) <- clx
+  return(condalc(.data, any(clx == "data.table")))
 }
 
 tfmv <- ftransformv
@@ -314,7 +324,8 @@ fcomputev <- function(.data, vars, FUN, ..., apply = TRUE, keep = NULL) {
   if(is.null(vs)) vs <- eval_exp(nam, substitute(vars), parent.frame())
   vars <- cols2int(vs, .data, nam, FALSE)
   if(apply) {
-    value <- `names<-`(.subset(.data, vars), NULL)
+    value <- .subset(.data, vars)
+    names(value) <- NULL
     value <- if(missing(...)) lapply(value, FUN) else
       eval(substitute(lapply(value, FUN, ...)), .data, parent.frame())
     names(value) <- nam[vars]
@@ -346,7 +357,9 @@ fFUN_mutate_add_groups <- function(z) {
 
 gsplit_single_apply <- function(x, g, ex, v, encl, unl = TRUE) {
   funexpr <- quote(function(.x_yz_) .x_yz_)
-  funexpr[[3]] <- eval(call("substitute", ex, `names<-`(list(quote(.x_yz_)), v)), NULL, NULL)
+  subst_list <- list(quote(.x_yz_))
+  names(subst_list) <- v
+  funexpr[[3]] <- eval(call("substitute", ex, subst_list), NULL, NULL)
   funexpr[[4]] <- NULL
   fun <- eval(funexpr, encl, baseenv())
   res <- lapply(gsplit(x, g), fun)
@@ -380,7 +393,8 @@ keep_v <- function(d, v) copyMostAttributes(null_rm(.subset(d, unique.default(v)
 acr_get_cols <- function(.cols, d, nam, ce) {
   # Note: .cols is passed through substitute() before it enters here. Thus only an explicit NULL is NULL up front
   if(is.null(.cols)) return(if(is.null(d[[".g_"]])) seq_along(nam) else seq_along(nam)[nam %!in% c(".g_", ".gsplit_", d[[".g_"]]$group.vars)])
-  nl <- `names<-`(as.vector(seq_along(nam), "list"), nam)
+  nl <- as.vector(seq_along(nam), "list")
+  names(nl) <- nam
   cols <- eval(.cols, nl, ce)
   # Needed for programming usage, because you can pass a variable that is null
   if(is.null(cols)) return(if(is.null(d[[".g_"]])) seq_along(nam) else seq_along(nam)[nam %!in% c(".g_", ".gsplit_", d[[".g_"]]$group.vars)])
@@ -394,7 +408,8 @@ acr_get_funs <- function(.fnsexp, .fns, ...) {
 
   if(is.function(.fns)) {
     namfun <- l1orlst(as.character(.fnsexp))
-    .fns <- `names<-`(list(.fns), namfun)
+    .fns <- list(.fns)
+    names(.fns) <- namfun
   } else if(is.list(.fns)) {
     namfun <- names(.fns)
     # In programming usage, could simply pass a list of functions l, in which case this is not a call..
@@ -478,7 +493,15 @@ setup_across <- function(.cols, .fnsexp, .fns, .names, .apply, .transpose, .FFUN
     .apply <- switch(.apply, auto = NA, stop(".apply must be 'auto', TRUE or FALSE"))
     aplvec <- names(fun) %!in% .FFUN
   }
-  .data_ <- if(all(aplvec)) d[cols] else .Call(C_subsetCols, if(is.null(d[[".g_"]])) `oldClass<-`(d, pe$cld) else fungroup2(d, pe$cld), cols, FALSE)
+  # Note: d must remain unclassed here, as it is returned below ("data" element).
+  # Use a shallow copy for the classed version passed to column subsetting.
+  if(all(aplvec)) {
+    .data_ <- d[cols]
+  } else {
+    dsub <- d
+    if(is.null(dsub[[".g_"]])) oldClass(dsub) <- pe$cld else dsub <- fungroup2(dsub, pe$cld)
+    .data_ <- .Call(C_subsetCols, dsub, cols, FALSE)
+  }
 
   # Note: Keep the order and the names !!!
   list(data = d,
@@ -518,8 +541,13 @@ do_across <- function(.cols = NULL, .fns, ..., .names = NULL, .apply = "auto", .
         names(res) <- funlist(t_list2(lapply(r, names)))
     }
   }
-  if(.summ) return(if(is.null(names)) res else `names<-`(res, names))
-  return(`[<-`(setup$data, if(is.null(names)) names(res) else names, value = res))
+  if(.summ) {
+    if(!is.null(names)) names(res) <- names
+    return(res)
+  }
+  res_nams <- if(is.null(names)) names(res) else names
+  setup$data[res_nams] <- res
+  return(setup$data)
 }
 
 mutate_funi_simple <- function(i, data, .data_, funs, aplvec, ce, ...) { # g is unused here...

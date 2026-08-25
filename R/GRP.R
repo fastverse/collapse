@@ -133,15 +133,17 @@ GRP.default <- function(X, by = NULL, sort = .op[["sort"]], decreasing = FALSE, 
       cols <- if(by_null) unclass(X) else .subset(unclass(X), by)
       if(any(.Call(C_vtypes, cols, 2L))) {
         res <- .Call(C_GRP_default_drop, X, cols, namby, return.groups)
-        return(`oldClass<-`(list(N.groups = res[[1L]],
-                              group.id = res[[2L]],
-                              group.sizes = res[[3L]],
-                              groups = if(return.groups) res[[5L]] else NULL,
-                              group.vars = namby,
-                              ordered = c(ordered = NA, sorted = NA),
-                              order = NULL,
-                              group.starts = res[[4L]],
-                              call = if(call) match.call() else NULL), "GRP"))
+        g <- list(N.groups = res[[1L]],
+                  group.id = res[[2L]],
+                  group.sizes = res[[3L]],
+                  groups = if(return.groups) res[[5L]] else NULL,
+                  group.vars = namby,
+                  ordered = c(ordered = NA, sorted = NA),
+                  order = NULL,
+                  group.starts = res[[4L]],
+                  call = if(call) match.call() else NULL)
+        oldClass(g) <- "GRP"
+        return(g)
       }
     }
     o <- switchGRP(if(by_null) X else .subset(X, by),
@@ -162,26 +164,43 @@ GRP.default <- function(X, by = NULL, sort = .op[["sort"]], decreasing = FALSE, 
       # if unit groups, don't subset rows...
       if(length(gs) == length(o) && (use.group || sorted)) {
         ust <- st
-        groups <- if(is.list(X)) .Call(C_subsetCols, X, by, FALSE) else `names<-`(list(X), namby)
+        if(is.list(X)) {
+          groups <- .Call(C_subsetCols, X, by, FALSE)
+        } else {
+          groups <- list(X)
+          names(groups) <- namby
+        }
       } else {
         ust <- if(use.group || sorted) st else if(length(gs) == length(o)) o else .Call(C_subsetVector, o, st, FALSE) # o[st]
-        groups <- if(is.list(X)) .Call(C_subsetDT, X, ust, by, FALSE) else
-          `names<-`(list(.Call(C_subsetVector, X, ust, FALSE)), namby) # subsetVector preserves attributes (such as "label")
+        if(is.list(X)) {
+          groups <- .Call(C_subsetDT, X, ust, by, FALSE)
+        } else {
+          groups <- list(.Call(C_subsetVector, X, ust, FALSE)) # subsetVector preserves attributes (such as "label")
+          names(groups) <- namby
+        }
       }
   } else {
     groups <- NULL
     ust <- NULL
   }
 
-  return(`oldClass<-`(list(N.groups = length(gs),
-                        group.id = if(use.group) o else .Call(C_frankds, o, st, gs, sorted),
-                        group.sizes = gs,
-                        groups = groups,
-                        group.vars = namby,
-                        ordered = c(ordered = sort, sorted = sorted),
-                        order = if(return.order && !use.group) `attributes<-`(o, ao) else NULL, # `attributes<-`(o, attributes(o)[-2L]) This does a shallow copy on newer R versions # `attr<-`(o, "group.sizes", NULL): This deep-copies it..
-                        group.starts = ust, # Does not need to be computed by group()
-                        call = if(call) match.call() else NULL), "GRP"))
+  ord <- NULL
+  if(return.order && !use.group) {
+    ord <- o
+    attributes(ord) <- ao
+  }
+
+  g <- list(N.groups = length(gs),
+            group.id = if(use.group) o else .Call(C_frankds, o, st, gs, sorted),
+            group.sizes = gs,
+            groups = groups,
+            group.vars = namby,
+            ordered = c(ordered = sort, sorted = sorted),
+            order = ord,
+            group.starts = ust, # Does not need to be computed by group()
+            call = if(call) match.call() else NULL)
+  oldClass(g) <- "GRP"
+  return(g)
 }
 
 is_GRP <- function(x) inherits(x, "GRP")

@@ -445,7 +445,9 @@ na_omit <- function(X, cols = NULL, na.attr = FALSE, prop = 0, ...) {
     rn <- attr(X, "row.names")
     if(!(is.numeric(rn) || is.null(rn) || rn[1L] == "1")) attr(res, "row.names") <- Csv(rn, rkeep)
     if(na.attr) {
-      attr(res, "na.action") <- `oldClass<-`(which(rl), "omit")
+      naact <- which(rl)
+      oldClass(naact) <- "omit"
+      attr(res, "na.action") <- naact
       if(inherits(res, "data.table") && !inherits(X, "pdata.frame")) return(alc(res))
     }
     if(inherits(X, "pdata.frame")) {
@@ -460,7 +462,11 @@ na_omit <- function(X, cols = NULL, na.attr = FALSE, prop = 0, ...) {
     rkeep <- which(rl)
     if(length(rkeep) == NROW(X)) return(X)
     res <- if(is.matrix(X)) X[rkeep, , drop = FALSE, ...] else X[rkeep, ...]
-    if(na.attr) attr(res, "na.action") <- `oldClass<-`(whichv(rl, FALSE), "omit")
+    if(na.attr) {
+      naact <- whichv(rl, FALSE)
+      oldClass(naact) <- "omit"
+      attr(res, "na.action") <- naact
+    }
   }
   res
 }
@@ -485,7 +491,7 @@ na_insert <- function(X, prop = 0.1, value = NA, set = FALSE) {
   return(scv(X, sample.int(l, floor(l * prop)), value))
 }
 
-fdapply <- function(X, FUN, ...) duplAttributes(lapply(`attributes<-`(X, NULL), FUN, ...), X)
+fdapply <- function(X, FUN, ...) duplAttributes(lapply(X, FUN, ...), X) # lapply ignores object attributes, so no need to strip them first
 
 fnlevels <- function(x) length(attr(x, "levels"))
 
@@ -512,9 +518,10 @@ forder.int <- function(x, na.last = TRUE, decreasing = FALSE) .Call(C_radixsort,
 fsetdiff <- function(x, y) x[match(x, y, 0L) == 0L] # not unique !
 
 ffka <- function(x, f) {
-   ax <- attributes(x)
-  `attributes<-`(f(ax[["levels"]])[x],
-   ax[names(ax) %!in% c("levels", "class")])
+  ax <- attributes(x)
+  res <- f(ax[["levels"]])[x]
+  attributes(res) <- ax[names(ax) %!in% c("levels", "class")]
+  res
 }
 
 
@@ -559,7 +566,10 @@ as_character_factor <- function(X, keep.attr = TRUE) {
 # }
 
 
-setRnDF <- function(df, nm) `attr<-`(df, "row.names", nm)
+setRnDF <- function(df, nm) {
+  attr(df, "row.names") <- nm
+  df
+}
 
 # TtI <- function(x)
 #   switch(x, replace_fill = 1L, replace = 2L, `-` = 3L, `-+` = 4L, `/` = 5L, `%` = 6L, `+` = 7L, `*` = 8L, `%%` = 9L, `-%%` = 10L,
@@ -678,7 +688,7 @@ colsubset <- function(x, ind, checksf = FALSE) {
     if(length(ind) == nc) return(x)
     return(.Call(C_subsetCols, x, ind, checksf))
   }
-  ind <- if(is.character(ind)) ckmatch(ind, attr(x, "names")) else which(vapply(`attributes<-`(x, NULL), ind, TRUE))
+  ind <- if(is.character(ind)) ckmatch(ind, attr(x, "names")) else which(vapply(x, ind, TRUE)) # vapply ignores object attributes, so no need to strip them first
   return(.Call(C_subsetCols, x, ind, checksf))
 }
 

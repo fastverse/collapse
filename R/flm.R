@@ -46,7 +46,7 @@ flm.default <- function(y, X, w = NULL, add.icpt = FALSE, #  sparse = FALSE,
       list(dim = c(dim(X)[2L], 1L), dimnames = list(dimnames(X)[[2L]], NULL))
 
     Xdn <- X
-    dimnames(Xdn) <- NULL
+    dimnames(Xdn) <- NULL # qr() needs an unclassed matrix; other methods operate on X directly and get dimensions set below via ar
     res <- switch(method[1L],
                   lm = .lm.fit(X * wts, y * wts, ...)[[2L]],
                   solve = (function(xw) solve(crossprod(xw), crossprod(xw, y * wts), ...))(X * wts),
@@ -72,7 +72,7 @@ flm.default <- function(y, X, w = NULL, add.icpt = FALSE, #  sparse = FALSE,
     list(dim = c(dim(X)[2L], 1L), dimnames = list(dimnames(X)[[2L]], NULL))
 
   Xdn <- X
-  dimnames(Xdn) <- NULL
+  dimnames(Xdn) <- NULL # qr() needs an unclassed matrix; result dimensions are set below via ar
   res <- switch(method[1L],
          lm = .lm.fit(X, y, ...)[[2L]],
          solve = solve(crossprod(X), crossprod(X, y), ...),

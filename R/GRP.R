@@ -185,6 +185,10 @@ GRP.default <- function(X, by = NULL, sort = .op[["sort"]], decreasing = FALSE, 
   }
 
   ord <- NULL
+  # Note: attributes(o)[-2L] was captured before stripping o above; setting these
+  # attributes on a shallow copy preserves the ordering information without
+  # touching o itself (a direct `attributes<-`(o, ao) call deep-copies o on some
+  # R versions, whereas attr<- on individual attributes deep-copies as well).
   if(return.order && !use.group) {
     ord <- o
     attributes(ord) <- ao

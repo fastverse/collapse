@@ -12,14 +12,20 @@ fprod.default <- function(x, g = NULL, w = NULL, TRA = NULL, na.rm = .op[["na.rm
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`names<-`(.Call(C_fprod,x,length(lev),g,w,na.rm), lev))
+        res <- .Call(C_fprod,x,length(lev),g,w,na.rm)
+        names(res) <- lev
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_fprod,x,fnlevels(g),g,w,na.rm))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_fprod,x,attr(g,"N.groups"),g,w,na.rm))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`names<-`(.Call(C_fprod,x,g[[1L]],g[[2L]],w,na.rm), GRPnames(g)))
+    if(use.g.names) {
+      res <- .Call(C_fprod,x,g[[1L]],g[[2L]],w,na.rm)
+      names(res) <- GRPnames(g)
+      return(res)
+    }
     return(.Call(C_fprod,x,g[[1L]],g[[2L]],w,na.rm))
   }
   if(is.null(g)) return(TRAC(x,.Call(C_fprod,x,0L,0L,w,na.rm),0L,TRA, ...))
@@ -35,14 +41,20 @@ fprod.matrix <- function(x, g = NULL, w = NULL, TRA = NULL, na.rm = .op[["na.rm"
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`dimnames<-`(.Call(C_fprodm,x,length(lev),g,w,na.rm,FALSE), list(lev, dimnames(x)[[2L]])))
+        res <- .Call(C_fprodm,x,length(lev),g,w,na.rm,FALSE)
+        dimnames(res) <- list(lev, dimnames(x)[[2L]])
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_fprodm,x,fnlevels(g),g,w,na.rm,FALSE))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_fprodm,x,attr(g,"N.groups"),g,w,na.rm,FALSE))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`dimnames<-`(.Call(C_fprodm,x,g[[1L]],g[[2L]],w,na.rm,FALSE), list(GRPnames(g), dimnames(x)[[2L]])))
+    if(use.g.names) {
+      res <- .Call(C_fprodm,x,g[[1L]],g[[2L]],w,na.rm,FALSE)
+      dimnames(res) <- list(GRPnames(g), dimnames(x)[[2L]])
+      return(res)
+    }
     return(.Call(C_fprodm,x,g[[1L]],g[[2L]],w,na.rm,FALSE))
   }
   if(is.null(g)) return(TRAmC(x,.Call(C_fprodm,x,0L,0L,w,na.rm,TRUE),0L,TRA, ...))
@@ -95,7 +107,10 @@ fprod.grouped_df <- function(x, w = NULL, TRA = NULL, na.rm = .op[["na.rm"]], us
       if(any(gn %in% wn)) stop("Weights coincide with grouping variables!")
       gn <- c(gn, wn)
       if(keep.w) {
-        if(nTRAl) prodw <- `names<-`(list(.Call(C_fprod,w,g[[1L]],g[[2L]],NULL,na.rm)), do_stub(stub, if(length(wsym) == 1L) as.character(wsym) else deparse(wsym), "prod.")) else if(keep.group_vars)
+        if(nTRAl) {
+          prodw <- list(.Call(C_fprod,w,g[[1L]],g[[2L]],NULL,na.rm))
+          names(prodw) <- do_stub(stub, if(length(wsym) == 1L) as.character(wsym) else deparse(wsym), "prod.")
+        } else if(keep.group_vars)
           gn2 <- gn else prodw <- gn2 <- wn
       }
     }

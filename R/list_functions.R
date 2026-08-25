@@ -7,9 +7,15 @@ get_elem_indl <- function(x, indl, return = "sublist", keep_class = FALSE)
   switch(return, sublist = if(keep_class) fcolsubset(x, indl) else .subset(x, indl),
          names = attr(x, "names")[indl],
          indices = which(indl),
-         named_indices = which(`names<-`(indl, attr(x, "names"))),
+         named_indices = {
+           names(indl) <- attr(x, "names")
+           which(indl)
+         },
          logical = indl,
-         named_logical = `names<-`(indl, attr(x, "names")),
+         named_logical = {
+           names(indl) <- attr(x, "names")
+           indl
+         },
          stop("Unknown return option!"))
 
 list_elem <- function(l, return = "sublist", keep.class = FALSE) {

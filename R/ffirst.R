@@ -12,14 +12,20 @@ ffirst.default <- function(x, g = NULL, TRA = NULL, na.rm = .op[["na.rm"]], use.
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`names<-`(.Call(C_ffirst,x,length(lev),g,NULL,na.rm), lev))
+        res <- .Call(C_ffirst,x,length(lev),g,NULL,na.rm)
+        names(res) <- lev
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_ffirst,x,fnlevels(g),g,NULL,na.rm))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_ffirst,x,attr(g,"N.groups"),g,NULL,na.rm))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`names<-`(.Call(C_ffirst,x,g[[1L]],g[[2L]],g[[8L]],na.rm), GRPnames(g)))
+    if(use.g.names) {
+      res <- .Call(C_ffirst,x,g[[1L]],g[[2L]],g[[8L]],na.rm)
+      names(res) <- GRPnames(g)
+      return(res)
+    }
     return(.Call(C_ffirst,x,g[[1L]],g[[2L]],g[[8L]],na.rm))
   }
   if(is.null(g)) return(TRAC(x,.Call(C_ffirst,x,0L,0L,NULL,na.rm),0L,TRA, ...))
@@ -35,14 +41,20 @@ ffirst.matrix <- function(x, g = NULL, TRA = NULL, na.rm = .op[["na.rm"]], use.g
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        return(`dimnames<-`(.Call(C_ffirstm,x,length(lev),g,NULL,na.rm,FALSE), list(lev, dimnames(x)[[2L]])))
+        res <- .Call(C_ffirstm,x,length(lev),g,NULL,na.rm,FALSE)
+        dimnames(res) <- list(lev, dimnames(x)[[2L]])
+        return(res)
       }
       if(is.nmfactor(g)) return(.Call(C_ffirstm,x,fnlevels(g),g,NULL,na.rm,FALSE))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_ffirstm,x,attr(g,"N.groups"),g,NULL,na.rm,FALSE))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) return(`dimnames<-`(.Call(C_ffirstm,x,g[[1L]],g[[2L]],g[[8L]],na.rm,FALSE), list(GRPnames(g), dimnames(x)[[2L]])))
+    if(use.g.names) {
+      res <- .Call(C_ffirstm,x,g[[1L]],g[[2L]],g[[8L]],na.rm,FALSE)
+      dimnames(res) <- list(GRPnames(g), dimnames(x)[[2L]])
+      return(res)
+    }
     return(.Call(C_ffirstm,x,g[[1L]],g[[2L]],g[[8L]],na.rm,FALSE))
   }
   if(is.null(g)) return(TRAmC(x,.Call(C_ffirstm,x,0L,0L,NULL,na.rm,TRUE),0L,TRA, ...))

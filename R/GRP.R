@@ -446,7 +446,8 @@ fgroup_by <- function(.X, ..., sort = .op[["sort"]], decreasing = FALSE, na.last
   # In case sequences of columns are passed... Think: can enable fgroup_by(mtcars, 1:cyl)
   if(any(all_funs(dots) == ":")) { # length(vars)+1L != length(dots) && any(all.names(dots) == ":")
   # Note that fgroup_by(mtcars, bla = round(mpg / cyl), vs:am) only groups by vs, and am. fselect(mtcars, bla = round(mpg / cyl), vs:am) also does the wrong thing.
-    nl <- `names<-`(as.vector(seq_along(.X), "list"), names(.X))
+    nl <- as.vector(seq_along(.X), "list")
+    names(nl) <- names(.X)
     vars <- eval(substitute(c(...)), nl, parent.frame())
     e <- .X[vars]
     # This allows renaming...
@@ -561,7 +562,13 @@ print.invisible <- function(x, ...) cat("")
 `[[.GRP_df` <-  function(x, ...) UseMethod("[[", fungroup(x)) # function(x, ..., exact = TRUE) .subset2(x, ..., exact = exact)
 `[<-.GRP_df` <- function(x, ..., value) UseMethod("[<-", fungroup(x))
 `[[<-.GRP_df` <- function(x, ..., value) UseMethod("[[<-", fungroup(x))
-`names<-.GRP_df` <- function(x, value) `oldClass<-`(`names<-`(unclass(x), value), oldClass(x))
+`names<-.GRP_df` <- function(x, value) {
+  clx <- oldClass(x)
+  x <- unclass(x)
+  names(x) <- value
+  oldClass(x) <- clx
+  x
+}
 
 # Produce errors...
 # print_GRP_df_core <- function(x) {
@@ -619,11 +626,22 @@ fgroup_vars <- function(X, return = "data") {
     unique = if(is_GRP(g)) condCopyAttrib(g[[4L]], X) else .Call(C_subsetCols, g, -length(unclass(g)), FALSE), # what about attr(*, ".drop") ??
     names = vars,
     indices = ckmatch(vars, attr(X, "names")),
-    named_indices = `names<-`(ckmatch(vars, attr(X, "names")), vars),
-    logical = `[<-`(logical(length(unclass(X))), ckmatch(vars, attr(X, "names")), TRUE),
+    named_indices = {
+      ind <- ckmatch(vars, attr(X, "names"))
+      names(ind) <- vars
+      ind
+    },
+    logical = {
+      out <- logical(length(unclass(X)))
+      out[ckmatch(vars, attr(X, "names"))] <- TRUE
+      out
+    },
     named_logical = {
       nam <- attr(X, "names")
-      `names<-`(`[<-`(logical(length(nam)), ckmatch(vars, nam), TRUE), nam)
+      out <- logical(length(nam))
+      out[ckmatch(vars, nam)] <- TRUE
+      names(out) <- nam
+      out
     },
     stop("Unknown return option!"))
 }
@@ -753,7 +771,8 @@ as_factor_qG <- function(x, ordered = FALSE, na.exclude = TRUE) {
     }
     clx <- c(if(ordered) "ordered", "factor", "na.included")
   }
-  return(`attributes<-`(x, list(levels = groups, class = clx)))
+  attributes(x) <- list(levels = groups, class = clx)
+  return(x)
 }
 
 # as.factor_qG <- function(x, ordered = FALSE, na.exclude = TRUE) {
@@ -802,7 +821,8 @@ qG <- function(x, ordered = FALSE, na.exclude = TRUE, sort = .op[["sort"]],
           list(N.groups = attr(x, "N.groups"), class = newclx)
       }
       if(identical(ax, attributes(x))) return(x)
-      return(`attributes<-`(x, ax))
+      attributes(x) <- ax
+      return(x)
     }
     newclx <- c(if(ordered) "ordered", "qG", "na.included")
     if(is.factor(x)) {
@@ -819,7 +839,9 @@ qG <- function(x, ordered = FALSE, na.exclude = TRUE, sort = .op[["sort"]],
     ax <- if(return.groups) list(N.groups = ng, groups = lev, class = newclx) else
       list(N.groups = ng, class = newclx)
      # x[is.na(x)] <- ng
-    return(`attributes<-`(.Call(C_setcopyv, x, NA, ng, FALSE, FALSE, FALSE), ax))
+    x <- .Call(C_setcopyv, x, NA, ng, FALSE, FALSE, FALSE)
+    attributes(x) <- ax
+    return(x)
   }
   switch(method, # if((is.character(x) && !na.exclude) || (length(x) < 500 && !(is.character(x) && na.exclude)))
          auto  = if(is.double(x) && sort) # is.character(x) || is.logical(x) || !sort || length(x) < 500L

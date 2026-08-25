@@ -131,7 +131,9 @@ collap <- function(X, by, FUN = fmean, catFUN = fmode, cols = NULL, w = NULL, wF
   } else if(is.atomic(by)) {
     numby <- 0L
     if(ncustoml) if(is.null(cols)) vl <- FALSE else v <- cols2int(cols, X, nam)
-    by <- GRP.default(`names<-`(list(by), l1orlst(as.character(substitute(by)))), NULL, sort, decreasing, na.last, keep.by, return.order, method, drop = drop, call = FALSE)
+    byl <- list(by)
+    names(byl) <- l1orlst(as.character(substitute(by)))
+    by <- GRP.default(byl, NULL, sort, decreasing, na.last, keep.by, return.order, method, drop = drop, call = FALSE)
   } else {
     if(ncustoml) if(is.null(cols)) vl <- FALSE else v <- cols2int(cols, X, nam)
     if(!is_GRP(by)) by <- GRP.default(by, NULL, sort, decreasing, na.last, keep.by, return.order, method, drop = drop, call = FALSE)
@@ -161,12 +163,16 @@ collap <- function(X, by, FUN = fmean, catFUN = fmode, cols = NULL, w = NULL, wF
       if(!all(names(wFUN) %in% .FAST_STAT_FUN_EXT)) stop("wFUN needs to be fast statistical functions, see print(.FAST_STAT_FUN)")
       if(length(wFUN) > 1L) {
         namw <- paste(namwFUN, namw, sep = ".")
-        by[[4L]] <- c(if(keep.by) by[[4L]], `names<-`(lapply(wFUN, function(f) f(w, g = by, ..., use.g.names = FALSE)), namw))
+        wfres <- lapply(wFUN, function(f) f(w, g = by, ..., use.g.names = FALSE))
+        names(wfres) <- namw
+        by[[4L]] <- c(if(keep.by) by[[4L]], wfres)
         if(keep.col.order) numby <- c(if(keep.by) numby, rep_len(numw, length(wFUN)))
       } else {
         wFUN <- wFUN[[1L]]
         if(isTRUE(give.names)) namw <- paste(namwFUN, namw, sep = ".")
-        by[[4L]] <- c(if(keep.by) by[[4L]], `names<-`(list(wFUN(w, g = by, ..., use.g.names = FALSE)), namw))
+        wfres <- list(wFUN(w, g = by, ..., use.g.names = FALSE))
+        names(wfres) <- namw
+        by[[4L]] <- c(if(keep.by) by[[4L]], wfres)
         if(keep.col.order) numby <- c(if(keep.by) numby, numw)  # need to accommodate any option of keep.by, keep.w and keep.col.order
       }
       keep.by <- TRUE
@@ -364,12 +370,16 @@ collapv <- function(X, by, FUN = fmean, catFUN = fmode, cols = NULL, w = NULL, w
       if(!all(names(wFUN) %in% .FAST_STAT_FUN_EXT)) stop("wFUN needs to be fast statistical functions, see print(.FAST_STAT_FUN)")
       if(length(wFUN) > 1L) {
         namw <- paste(namwFUN, namw, sep = ".")
-        by[[4L]] <- c(if(keep.by) by[[4L]], `names<-`(lapply(wFUN, function(f) f(w, g = by, ..., use.g.names = FALSE)), namw))
+        wfres <- lapply(wFUN, function(f) f(w, g = by, ..., use.g.names = FALSE))
+        names(wfres) <- namw
+        by[[4L]] <- c(if(keep.by) by[[4L]], wfres)
         if(keep.col.order) numby <- c(if(keep.by) numby, rep_len(numw, length(wFUN)))
       } else {
         wFUN <- wFUN[[1L]]
         if(isTRUE(give.names)) namw <- paste(namwFUN, namw, sep = ".")
-        by[[4L]] <- c(if(keep.by) by[[4L]], `names<-`(list(wFUN(w, g = by, ..., use.g.names = FALSE)), namw))
+        wfres <- list(wFUN(w, g = by, ..., use.g.names = FALSE))
+        names(wfres) <- namw
+        by[[4L]] <- c(if(keep.by) by[[4L]], wfres)
         if(keep.col.order) numby <- c(if(keep.by) numby, numw)  # need to accommodate any option of keep.by, keep.w and keep.col.order
       }
       keep.by <- TRUE

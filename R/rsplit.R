@@ -10,7 +10,10 @@ t_list <- function(l) {
   lmat <- do.call(rbind, l)
   dn <- dimnames(lmat)
   res <- .Call(Cpp_mctl, lmat, !is.null(dn[[2L]]), 0L)
-  if(length(rn <- dn[[1L]])) res <- lapply(res, `names<-`, rn)
+  if(length(rn <- dn[[1L]])) res <- lapply(res, function(l) {
+    names(l) <- rn
+    l
+  })
   .Call(C_copyMostAttrib, res, l)
 }
 
@@ -95,7 +98,11 @@ rsplit.data.frame <- function(x, by, drop = TRUE, flatten = FALSE, # check = TRU
     gsplit_DF <- function(x, f, ...) {
       rown <- attr(x, "row.names") # Need to do this, handing down from the function body doesn't work
       lapply(gsplit(NULL, f, use.names, drop = drop, ...),
-             function(i) `attr<-`(.Call(C_subsetDT, x, i, j, FALSE), "row.names", rown[i]))
+             function(i) {
+               out <- .Call(C_subsetDT, x, i, j, FALSE)
+               attr(out, "row.names") <- rown[i]
+               out
+             })
     }
   }
 

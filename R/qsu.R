@@ -226,8 +226,10 @@ qsu.pdata.frame <- function(x, by = NULL, w = NULL, cols = NULL, effect = 1L, hi
 
 # Try to speed up ! Printing Takes 100 milliseconds on WDI !
 print.qsu <- function(x, digits = .op[["digits"]] + 2L, nonsci.digits = 9, na.print = "-", return = FALSE, print.gap = 2, ...) {
-  vec2mat <- function(x) if(is.array(x)) x else  # outer(1, x) # for variable spacing in vector printing...
-    `attributes<-`(x, list(dim = c(1L, length(x)), dimnames = list("", names(x)))) # faster and better !!
+  vec2mat <- function(x) if(is.array(x)) x else { # outer(1, x) # for variable spacing in vector printing...
+    attributes(x) <- list(dim = c(1L, length(x)), dimnames = list("", names(x))) # faster and better !!
+    x
+  }
   formatfun <- function(x) { # , drop0trailing = FALSE redundat ??
     class(x) <- NULL
     xx <- formatC(vec2mat(round(x, digits)), format = "g", flag = "#",
@@ -251,7 +253,11 @@ aperm.qsu <- function(a, perm = NULL, resize = TRUE, keep.class = TRUE, ...) {
 }
 
 
-`[.qsu` <- function(x, i, j, ..., drop = TRUE) `oldClass<-`(NextMethod(), oldClass(x))
+`[.qsu` <- function(x, i, j, ..., drop = TRUE) {
+  r <- NextMethod()
+  oldClass(r) <- oldClass(x)
+  r
+}
 
 
 as.data.frame.qsu <- function(x, ..., gid = "Group", stringsAsFactors = TRUE) {
@@ -264,7 +270,11 @@ as.data.frame.qsu <- function(x, ..., gid = "Group", stringsAsFactors = TRUE) {
     # res <- list(Statistic = names(x), Value = unattrib(x))
     # attr(res, "row.names") <- .set_row_names(length(x))
   } else if(length(d) == 2L) {
-    varl <- if(stringsAsFactors) list(`attributes<-`(seq_len(d[1L]), list(levels = dn[[1L]], class = c("factor", "na.included")))) else dn[1L]
+    varl <- if(stringsAsFactors) list({
+              f1 <- seq_len(d[1L])
+              attributes(f1) <- list(levels = dn[[1L]], class = c("factor", "na.included"))
+              f1
+            }) else dn[1L]
     res <- c(varl,  mctl(x))
     names(res) <- c(if(stnam[1L] == "N") "Variable" else "Trans", stnam)
     attr(res, "row.names") <- .set_row_names(d[1L])
@@ -282,8 +292,15 @@ as.data.frame.qsu <- function(x, ..., gid = "Group", stringsAsFactors = TRUE) {
     }
     attributes(res) <- NULL
     dim(res) <- c(d[1L]*d[3L], d[2L])
-    varsl <- if(stringsAsFactors) list(`attributes<-`(rep(seq_len(d[3L]), each = d[1L]), list(levels =  dn[[3L]], class = c("factor", "na.included"))),
-                                `attributes<-`(rep(seq_len(d[1L]), d[3L]), list(levels = dn[[1L]], class = c("factor", "na.included")))) else
+    varsl <- if(stringsAsFactors) list({
+               f3 <- rep(seq_len(d[3L]), each = d[1L])
+               attributes(f3) <- list(levels =  dn[[3L]], class = c("factor", "na.included"))
+               f3
+             }, {
+               f1 <- rep(seq_len(d[1L]), d[3L])
+               attributes(f1) <- list(levels = dn[[1L]], class = c("factor", "na.included"))
+               f1
+             }) else
                            list(rep(dn[[3L]], each = d[1L]), rep(dn[[1L]], d[3L]))
     res <- c(varsl, mctl(res))
     names(res) <- c(vn, if(stnam[1L] == "N") gid else "Trans", stnam)
@@ -295,9 +312,19 @@ as.data.frame.qsu <- function(x, ..., gid = "Group", stringsAsFactors = TRUE) {
     nr <- d[1L]*3L*d[4L]
     dim(res) <- c(nr, d[2L])
     varsl <- if(stringsAsFactors)
-              list(`attributes<-`(rep(seq_len(d[4L]), each = 3L*d[1L]), list(levels = dn[[4L]], class = c("factor", "na.included"))),
-                   `attributes<-`(rep(seq_len(d[1L]), d[4L], each = 3L), list(levels = dn[[1L]], class = c("factor", "na.included"))),
-                   `attributes<-`(rep(seq_len(d[3L]), d[1L]*d[4L]), list(levels = dn[[3L]], class = c("factor", "na.included")))) else
+              list({
+                f4 <- rep(seq_len(d[4L]), each = 3L*d[1L])
+                attributes(f4) <- list(levels = dn[[4L]], class = c("factor", "na.included"))
+                f4
+              }, {
+                f1 <- rep(seq_len(d[1L]), d[4L], each = 3L)
+                attributes(f1) <- list(levels = dn[[1L]], class = c("factor", "na.included"))
+                f1
+              }, {
+                f3 <- rep(seq_len(d[3L]), d[1L]*d[4L])
+                attributes(f3) <- list(levels = dn[[3L]], class = c("factor", "na.included"))
+                f3
+              }) else
               list(rep(dn[[4L]], each = 3L*d[1L]), rep(dn[[1L]], d[4L], each = 3L), rep(dn[[3L]], d[1L]*d[4L]))
     res <- c(varsl,  mctl(res))
     names(res) <- c("Variable", gid, "Trans", stnam)

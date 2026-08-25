@@ -9,14 +9,20 @@ varying.default <- function(x, g = NULL, any_group = TRUE, use.g.names = TRUE, .
     if(use.g.names && !any_group) {
       if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE, sort = !any_group && .op[["sort"]])
       lev <- attr(g, "levels")
-      return(`names<-`(.Call(Cpp_varying,x,length(lev),g,any_group), lev))
+      res <- .Call(Cpp_varying,x,length(lev),g,any_group)
+      names(res) <- lev
+      return(res)
     }
     if(is.nmfactor(g)) return(.Call(Cpp_varying,x,fnlevels(g),g,any_group))
     g <- qG(g, na.exclude = FALSE, sort = !any_group && .op[["sort"]])
     return(.Call(Cpp_varying,x,attr(g,"N.groups"),g,any_group))
   }
   if(!is_GRP(g)) g <- GRP.default(g, sort = !any_group && .op[["sort"]], return.groups = use.g.names && !any_group, call = FALSE)
-  if(use.g.names && !any_group) return(`names<-`(.Call(Cpp_varying,x,g[[1L]],g[[2L]],any_group), GRPnames(g)))
+  if(use.g.names && !any_group) {
+    res <- .Call(Cpp_varying,x,g[[1L]],g[[2L]],any_group)
+    names(res) <- GRPnames(g)
+    return(res)
+  }
   .Call(Cpp_varying,x,g[[1L]],g[[2L]],any_group)
 }
 
@@ -25,7 +31,9 @@ varying.pseries <- function(x, effect = 1L, any_group = TRUE, use.g.names = TRUE
   g <- if(length(effect) == 1L) .subset2(findex(x), effect) else finteraction(.subset(findex(x), effect), sort = !any_group && .op[["sort"]])
   if(!any_group && use.g.names) {
     lev <- attr(g, "levels")
-    return(`names<-`(.Call(Cpp_varying,x,length(lev),g,any_group), lev))
+    res <- .Call(Cpp_varying,x,length(lev),g,any_group)
+    names(res) <- lev
+    return(res)
   }
   .Call(Cpp_varying,x,fnlevels(g),g,any_group)
 }
@@ -37,14 +45,20 @@ varying.matrix <- function(x, g = NULL, any_group = TRUE, use.g.names = TRUE, dr
     if(use.g.names && !any_group) {
       if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE, sort = !any_group && .op[["sort"]])
       lev <- attr(g, "levels")
-      return(`dimnames<-`(.Call(Cpp_varyingm,x,length(lev),g,any_group,FALSE), list(lev, dimnames(x)[[2L]])))
+      res <- .Call(Cpp_varyingm,x,length(lev),g,any_group,FALSE)
+      dimnames(res) <- list(lev, dimnames(x)[[2L]])
+      return(res)
     }
     if(is.nmfactor(g)) return(.Call(Cpp_varyingm,x,fnlevels(g),g,any_group,drop))
     g <- qG(g, na.exclude = FALSE, sort = !any_group && .op[["sort"]])
     return(.Call(Cpp_varyingm,x,attr(g,"N.groups"),g,any_group,drop))
   }
   if(!is_GRP(g)) g <- GRP.default(g, sort = !any_group && .op[["sort"]], return.groups = use.g.names && !any_group, call = FALSE)
-  if(use.g.names && !any_group) return(`dimnames<-`(.Call(Cpp_varyingm,x,g[[1L]],g[[2L]],any_group,FALSE), list(GRPnames(g), dimnames(x)[[2L]])))
+  if(use.g.names && !any_group) {
+    res <- .Call(Cpp_varyingm,x,g[[1L]],g[[2L]],any_group,FALSE)
+    dimnames(res) <- list(GRPnames(g), dimnames(x)[[2L]])
+    return(res)
+  }
   .Call(Cpp_varyingm,x,g[[1L]],g[[2L]],any_group,drop)
 }
 

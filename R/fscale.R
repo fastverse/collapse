@@ -168,8 +168,7 @@ STD.pdata.frame <- function(x, effect = 1L, w = NULL, cols = is.numeric,
     ax[["names"]] <- do_stub(stub, nam, "STD.")
     return(setAttributes(.Call(Cpp_fscalel,x,fnlevels(g),g,w,na.rm,cm(mean),csd(sd)), ax))
   }
-  oldClass(x) <- ax[["class"]]
-  .Call(Cpp_fscalel,x,fnlevels(g),g,w,na.rm,cm(mean),csd(sd))
+  .Call(Cpp_fscalel,`oldClass<-`(x, ax[["class"]]),fnlevels(g),g,w,na.rm,cm(mean),csd(sd))
 }
 
 # updated, fast and data.table proof version !

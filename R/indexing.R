@@ -227,11 +227,7 @@ findex_by <- function(.X, ..., single = "auto", interact.ids = TRUE) { # pid = N
   } else {
     if(length(nam)) {
       nonmiss <- nzchar(nam)
-      if(!all(nonmiss)) {
-        nam_dots <- as.character(dots[-1L])
-        nam_dots[nonmiss] <- nam[nonmiss]
-        names(ids) <- nam_dots
-      }
+      if(!all(nonmiss)) names(ids) <- `[<-`(as.character(dots[-1L]), nonmiss, value = nam[nonmiss])
     } else names(ids) <- vars
   }
 
@@ -245,9 +241,7 @@ findex_by <- function(.X, ..., single = "auto", interact.ids = TRUE) { # pid = N
     if(lids > 2L) {
       if(interact.ids) {
         nam <- names(ids)
-        fintl <- list(finteraction(ids[-lids], sort = FALSE))
-        names(fintl) <- paste(nam[-lids], collapse = ".")
-        ids <- c(fintl, ids[lids])
+        ids <- c(`names<-`(list(finteraction(ids[-lids], sort = FALSE)), paste(nam[-lids], collapse = ".")), ids[lids])
         attr(ids, "nam") <- nam # This is a trick, fetched using attr(x, "nam"), before "names" attribute
       } else ids[-lids] <- lapply(ids[-lids], function(x) qF(x, sort = is.factor(x), na.exclude = FALSE))
     } else ids[[1L]] <- qF(ids[[1L]], sort = is.factor(ids[[1L]]), na.exclude = FALSE)
@@ -401,9 +395,7 @@ print.index_df <- function(x, topn = 5, ...) {
    if(fnrow(x) > 2*topn) {
      print(head(x, topn), ...)
      cat("---")
-     tailx <- tail(x, topn)
-     names(tailx) <- NULL
-     print(tailx, ...)
+     print(`names<-`(tail(x, topn), NULL), ...)
    } else print(x, ...)
    cat("\n", index_stats(x), "\n", sep = "")
 }

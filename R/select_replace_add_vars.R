@@ -5,21 +5,9 @@ get_vars_ind <- function(x, ind, return = "data")
          data = .Call(C_subsetCols, x, ind, TRUE),
          names = attr(x, "names")[ind],
          indices = ind,
-         named_indices = {
-           names(ind) <- attr(x, "names")[ind]
-           ind
-         },
-         logical = {
-           out <- logical(length(unclass(x)))
-           out[ind] <- TRUE
-           out
-         },
-         named_logical = {
-           out <- logical(length(unclass(x)))
-           out[ind] <- TRUE
-           names(out) <- attr(x, "names")
-           out
-         },
+         named_indices = `names<-`(ind, attr(x, "names")[ind]),
+         logical = `[<-`(logical(length(unclass(x))), ind, value = TRUE),
+         named_logical = `names<-`(`[<-`(logical(length(unclass(x))), ind, value = TRUE), attr(x, "names")),
          stop("Unknown return option!"))
 
 # ind must be logical !!! (this used to be get_vars_FUN)
@@ -28,15 +16,9 @@ get_vars_indl <- function(x, indl, return = "data")
          data = .Call(C_subsetCols, x, which(indl), TRUE),
          names = attr(x, "names")[indl],
          indices = which(indl),
-         named_indices = {
-           names(indl) <- attr(x, "names")
-           which(indl)
-         },
+         named_indices = which(`names<-`(indl, attr(x, "names"))),
          logical = indl,
-         named_logical = {
-           names(indl) <- attr(x, "names")
-           indl
-         },
+         named_logical = `names<-`(indl, attr(x, "names")),
          stop("Unknown return option!"))
 
 # ind can be integer or logical
@@ -59,8 +41,7 @@ get_vars_indl <- function(x, indl, return = "data")
     if(length(ind) != 1L) stop("NCOL(value) must match selected variables") # length(num_vars(x))
     x[[ind]] <- value
   }
-  oldClass(x) <- clx
-  return(condalc(x, any(clx == "data.table")))
+  return(condalc(`oldClass<-`(x, clx), any(clx == "data.table")))
 }
 
 
@@ -69,8 +50,7 @@ fselect <- function(.x, ..., return = "data") { # This also takes names and indi
   # oldClass(.x) <- NULL # attributes ?
   nam <- attr(.x, "names")
   # if(inherits(.x, "data.table")) nam <- nam[seq_col(.x)] # required because of overallocation... -> Should be solved now, always take shallow copy...
-  nl <- as.vector(seq_along(nam), "list")
-  names(nl) <- nam
+  nl <- `names<-`(as.vector(seq_along(nam), "list"), nam)
   vars <- eval(substitute(c(...)), nl, parent.frame())
   # if(!is.integer(vars)) stop(paste0("Unknown columns: ", .c(...))) # if(!is.integer(vars) || bmax(vars) > length(nam)) # nah, a bit redundant..
   if(!is.atomic(vars) || is.logical(vars)) stop("... needs to be expressions evaluating to integer or character")
@@ -82,27 +62,12 @@ fselect <- function(.x, ..., return = "data") { # This also takes names and indi
   }
   # if(!is.numeric(vars)) stop("... needs to be column names, or character / integer / logical vectors")
   switch(return, # need this for sf data.frame
-         data = {
-           if(length(nam_vars)) attr(.x, "names") <- nam
-           .Call(C_subsetCols, .x, vars, TRUE)
-         },
+         data = .Call(C_subsetCols, if(length(nam_vars)) `attr<-`(.x, "names", nam) else .x, vars, TRUE), # setAttributes(.x[vars], `[[<-`(ax, "names", nam[vars])), # Also Improvements in code below ?
          names = nam[vars],
          indices = vars,
-         named_indices = {
-           names(vars) <- nam[vars]
-           vars
-         },
-         logical = {
-           out <- logical(length(nam))
-           out[vars] <- TRUE
-           out
-         },
-         named_logical = {
-           out <- logical(length(nam))
-           out[vars] <- TRUE
-           names(out) <- nam
-           out
-         },
+         named_indices = `names<-`(vars, nam[vars]),
+         logical = `[<-`(logical(length(nam)), vars, TRUE),
+         named_logical = `names<-`(`[<-`(logical(length(nam)), vars, TRUE), nam),
          stop("Unknown return option"))
 }
 
@@ -115,8 +80,7 @@ slt <- fselect # good, consistent
 "fselect<-" <- function(x, ..., value) {
   nam <- attr(x, "names")
   # if(inherits(x, "data.table")) nam <- nam[seq_col(x)] # required because of overallocation... Should be solved now -> always make shallow copy
-  nl <- as.vector(seq_along(nam), "list")
-  names(nl) <- nam
+  nl <- `names<-`(as.vector(seq_along(nam), "list"), nam)
   vars <- eval(substitute(c(...)), nl, parent.frame())
   if(!is.atomic(vars) || is.logical(vars)) stop("... needs to be expressions evaluating to integer or character")
   if(is.character(vars)) vars <- ckmatch(vars, nam)
@@ -147,8 +111,8 @@ fact_vars <- function(x, return = "data") get_vars_indl(x, .Call(C_vtypes, x, 2L
 logi_vars <- function(x, return = "data") get_vars_ind(x, .Call(C_vtypes, x, 0L) %==% 11L, return) # vapply(`attributes<-`(x, NULL), is.logical, TRUE)
 "logi_vars<-" <- function(x, value) `get_vars_ind<-`(x, .Call(C_vtypes, x, 0L) %==% 11L, value)
 
-date_vars <- function(x, return = "data") get_vars_indl(x, vapply(x, is_date, TRUE), return)
-"date_vars<-" <- function(x, value) `get_vars_ind<-`(x, vapply(x, is_date, TRUE), value)
+date_vars <- function(x, return = "data") get_vars_indl(x, vapply(`attributes<-`(x, NULL), is_date, TRUE), return)
+"date_vars<-" <- function(x, value) `get_vars_ind<-`(x, vapply(`attributes<-`(x, NULL), is_date, TRUE), value)
 # Date_vars <- function(x, return = "data") {
 #   .Deprecated(msg = "'Date_vars' was renamed to 'date_vars'. It will be removed end of 2023, see help('collapse-renamed').")
 #   date_vars(x, return)

@@ -34,11 +34,7 @@ roworder <- function(X, ..., na.last = TRUE, verbose = .op[["verbose"]]) {
 posord <- function(sq, o, pos) switch(pos,
                                       front = c(o, sq[-o]),
                                       end = c(sq[-o], o),
-                                      exchange = {
-                                        sqx <- sq
-                                        sqx[o[forder.int(o)]] <- o
-                                        sqx
-                                      },
+                                      exchange = `[<-`(sq, o[forder.int(o)], value = o),
                                       after = {
                                         if(length(o) == 1L) stop('Need o supply at least 2 columns if pos = "after"')
                                         om1 <- o[-1L]
@@ -95,8 +91,7 @@ colorder <- function(.X, ..., pos = "front") { # This also takes names and indic
   oldClass(.X) <- NULL # attributes ?
   nam <- names(.X)
   iX <- seq_along(.X)
-  nl <- as.vector(iX, "list")
-  names(nl) <- nam
+  nl <- `names<-`(as.vector(iX, "list"), nam)
   vars <- eval(substitute(c(...)), nl, parent.frame())
   if(!is.integer(vars)) stop(paste0("Unknown columns: ", .c(...)))
   if(length(names(vars))) { # Allow renaming during selection

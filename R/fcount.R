@@ -23,9 +23,7 @@ fcount_core <- function(x, g, w = NULL, name = "N", add = FALSE) {
       x <- # if(inherits(x, "grouped_df")) fgroup_vars(x) else # Better keep groups, does no harm... can use fungroup()
         .Call(C_subsetCols, x, ckmatch(g$group.vars, attr(x, "names")), TRUE)
     }
-    gsl <- list(gs)
-    names(gsl) <- name[1L]
-    res <- c(x, gsl)
+    res <- c(x, `names<-`(list(gs), name[1L]))
     return(condalc(copyMostAttributes(res, x), inherits(x, "data.table")))
   }
   res <- g$groups
@@ -33,9 +31,7 @@ fcount_core <- function(x, g, w = NULL, name = "N", add = FALSE) {
     res[[name[1L]]] <- g$group.sizes
     return(condCopyAttrib(res, x))
   }
-  gsl <- list(g$group.sizes)
-  names(gsl) <- name[1L]
-  condalc(copyMostAttributes(c(res, gsl), res), inherits(x, "data.table"))
+  condalc(copyMostAttributes(c(res, `names<-`(list(g$group.sizes), name[1L])), res), inherits(x, "data.table"))
 }
 
 fcount <- function(x, ..., w = NULL, name = "N", add = FALSE, sort = FALSE, decreasing = FALSE, drop = TRUE) {

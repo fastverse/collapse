@@ -12,20 +12,14 @@ flast.default <- function(x, g = NULL, TRA = NULL, na.rm = .op[["na.rm"]], use.g
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        res <- .Call(C_flast,x,length(lev),g,na.rm)
-        names(res) <- lev
-        return(res)
+        return(`names<-`(.Call(C_flast,x,length(lev),g,na.rm), lev))
       }
       if(is.nmfactor(g)) return(.Call(C_flast,x,fnlevels(g),g,na.rm))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_flast,x,attr(g,"N.groups"),g,na.rm))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) {
-      res <- .Call(C_flast,x,g[[1L]],g[[2L]],na.rm)
-      names(res) <- GRPnames(g)
-      return(res)
-    }
+    if(use.g.names) return(`names<-`(.Call(C_flast,x,g[[1L]],g[[2L]],na.rm), GRPnames(g)))
     return(.Call(C_flast,x,g[[1L]],g[[2L]],na.rm))
   }
   if(is.null(g)) return(TRAC(x,.Call(C_flast,x,0L,0L,na.rm),0L,TRA, ...))
@@ -41,20 +35,14 @@ flast.matrix <- function(x, g = NULL, TRA = NULL, na.rm = .op[["na.rm"]], use.g.
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        res <- .Call(C_flastm,x,length(lev),g,na.rm,FALSE)
-        dimnames(res) <- list(lev, dimnames(x)[[2L]])
-        return(res)
+        return(`dimnames<-`(.Call(C_flastm,x,length(lev),g,na.rm,FALSE), list(lev, dimnames(x)[[2L]])))
       }
       if(is.nmfactor(g)) return(.Call(C_flastm,x,fnlevels(g),g,na.rm,FALSE))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(C_flastm,x,attr(g,"N.groups"),g,na.rm,FALSE))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) {
-      res <- .Call(C_flastm,x,g[[1L]],g[[2L]],na.rm,FALSE)
-      dimnames(res) <- list(GRPnames(g), dimnames(x)[[2L]])
-      return(res)
-    }
+    if(use.g.names) return(`dimnames<-`(.Call(C_flastm,x,g[[1L]],g[[2L]],na.rm,FALSE), list(GRPnames(g), dimnames(x)[[2L]])))
     return(.Call(C_flastm,x,g[[1L]],g[[2L]],na.rm,FALSE))
   }
   if(is.null(g)) return(TRAmC(x,.Call(C_flastm,x,0L,0L,na.rm,TRUE),0L,TRA, ...))

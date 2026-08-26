@@ -58,15 +58,10 @@ unlist2d <- function(l, idcols = ".id", row.names = FALSE, recursive = TRUE, id.
 
   DFDTl <- function(l) {
     attr(l, "row.names") <- .set_row_names(.Call(C_fnrow, l))
-    oldClass(l) <- DATAclass
-    l
+    `oldClass<-`(l, DATAclass)
   }
   # idf <- function(x) if(inherits(x, "data.frame")) 2L else if (!length(x)) 1L else 3L*is.atomic(x) # was if(is.null(x)) 1L -> disregards empty list, bug reported # faster way ? : This is not faster:   2L*inherits(x, "data.frame") + is.null(x) + 3L*is.atomic(x)
-  addrn <- function(x) if(any(attr(x, "names") == row.names)) x else {
-    rnl <- list(attr(x, "row.names"))
-    names(rnl) <- row.names
-    c(rnl, x)
-  } # faster way ?
+  addrn <- function(x) if(any(attr(x, "names") == row.names)) x else c(`names<-`(list(attr(x, "row.names")), row.names), x) # faster way ?
   attol <- function(x) {
     # class(x) <- NULL # tables are also arrays, although only 1D, not because of the class but because they have a dimension attribute.
     if (length(d <- dim(x)) > 1L) { # is.array(x) # length could also be 0... not NULL
@@ -80,9 +75,7 @@ unlist2d <- function(l, idcols = ".id", row.names = FALSE, recursive = TRUE, id.
       }
       if(keeprn) {
         dn <- dimnames(x)
-        xl <- c(list(if(is.null(dn[[1L]])) seq_len(d[1L]) else dn[[1L]]), .Call(Cpp_mctl, x, FALSE, 0L))
-        names(xl) <- c(row.names, dn[[2L]])
-        x <- xl
+        x <- `names<-`(c(list(if(is.null(dn[[1L]])) seq_len(d[1L]) else dn[[1L]]), .Call(Cpp_mctl, x, FALSE, 0L)), c(row.names, dn[[2L]]))
       } else x <- .Call(Cpp_mctl, x, TRUE, 0L)
     } else x <- as.vector(x, "list")
     if (is.null(names(x))) names(x) <- paste0("V", seq_along(x))     # it seems this is not yet working for all (i.e. model objects..), also perhaps not start at V1, depending on what other columsn there are.. i.e. start at the right position ?

@@ -133,17 +133,15 @@ GRP.default <- function(X, by = NULL, sort = .op[["sort"]], decreasing = FALSE, 
       cols <- if(by_null) unclass(X) else .subset(unclass(X), by)
       if(any(.Call(C_vtypes, cols, 2L))) {
         res <- .Call(C_GRP_default_drop, X, cols, namby, return.groups)
-        g <- list(N.groups = res[[1L]],
-                  group.id = res[[2L]],
-                  group.sizes = res[[3L]],
-                  groups = if(return.groups) res[[5L]] else NULL,
-                  group.vars = namby,
-                  ordered = c(ordered = NA, sorted = NA),
-                  order = NULL,
-                  group.starts = res[[4L]],
-                  call = if(call) match.call() else NULL)
-        oldClass(g) <- "GRP"
-        return(g)
+        return(`oldClass<-`(list(N.groups = res[[1L]],
+                              group.id = res[[2L]],
+                              group.sizes = res[[3L]],
+                              groups = if(return.groups) res[[5L]] else NULL,
+                              group.vars = namby,
+                              ordered = c(ordered = NA, sorted = NA),
+                              order = NULL,
+                              group.starts = res[[4L]],
+                              call = if(call) match.call() else NULL), "GRP"))
       }
     }
     o <- switchGRP(if(by_null) X else .subset(X, by),
@@ -164,47 +162,26 @@ GRP.default <- function(X, by = NULL, sort = .op[["sort"]], decreasing = FALSE, 
       # if unit groups, don't subset rows...
       if(length(gs) == length(o) && (use.group || sorted)) {
         ust <- st
-        if(is.list(X)) {
-          groups <- .Call(C_subsetCols, X, by, FALSE)
-        } else {
-          groups <- list(X)
-          names(groups) <- namby
-        }
+        groups <- if(is.list(X)) .Call(C_subsetCols, X, by, FALSE) else `names<-`(list(X), namby)
       } else {
         ust <- if(use.group || sorted) st else if(length(gs) == length(o)) o else .Call(C_subsetVector, o, st, FALSE) # o[st]
-        if(is.list(X)) {
-          groups <- .Call(C_subsetDT, X, ust, by, FALSE)
-        } else {
-          groups <- list(.Call(C_subsetVector, X, ust, FALSE)) # subsetVector preserves attributes (such as "label")
-          names(groups) <- namby
-        }
+        groups <- if(is.list(X)) .Call(C_subsetDT, X, ust, by, FALSE) else
+          `names<-`(list(.Call(C_subsetVector, X, ust, FALSE)), namby) # subsetVector preserves attributes (such as "label")
       }
   } else {
     groups <- NULL
     ust <- NULL
   }
 
-  ord <- NULL
-  # Note: attributes(o)[-2L] was captured before stripping o above; setting these
-  # attributes on a shallow copy preserves the ordering information without
-  # touching o itself (a direct `attributes<-`(o, ao) call deep-copies o on some
-  # R versions, whereas attr<- on individual attributes deep-copies as well).
-  if(return.order && !use.group) {
-    ord <- o
-    attributes(ord) <- ao
-  }
-
-  g <- list(N.groups = length(gs),
-            group.id = if(use.group) o else .Call(C_frankds, o, st, gs, sorted),
-            group.sizes = gs,
-            groups = groups,
-            group.vars = namby,
-            ordered = c(ordered = sort, sorted = sorted),
-            order = ord,
-            group.starts = ust, # Does not need to be computed by group()
-            call = if(call) match.call() else NULL)
-  oldClass(g) <- "GRP"
-  return(g)
+  return(`oldClass<-`(list(N.groups = length(gs),
+                        group.id = if(use.group) o else .Call(C_frankds, o, st, gs, sorted),
+                        group.sizes = gs,
+                        groups = groups,
+                        group.vars = namby,
+                        ordered = c(ordered = sort, sorted = sorted),
+                        order = if(return.order && !use.group) `attributes<-`(o, ao) else NULL, # `attributes<-`(o, attributes(o)[-2L]) This does a shallow copy on newer R versions # `attr<-`(o, "group.sizes", NULL): This deep-copies it..
+                        group.starts = ust, # Does not need to be computed by group()
+                        call = if(call) match.call() else NULL), "GRP"))
 }
 
 is_GRP <- function(x) inherits(x, "GRP")
@@ -362,21 +339,15 @@ GRP.qG <- function(X, ..., group.sizes = TRUE, return.groups = TRUE, call = TRUE
   ordered <- is.ordered(X)
   attributes(X) <- NULL
 
-  if(grl) {
-    groups <- list(groups)
-    names(groups) <- gvars
-  } else groups <- NULL
-  g <- list(N.groups = ng,
-            group.id = X,
-            group.sizes = if(group.sizes) .Call(C_fwtabulate, X, NULL, ng, FALSE) else NULL, # tabulate(X, ng)  # .Internal(tabulate(X, ng))
-            groups = groups,
-            group.vars = gvars,
-            ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(X)),
-            order = NULL, # starts = NULL, maxgrpn = NULL,
-            group.starts = st,
-            call = if(call) match.call() else NULL)
-  oldClass(g) <- "GRP"
-  return(g)
+  return(`oldClass<-`(list(N.groups = ng,
+                        group.id = X,
+                        group.sizes = if(group.sizes) .Call(C_fwtabulate, X, NULL, ng, FALSE) else NULL, # tabulate(X, ng)  # .Internal(tabulate(X, ng))
+                        groups = if(grl) `names<-`(list(groups), gvars) else NULL,
+                        group.vars = gvars,
+                        ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(X)),
+                        order = NULL, # starts = NULL, maxgrpn = NULL,
+                        group.starts = st,
+                        call = if(call) match.call() else NULL), "GRP"))
 }
 
 GRP.factor <- function(X, ..., group.sizes = TRUE, drop = FALSE, return.groups = TRUE, call = TRUE) {
@@ -388,21 +359,15 @@ GRP.factor <- function(X, ..., group.sizes = TRUE, drop = FALSE, return.groups =
   nl <- length(lev)
   ordered <- is.ordered(X)
   attributes(X) <- NULL
-  if(return.groups) {
-    groups <- list(lev)
-    names(groups) <- nam
-  } else groups <- NULL
-  g <- list(N.groups = nl,
-            group.id = X,
-            group.sizes = if(group.sizes) .Call(C_fwtabulate, X, NULL, nl, FALSE) else NULL, # tabulate(X, nl) # .Internal(tabulate(X, nl))
-            groups = groups,
-            group.vars = nam,
-            ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(X)),
-            order = NULL, # starts = NULL, maxgrpn = NULL,
-            group.starts = NULL,
-            call = if(call) match.call() else NULL)
-  oldClass(g) <- "GRP"
-  return(g)
+  return(`oldClass<-`(list(N.groups = nl,
+                        group.id = X,
+                        group.sizes = if(group.sizes) .Call(C_fwtabulate, X, NULL, nl, FALSE) else NULL, # tabulate(X, nl) # .Internal(tabulate(X, nl))
+                        groups = if(return.groups) `names<-`(list(lev), nam) else NULL,
+                        group.vars = nam,
+                        ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(X)),
+                        order = NULL, # starts = NULL, maxgrpn = NULL,
+                        group.starts = NULL,
+                        call = if(call) match.call() else NULL), "GRP"))
 }
 
 GRP.pseries <- function(X, effect = 1L, ..., group.sizes = TRUE, return.groups = TRUE, call = TRUE) {
@@ -422,21 +387,15 @@ GRP.pseries <- function(X, effect = 1L, ..., group.sizes = TRUE, return.groups =
   ordered <- is.ordered(g)
   attributes(g) <- NULL
 
-  if(return.groups) {
-    groups <- list(lev)
-    names(groups) <- nam
-  } else groups <- NULL
-  gr <- list(N.groups = nl,
-             group.id = g,
-             group.sizes = if(group.sizes) .Call(C_fwtabulate, g, NULL, nl, FALSE) else NULL, # tabulate(g, nl) # .Internal(tabulate(g, nl))
-             groups = groups,
-             group.vars = nam,
-             ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(g)),
-             order = NULL, # starts = NULL, maxgrpn = NULL,
-             group.starts = NULL,
-             call = if(call) match.call() else NULL)
-  oldClass(gr) <- "GRP"
-  return(gr)
+  return(`oldClass<-`(list(N.groups = nl,
+                        group.id = g,
+                        group.sizes = if(group.sizes) .Call(C_fwtabulate, g, NULL, nl, FALSE) else NULL, # tabulate(g, nl) # .Internal(tabulate(g, nl))
+                        groups = if(return.groups) `names<-`(list(lev), nam) else NULL,
+                        group.vars = nam,
+                        ordered = c(ordered = if(ordered) TRUE else NA, sorted = issorted(g)),
+                        order = NULL, # starts = NULL, maxgrpn = NULL,
+                        group.starts = NULL,
+                        call = if(call) match.call() else NULL), "GRP"))
 }
 GRP.pdata.frame <- function(X, effect = 1L, ..., group.sizes = TRUE, return.groups = TRUE, call = TRUE)
   GRP.pseries(X, effect, ..., group.sizes = group.sizes, return.groups = return.groups, call = call)
@@ -450,8 +409,7 @@ fgroup_by <- function(.X, ..., sort = .op[["sort"]], decreasing = FALSE, na.last
   # In case sequences of columns are passed... Think: can enable fgroup_by(mtcars, 1:cyl)
   if(any(all_funs(dots) == ":")) { # length(vars)+1L != length(dots) && any(all.names(dots) == ":")
   # Note that fgroup_by(mtcars, bla = round(mpg / cyl), vs:am) only groups by vs, and am. fselect(mtcars, bla = round(mpg / cyl), vs:am) also does the wrong thing.
-    nl <- as.vector(seq_along(.X), "list")
-    names(nl) <- names(.X)
+    nl <- `names<-`(as.vector(seq_along(.X), "list"), names(.X))
     vars <- eval(substitute(c(...)), nl, parent.frame())
     e <- .X[vars]
     # This allows renaming...
@@ -472,11 +430,7 @@ fgroup_by <- function(.X, ..., sort = .op[["sort"]], decreasing = FALSE, na.last
     } else {
       if(length(name)) {  # fgroup_by(mtcars, bla = round(mpg / cyl), vs, am)
         nonmiss <- nzchar(name) # -> using as.character(dots[-1L]) instead of vars
-        if(!all(nonmiss)) {
-          nam_dots <- as.character(dots[-1L])
-          nam_dots[nonmiss] <- name[nonmiss]
-          names(e) <- nam_dots
-        }
+        if(!all(nonmiss)) names(e) <- `[<-`(as.character(dots[-1L]), nonmiss, value = name[nonmiss])
       } else names(e) <- vars
     }
   }
@@ -570,13 +524,7 @@ print.invisible <- function(x, ...) cat("")
 `[[.GRP_df` <-  function(x, ...) UseMethod("[[", fungroup(x)) # function(x, ..., exact = TRUE) .subset2(x, ..., exact = exact)
 `[<-.GRP_df` <- function(x, ..., value) UseMethod("[<-", fungroup(x))
 `[[<-.GRP_df` <- function(x, ..., value) UseMethod("[[<-", fungroup(x))
-`names<-.GRP_df` <- function(x, value) {
-  clx <- oldClass(x)
-  x <- unclass(x)
-  names(x) <- value
-  oldClass(x) <- clx
-  x
-}
+`names<-.GRP_df` <- function(x, value) `oldClass<-`(`names<-`(unclass(x), value), oldClass(x))
 
 # Produce errors...
 # print_GRP_df_core <- function(x) {
@@ -634,22 +582,11 @@ fgroup_vars <- function(X, return = "data") {
     unique = if(is_GRP(g)) condCopyAttrib(g[[4L]], X) else .Call(C_subsetCols, g, -length(unclass(g)), FALSE), # what about attr(*, ".drop") ??
     names = vars,
     indices = ckmatch(vars, attr(X, "names")),
-    named_indices = {
-      ind <- ckmatch(vars, attr(X, "names"))
-      names(ind) <- vars
-      ind
-    },
-    logical = {
-      out <- logical(length(unclass(X)))
-      out[ckmatch(vars, attr(X, "names"))] <- TRUE
-      out
-    },
+    named_indices = `names<-`(ckmatch(vars, attr(X, "names")), vars),
+    logical = `[<-`(logical(length(unclass(X))), ckmatch(vars, attr(X, "names")), TRUE),
     named_logical = {
       nam <- attr(X, "names")
-      out <- logical(length(nam))
-      out[ckmatch(vars, nam)] <- TRUE
-      names(out) <- nam
-      out
+      `names<-`(`[<-`(logical(length(nam)), ckmatch(vars, nam), TRUE), nam)
     },
     stop("Unknown return option!"))
 }
@@ -666,17 +603,15 @@ GRP.grouped_df <- function(X, ..., return.groups = TRUE, call = TRUE) {
   ng <- length(gr)
   gs <- vlengths(gr, FALSE)
   id <- .Call(C_groups2GRP, gr, fnrow(X), gs)
-  res <- list(N.groups = ng, # The C code here speeds up things a lot !!
-              group.id = id,  # Old: rep(seq_len(ng), gs)[order(funlist(gr))], # .Internal(radixsort(TRUE, FALSE, FALSE, TRUE, .Internal(unlist(gr, FALSE, FALSE))))
-              group.sizes = gs,
-              groups = if(return.groups) g[-lg] else NULL, # better reclass afterwards ? -> Nope, this is only used in internal codes...
-              group.vars = names(g)[-lg],
-              ordered = c(ordered = TRUE, sorted = issorted(id)), # Important to have NA here, otherwise wrong result in gsplit (wrong optimization)
-              order = NULL, # starts = NULL, maxgrpn = NULL,
-              group.starts = NULL,
-              call = if(call) match.call() else NULL)
-  oldClass(res) <- "GRP"
-  return(res)
+  return(`oldClass<-`(list(N.groups = ng, # The C code here speeds up things a lot !!
+                        group.id = id,  # Old: rep(seq_len(ng), gs)[order(funlist(gr))], # .Internal(radixsort(TRUE, FALSE, FALSE, TRUE, .Internal(unlist(gr, FALSE, FALSE))))
+                        group.sizes = gs,
+                        groups = if(return.groups) g[-lg] else NULL, # better reclass afterwards ? -> Nope, this is only used in internal codes...
+                        group.vars = names(g)[-lg],
+                        ordered = c(ordered = TRUE, sorted = issorted(id)), # Important to have NA here, otherwise wrong result in gsplit (wrong optimization)
+                        order = NULL, # starts = NULL, maxgrpn = NULL,
+                        group.starts = NULL,
+                        call = if(call) match.call() else NULL), "GRP"))
 }
 
 is_qG <- function(x) is.integer(x) && inherits(x, "qG")
@@ -779,8 +714,7 @@ as_factor_qG <- function(x, ordered = FALSE, na.exclude = TRUE) {
     }
     clx <- c(if(ordered) "ordered", "factor", "na.included")
   }
-  attributes(x) <- list(levels = groups, class = clx)
-  return(x)
+  return(`attributes<-`(x, list(levels = groups, class = clx)))
 }
 
 # as.factor_qG <- function(x, ordered = FALSE, na.exclude = TRUE) {
@@ -829,8 +763,7 @@ qG <- function(x, ordered = FALSE, na.exclude = TRUE, sort = .op[["sort"]],
           list(N.groups = attr(x, "N.groups"), class = newclx)
       }
       if(identical(ax, attributes(x))) return(x)
-      attributes(x) <- ax
-      return(x)
+      return(`attributes<-`(x, ax))
     }
     newclx <- c(if(ordered) "ordered", "qG", "na.included")
     if(is.factor(x)) {
@@ -847,9 +780,7 @@ qG <- function(x, ordered = FALSE, na.exclude = TRUE, sort = .op[["sort"]],
     ax <- if(return.groups) list(N.groups = ng, groups = lev, class = newclx) else
       list(N.groups = ng, class = newclx)
      # x[is.na(x)] <- ng
-    x <- .Call(C_setcopyv, x, NA, ng, FALSE, FALSE, FALSE)
-    attributes(x) <- ax
-    return(x)
+    return(`attributes<-`(.Call(C_setcopyv, x, NA, ng, FALSE, FALSE, FALSE), ax))
   }
   switch(method, # if((is.character(x) && !na.exclude) || (length(x) < 500 && !(is.character(x) && na.exclude)))
          auto  = if(is.double(x) && sort) # is.character(x) || is.logical(x) || !sort || length(x) < 500L

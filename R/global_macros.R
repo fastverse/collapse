@@ -69,13 +69,7 @@ set_collapse <- function(...) {
 
 
 
-get_collapse <- function(opts = NULL) {
-  if(is.null(opts)) return(as.list(.op))
-  if(length(opts) == 1L) return(.op[[opts]])
-  res <- lapply(opts, function(x) .op[[x]])
-  names(res) <- opts
-  res
-}
+get_collapse <- function(opts = NULL) if(is.null(opts)) as.list(.op) else if(length(opts) == 1L) .op[[opts]] else `names<-`(lapply(opts, function(x) .op[[x]]), opts)
 
 # Global Macros
 

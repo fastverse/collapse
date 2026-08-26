@@ -13,20 +13,14 @@ fsd.default <- function(x, g = NULL, w = NULL, TRA = NULL, na.rm = .op[["na.rm"]
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        res <- .Call(Cpp_fvarsd,x,length(lev),g,NULL,w,na.rm,stable.algo,TRUE)
-        names(res) <- lev
-        return(res)
+        return(`names<-`(.Call(Cpp_fvarsd,x,length(lev),g,NULL,w,na.rm,stable.algo,TRUE), lev))
       }
       if(is.nmfactor(g)) return(.Call(Cpp_fvarsd,x,fnlevels(g),g,NULL,w,na.rm,stable.algo,TRUE))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(Cpp_fvarsd,x,attr(g,"N.groups"),g,NULL,w,na.rm,stable.algo,TRUE))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) {
-      res <- .Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,TRUE)
-      names(res) <- GRPnames(g)
-      return(res)
-    }
+    if(use.g.names) return(`names<-`(.Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,TRUE), GRPnames(g)))
     return(.Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,TRUE))
   }
   if(is.null(g)) return(TRAC(x,.Call(Cpp_fvarsd,x,0L,0L,NULL,w,na.rm,stable.algo,TRUE),0L,TRA, ...))
@@ -42,20 +36,14 @@ fsd.matrix <- function(x, g = NULL, w = NULL, TRA = NULL, na.rm = .op[["na.rm"]]
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        res <- .Call(Cpp_fvarsdm,x,length(lev),g,NULL,w,na.rm,stable.algo,TRUE,FALSE)
-        dimnames(res) <- list(lev, dimnames(x)[[2L]])
-        return(res)
+        return(`dimnames<-`(.Call(Cpp_fvarsdm,x,length(lev),g,NULL,w,na.rm,stable.algo,TRUE,FALSE), list(lev, dimnames(x)[[2L]])))
       }
       if(is.nmfactor(g)) return(.Call(Cpp_fvarsdm,x,fnlevels(g),g,NULL,w,na.rm,stable.algo,TRUE,FALSE))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(Cpp_fvarsdm,x,attr(g,"N.groups"),g,NULL,w,na.rm,stable.algo,TRUE,FALSE))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) {
-      res <- .Call(Cpp_fvarsdm,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,TRUE,FALSE)
-      dimnames(res) <- list(GRPnames(g), dimnames(x)[[2L]])
-      return(res)
-    }
+    if(use.g.names) return(`dimnames<-`(.Call(Cpp_fvarsdm,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,TRUE,FALSE), list(GRPnames(g), dimnames(x)[[2L]])))
     return(.Call(Cpp_fvarsdm,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,TRUE,FALSE))
   }
   if(is.null(g)) return(TRAmC(x,.Call(Cpp_fvarsdm,x,0L,0L,NULL,w,na.rm,stable.algo,TRUE,TRUE),0L,TRA, ...))
@@ -108,10 +96,7 @@ fsd.grouped_df <- function(x, w = NULL, TRA = NULL, na.rm = .op[["na.rm"]], use.
       if(any(gn %in% wn)) stop("Weights coincide with grouping variables!")
       gn <- c(gn, wn)
       if(keep.w) {
-        if(nTRAl) {
-          sumw <- list(fsumC(w,g[[1L]],g[[2L]],NULL,na.rm))
-          names(sumw) <- do_stub(stub, if(length(wsym) == 1L) as.character(wsym) else deparse(wsym), "sum.")
-        } else if(keep.group_vars)
+        if(nTRAl) sumw <- `names<-`(list(fsumC(w,g[[1L]],g[[2L]],NULL,na.rm)), do_stub(stub, if(length(wsym) == 1L) as.character(wsym) else deparse(wsym), "sum.")) else if(keep.group_vars)
           gn2 <- gn else sumw <- gn2 <- wn
       }
     }
@@ -160,20 +145,14 @@ fvar.default <- function(x, g = NULL, w = NULL, TRA = NULL, na.rm = .op[["na.rm"
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        res <- .Call(Cpp_fvarsd,x,length(lev),g,NULL,w,na.rm,stable.algo,FALSE)
-        names(res) <- lev
-        return(res)
+        return(`names<-`(.Call(Cpp_fvarsd,x,length(lev),g,NULL,w,na.rm,stable.algo,FALSE), lev))
       }
       if(is.nmfactor(g)) return(.Call(Cpp_fvarsd,x,fnlevels(g),g,NULL,w,na.rm,stable.algo,FALSE))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(Cpp_fvarsd,x,attr(g,"N.groups"),g,NULL,w,na.rm,stable.algo,FALSE))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) {
-      res <- .Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,FALSE)
-      names(res) <- GRPnames(g)
-      return(res)
-    }
+    if(use.g.names) return(`names<-`(.Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,FALSE), GRPnames(g)))
     return(.Call(Cpp_fvarsd,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,FALSE))
   }
   if(is.null(g)) return(TRAC(x,.Call(Cpp_fvarsd,x,0L,0L,NULL,w,na.rm,stable.algo,FALSE),0L,TRA, ...))
@@ -189,20 +168,14 @@ fvar.matrix <- function(x, g = NULL, w = NULL, TRA = NULL, na.rm = .op[["na.rm"]
       if(use.g.names) {
         if(!is.nmfactor(g)) g <- qF(g, na.exclude = FALSE)
         lev <- attr(g, "levels")
-        res <- .Call(Cpp_fvarsdm,x,length(lev),g,NULL,w,na.rm,stable.algo,FALSE,FALSE)
-        dimnames(res) <- list(lev, dimnames(x)[[2L]])
-        return(res)
+        return(`dimnames<-`(.Call(Cpp_fvarsdm,x,length(lev),g,NULL,w,na.rm,stable.algo,FALSE,FALSE), list(lev, dimnames(x)[[2L]])))
       }
       if(is.nmfactor(g)) return(.Call(Cpp_fvarsdm,x,fnlevels(g),g,NULL,w,na.rm,stable.algo,FALSE,FALSE))
       g <- qG(g, na.exclude = FALSE)
       return(.Call(Cpp_fvarsdm,x,attr(g,"N.groups"),g,NULL,w,na.rm,stable.algo,FALSE,FALSE))
     }
     if(!is_GRP(g)) g <- GRP.default(g, return.groups = use.g.names, call = FALSE)
-    if(use.g.names) {
-      res <- .Call(Cpp_fvarsdm,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,FALSE,FALSE)
-      dimnames(res) <- list(GRPnames(g), dimnames(x)[[2L]])
-      return(res)
-    }
+    if(use.g.names) return(`dimnames<-`(.Call(Cpp_fvarsdm,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,FALSE,FALSE), list(GRPnames(g), dimnames(x)[[2L]])))
     return(.Call(Cpp_fvarsdm,x,g[[1L]],g[[2L]],g[[3L]],w,na.rm,stable.algo,FALSE,FALSE))
   }
   if(is.null(g)) return(TRAmC(x,.Call(Cpp_fvarsdm,x,0L,0L,NULL,w,na.rm,stable.algo,FALSE,TRUE),0L,TRA, ...))
@@ -255,10 +228,7 @@ fvar.grouped_df <- function(x, w = NULL, TRA = NULL, na.rm = .op[["na.rm"]], use
       if(any(gn %in% wn)) stop("Weights coincide with grouping variables!")
       gn <- c(gn, wn)
       if(keep.w) {
-        if(nTRAl) {
-          sumw <- list(fsumC(w,g[[1L]],g[[2L]],NULL,na.rm))
-          names(sumw) <- do_stub(stub, if(length(wsym) == 1L) as.character(wsym) else deparse(wsym), "sum.")
-        } else if(keep.group_vars)
+        if(nTRAl) sumw <- `names<-`(list(fsumC(w,g[[1L]],g[[2L]],NULL,na.rm)), do_stub(stub, if(length(wsym) == 1L) as.character(wsym) else deparse(wsym), "sum.")) else if(keep.group_vars)
           gn2 <- gn else sumw <- gn2 <- wn
       }
     }

@@ -45,18 +45,14 @@ flm.default <- function(y, X, w = NULL, add.icpt = FALSE, #  sparse = FALSE,
     ar <- if(is.matrix(y)) list(dim = c(dim(X)[2L], dim(y)[2L]), dimnames = list(dimnames(X)[[2L]], dimnames(y)[[2L]])) else
       list(dim = c(dim(X)[2L], 1L), dimnames = list(dimnames(X)[[2L]], NULL))
 
-    Xdn <- X
-    dimnames(Xdn) <- NULL # qr() needs an unclassed matrix; other methods operate on X directly and get dimensions set below via ar
-    res <- switch(method[1L],
+    return(`attributes<-`(switch(method[1L],
                   lm = .lm.fit(X * wts, y * wts, ...)[[2L]],
                   solve = (function(xw) solve(crossprod(xw), crossprod(xw, y * wts), ...))(X * wts),
-                  qr = qr.coef(qr(Xdn * wts, ...), y * wts),
+                  qr = qr.coef(qr(`dimnames<-`(X, NULL) * wts, ...), y * wts),
                   arma = getenvFUN("RcppArmadillo_fastLmPure")(X * wts, y * wts)[[1L]], # .Call("_RcppArmadillo_fastLm_impl", X * wts, y * wts, PACKAGE = "RcppArmadillo"),
                   chol = (function(xw) chol2inv(chol(crossprod(xw), ...)) %*% crossprod(xw, y * wts))(X * wts),
                   eigen = getenvFUN("RcppEigen_fastLmPure")(X * wts, y * wts, eigen.method)[[1L]], # .Call("RcppEigen_fastLm_Impl", X * wts, y * wts, eigen.method, PACKAGE = "RcppEigen")
-                  stop("Unknown method!"))
-    attributes(res) <- ar
-    return(res)
+                  stop("Unknown method!")), ar))
 
   }
   if(return.raw) return(switch(method[1L],
@@ -71,18 +67,14 @@ flm.default <- function(y, X, w = NULL, add.icpt = FALSE, #  sparse = FALSE,
   ar <- if(is.matrix(y)) list(dim = c(dim(X)[2L], dim(y)[2L]), dimnames = list(dimnames(X)[[2L]], dimnames(y)[[2L]])) else
     list(dim = c(dim(X)[2L], 1L), dimnames = list(dimnames(X)[[2L]], NULL))
 
-  Xdn <- X
-  dimnames(Xdn) <- NULL # qr() needs an unclassed matrix; result dimensions are set below via ar
-  res <- switch(method[1L],
+  `attributes<-`(switch(method[1L],
          lm = .lm.fit(X, y, ...)[[2L]],
          solve = solve(crossprod(X), crossprod(X, y), ...),
-         qr = qr.coef(qr(Xdn, ...), y),
+         qr = qr.coef(qr(`dimnames<-`(X, NULL), ...), y),
          arma = getenvFUN("RcppArmadillo_fastLmPure")(X, y)[[1L]],
          chol = chol2inv(chol(crossprod(X), ...)) %*% crossprod(X, y),
          eigen = getenvFUN("RcppEigen_fastLmPure")(X, y, eigen.method)[[1L]],
-         stop("Unknown method!"))
-  attributes(res) <- ar
-  res
+         stop("Unknown method!")), ar)
 
   # if(!return.raw) return(switch(method[1L], solve = formatcoef(res$coefficients, X, y), res$coefficients))
   # res

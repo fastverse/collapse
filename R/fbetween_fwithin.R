@@ -162,10 +162,7 @@ W.pdata.frame <- function(x, effect = 1L, w = NULL, cols = is.numeric, na.rm = .
   } else if(isTRUE(stub) || is.character(stub)) {
     ax[["names"]] <- do_stub(stub, nam, "W.")
     return(setAttributes(.Call(Cpp_BWl,x,fnlevels(g),g,NULL,w,na.rm,theta,ckm(mean),FALSE,FALSE), ax))
-  } else {
-    oldClass(x) <- ax[["class"]]
-    return(.Call(Cpp_BWl,x,fnlevels(g),g,NULL,w,na.rm,theta,ckm(mean),FALSE,FALSE))
-  }
+  } else return(.Call(Cpp_BWl,`oldClass<-`(x, ax[["class"]]),fnlevels(g),g,NULL,w,na.rm,theta,ckm(mean),FALSE,FALSE))
 }
 
 W.data.frame <- function(x, by = NULL, w = NULL, cols = is.numeric, na.rm = .op[["na.rm"]],
@@ -384,10 +381,7 @@ B.pdata.frame <- function(x, effect = 1L, w = NULL, cols = is.numeric, na.rm = .
   } else if(isTRUE(stub) || is.character(stub)) {
       ax[["names"]] <- do_stub(stub, nam, "B.")
       return(setAttributes(.Call(Cpp_BWl,x,fnlevels(g),g,NULL,w,na.rm,1,0,TRUE,fill), ax))
-  } else {
-    oldClass(x) <- ax[["class"]]
-    return(.Call(Cpp_BWl,x,fnlevels(g),g,NULL,w,na.rm,1,0,TRUE,fill))
-  }
+  } else return(.Call(Cpp_BWl,`oldClass<-`(x, ax[["class"]]),fnlevels(g),g,NULL,w,na.rm,1,0,TRUE,fill))
 }
 
 B.data.frame <- function(x, by = NULL, w = NULL, cols = is.numeric, na.rm = .op[["na.rm"]],

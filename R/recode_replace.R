@@ -268,8 +268,7 @@ replace_na <- function(X, value = 0L, cols = NULL, set = FALSE, type = "const") 
     oldClass(X) <- NULL
     cols <- cols2int(cols, X, names(X), FALSE)
     X[cols] <- lapply(unattrib(X[cols]), FUN, NA, value) #  function(y) `[<-`(y, is.na(y), value = value)
-    oldClass(X) <- clx
-    return(condalc(X, any(clx == "data.table")))
+    return(condalc(`oldClass<-`(X, clx), any(clx == "data.table")))
   }
   FUN(X, NA, value) # `[<-`(X, is.na(X), value = value)
 }
@@ -360,8 +359,7 @@ replace_outliers <- function(X, limits, value = NA,
                        list(unattrib(X[num]), unattrib(STDXnum)), NULL)
         if(set) return(invisible(X))
         X[num] <- res
-        oldClass(X) <- clx
-        res <- X
+        res <- `oldClass<-`(X, clx)
       } else {
         limit_fun <- if(sl > 5L) mad_limits else sd_limits
         res <- lapply(unattrib(X), function(y) if(is.numeric(y)) Crepoutl(y, limit_fun(y, limits), value, sl, set) else y)
@@ -411,8 +409,7 @@ pad_atomic <- function(x, i, n, value) {
     # Could also pad row-names? perhaps with names of i ??
     if(length(ax[["dimnames"]][[1L]])) ax[["dimnames"]] <- list(NULL, ax[["dimnames"]][[2L]])
     if(is.object(x)) ax[["class"]] <- NULL
-    attributes(m) <- ax
-    return(m) # fastest ??
+    return(`attributes<-`(m, ax)) # fastest ??
   }
   r <- .Call(C_alloc, value, n, TRUE) # matrix(value, n) # matrix is faster than rep_len !!!!
   r[i] <- x
@@ -421,8 +418,7 @@ pad_atomic <- function(x, i, n, value) {
     if(length(ax) == 1L) return(r)
     ax[["names"]] <- NULL
   }
-  attributes(r) <- ax
-  return(r)
+  return(`attributes<-`(r, ax))
 }
 
 # microbenchmark::microbenchmark(x[-i] <- ri, x[i2] <- ri)

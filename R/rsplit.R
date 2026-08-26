@@ -95,11 +95,7 @@ rsplit.data.frame <- function(x, by, drop = TRUE, flatten = FALSE, # check = TRU
     gsplit_DF <- function(x, f, ...) {
       rown <- attr(x, "row.names") # Need to do this, handing down from the function body doesn't work
       lapply(gsplit(NULL, f, use.names, drop = drop, ...),
-             function(i) {
-               out <- .Call(C_subsetDT, x, i, j, FALSE)
-               attr(out, "row.names") <- rown[i]
-               out
-             })
+             function(i) `attr<-`(.Call(C_subsetDT, x, i, j, FALSE), "row.names", rown[i]))
     }
   }
 

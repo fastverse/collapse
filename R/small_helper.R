@@ -74,10 +74,7 @@ vlabels <- function(X, attrn = "label", use.names = TRUE) .Call(C_vlabels, X, at
 # }
 
 "vlabels<-" <- function(X, attrn = "label", value) {
-  if(is.atomic(X)) {
-    attr(X, attrn) <- value
-    return(X)
-  }
+  if(is.atomic(X)) return(`attr<-`(X, attrn, value))
   .Call(C_setvlabels, X, attrn, value, NULL)
 }
 
@@ -98,10 +95,7 @@ vlabels <- function(X, attrn = "label", use.names = TRUE) .Call(C_vlabels, X, at
 
 # Note: Shallow copy does not work as it only copies the list, but the attribute is a feature of the atomic elements inside...
 setLabels <- function(X, value = NULL, attrn = "label", cols = NULL) { # , sc = TRUE
-  if(is.atomic(X)) {
-    attr(X, attrn) <- value
-    return(X)
-  }
+  if(is.atomic(X)) return(`attr<-`(X, attrn, value))
   .Call(C_setvlabels, X, attrn, value, as.integer(cols))
 }
 
@@ -244,8 +238,7 @@ setRownames <- function(object, nm = if(is.atomic(object)) seq_row(object) else 
   }
   if(!is.array(object)) stop("Setting row-names only supported on arrays and lists")
   dn <- dimnames(object)
-  dimnames(object) <- c(list(nm), dn[-1L])
-  object
+ `dimnames<-`(object, c(list(nm), dn[-1L]))
 }
 
 setColnames <- function(object, nm) {
@@ -258,10 +251,7 @@ setColnames <- function(object, nm) {
 }
 
 setDimnames <- function(object, dn, which = NULL) {
-  if(is.null(which)) {
-    dimnames(object) <- dn
-    return(object)
-  }
+  if(is.null(which)) return(`dimnames<-`(object, dn))
   if(is.atomic(dn)) dimnames(object)[[which]] <- dn else
                     dimnames(object)[which] <- dn
   object
@@ -287,20 +277,13 @@ all_funs <- function(expr) .Call(C_all_funs, expr)
 cinv <- function(x) chol2inv(chol(x))
 
 vec <- function(X) {
-  if(is.atomic(X)) {
-    attributes(X) <- NULL
-    return(X)
-  }
+  if(is.atomic(X)) return(`attributes<-`(X, NULL))
   .Call(C_pivot_long, X, NULL, FALSE)
 }
 
 interact_names <- function(l) {
   oldClass(l) <- NULL
-  if(length(l) == 2L) {
-    res <- outer(l[[1L]], l[[2L]], paste, sep = ".")
-    dim(res) <- NULL
-    return(res)
-  }
+  if(length(l) == 2L) return(`dim<-`(outer(l[[1L]], l[[2L]], paste, sep = "."), NULL))
   do.call(paste, c(expand.grid(l, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE), list(sep = ".")))
 }
 
@@ -310,10 +293,7 @@ condalc <- function(x, DT) if(DT) .Call(C_alloccol, x) else x
 alcSA <- function(x, a) .Call(C_alloccol, .Call(C_setAttributes, x, a))
 condalcSA <- function(x, a, DT) if(DT) .Call(C_alloccol, .Call(C_setAttributes, x, a)) else .Call(C_setAttributes, x, a)
 
-unattrib <- function(object) {
-  attributes(object) <- NULL
-  object
-}
+unattrib <- function(object) `attributes<-`(object, NULL)
 
 # Both equally efficient and therefore redundant !
 # setAttr <- function(object, a, v) .Call(C_setAttr, object, a, v)
@@ -445,9 +425,7 @@ na_omit <- function(X, cols = NULL, na.attr = FALSE, prop = 0, ...) {
     rn <- attr(X, "row.names")
     if(!(is.numeric(rn) || is.null(rn) || rn[1L] == "1")) attr(res, "row.names") <- Csv(rn, rkeep)
     if(na.attr) {
-      naact <- which(rl)
-      oldClass(naact) <- "omit"
-      attr(res, "na.action") <- naact
+      attr(res, "na.action") <- `oldClass<-`(which(rl), "omit")
       if(inherits(res, "data.table") && !inherits(X, "pdata.frame")) return(alc(res))
     }
     if(inherits(X, "pdata.frame")) {
@@ -462,11 +440,7 @@ na_omit <- function(X, cols = NULL, na.attr = FALSE, prop = 0, ...) {
     rkeep <- which(rl)
     if(length(rkeep) == NROW(X)) return(X)
     res <- if(is.matrix(X)) X[rkeep, , drop = FALSE, ...] else X[rkeep, ...]
-    if(na.attr) {
-      naact <- whichv(rl, FALSE)
-      oldClass(naact) <- "omit"
-      attr(res, "na.action") <- naact
-    }
+    if(na.attr) attr(res, "na.action") <- `oldClass<-`(whichv(rl, FALSE), "omit")
   }
   res
 }
@@ -518,10 +492,9 @@ forder.int <- function(x, na.last = TRUE, decreasing = FALSE) .Call(C_radixsort,
 fsetdiff <- function(x, y) x[match(x, y, 0L) == 0L] # not unique !
 
 ffka <- function(x, f) {
-  ax <- attributes(x)
-  res <- f(ax[["levels"]])[x]
-  attributes(res) <- ax[names(ax) %!in% c("levels", "class")]
-  res
+   ax <- attributes(x)
+  `attributes<-`(f(ax[["levels"]])[x],
+   ax[names(ax) %!in% c("levels", "class")])
 }
 
 
@@ -566,10 +539,7 @@ as_character_factor <- function(X, keep.attr = TRUE) {
 # }
 
 
-setRnDF <- function(df, nm) {
-  attr(df, "row.names") <- nm
-  df
-}
+setRnDF <- function(df, nm) `attr<-`(df, "row.names", nm)
 
 # TtI <- function(x)
 #   switch(x, replace_fill = 1L, replace = 2L, `-` = 3L, `-+` = 4L, `/` = 5L, `%` = 6L, `+` = 7L, `*` = 8L, `%%` = 9L, `-%%` = 10L,

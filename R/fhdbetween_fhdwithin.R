@@ -4,10 +4,8 @@
 demean <- function(x, fl, weights, ..., means = FALSE) {
   if(length(fl) == 1L && is.null(attr(fl, "slope.flag"))) {
     clx <- oldClass(x) # Need to do this because could call fbetween.grouped_df of fbetween.pseries / pdata.frame
-    res <- if(means) fbetween(unclass(x), fl[[1L]], weights, na.rm = FALSE) else
-      fwithin(unclass(x), fl[[1L]], weights, na.rm = FALSE)
-    oldClass(res) <- clx
-    return(res)
+    if(means) return(`oldClass<-`(fbetween(unclass(x), fl[[1L]], weights, na.rm = FALSE), clx)) else
+      return(`oldClass<-`(fwithin(unclass(x), fl[[1L]], weights, na.rm = FALSE), clx))
   }
   msg <- "For higher-dimensional centering and projecting out interactions need to install.packages('%s'), then unload [detach('package:collapse', unload = TRUE)] and reload [library(collapse)]."
   res <- getenvFUN("fixest_demean", msg)(x, fl, attr(fl, "slope.vars"), attr(fl, "slope.flag"),
@@ -154,8 +152,7 @@ getfl <- function(mf) {
     slflag <- attr(fctdat, "slope.flag")
     if(length(modelterms)) { # Intercept only needed if facts with only negative slope flag...
       form <- paste0(if(is.null(slflag) || any(slflag > 0L)) "~ -1 + " else "~ ", paste(modelterms, collapse = " + "))
-      oldClass(mf) <- clmf
-      moddat <- model.matrix.default(as.formula(form), data = mf)
+      moddat <- model.matrix.default(as.formula(form), data = `oldClass<-`(mf, clmf))
     } else {
       moddat <- if(is.null(slflag) || any(slflag > 0L)) NULL else
                 alloc(1, length(mf[[1L]]))
@@ -209,12 +206,7 @@ subsetfl <- function(fl, cc) {
 
 # Neded to sort out some insufficiencies of base R default functions when dealing with dimensions
 `%**%` <- function(x, y) if(length(y) > 1L) x %*% y else x * y
-tcrossprod2 <- function(x, y) {
-  if(length(x) > 1L) return(tcrossprod(x, y))
-  res <- x * y
-  dim(res) <- c(1L, length(y))
-  res
-}
+tcrossprod2 <- function(x, y) if(length(x) > 1L) tcrossprod(x, y) else `dim<-`(x * y, c(1L, length(y)))
 
 # y = x; X = xmat; w = w; meth = lm.method
 flmres <- function(y, X, w = NULL, meth = "qr", resi = TRUE, ...) {

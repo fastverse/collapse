@@ -341,6 +341,38 @@ SEXP setcopyv(SEXP x, SEXP val, SEXP rep, SEXP Rinvert, SEXP Rset, SEXP Rind1) {
     for(int i = 0; i != n; ++i) if(pv[i] == 0) px[i] = pr[i];   \
   }
 
+  // STRSXP/VECSXP need SET_STRING_ELT()/SET_VECTOR_ELT() instead of raw pointer
+  // writes so that R's generational write barrier records the reference
+  // (see issue about setv()/copyv() corrupting old-generation targets).
+  #define setcopyvLOOP_SEXP(e, SETELT)                              \
+  if(invert) {                                                      \
+    for(int i = 0; i != n; ++i) if(px[i] != v) SETELT(target, i, e); \
+  } else {                                                          \
+    for(int i = 0; i != n; ++i) if(px[i] == v) SETELT(target, i, e); \
+  }
+
+  #define setcopyvLOOPLVEC1_SEXP(SETELT)                             \
+  if(tv == INTSXP) {                                                 \
+    for(int i = 0; i < lv; ++i) SETELT(target, pv[i]-1, r);          \
+  } else if(invert == 0) {                                           \
+    for(int i = 0; i != n; ++i) if(pv[i] > 0) SETELT(target, i, r);  \
+  } else {                                                           \
+    for(int i = 0; i != n; ++i) if(pv[i] == 0) SETELT(target, i, r); \
+  }
+
+  #define setcopyvLOOPLVEC_SEXP(SETELT)                                    \
+  if(tv == INTSXP) {                                                       \
+    if(lr == n) {                                                          \
+      for(int i = 0; i < lv; ++i) SETELT(target, pv[i]-1, pr[pv[i]-1]);    \
+    } else {                                                               \
+      for(int i = 0; i < lv; ++i) SETELT(target, pv[i]-1, pr[i]);          \
+    }                                                                      \
+  } else if(invert == 0) {                                                 \
+    for(int i = 0; i != n; ++i) if(pv[i] > 0) SETELT(target, i, pr[i]);    \
+  } else {                                                                 \
+    for(int i = 0; i != n; ++i) if(pv[i] == 0) SETELT(target, i, pr[i]);   \
+  }
+
   switch(tx) {
   case INTSXP:
   case LGLSXP:
@@ -413,27 +445,28 @@ SEXP setcopyv(SEXP x, SEXP val, SEXP rep, SEXP Rinvert, SEXP Rset, SEXP Rind1) {
   }
   case STRSXP:
   {
-    SEXP *restrict px = set ? SEXPPTR(x) : SEXPPTR(ans);
+    const SEXP target = set ? x : ans;
+    const SEXP *restrict px = SEXPPTR_RO(target);
     if(lv == 1 && ind1 == 0) {
       const SEXP v = PROTECT(asChar(val));
       if(lr == 1) {
         const SEXP r = PROTECT(asChar(rep));
-        setcopyvLOOP(r)
+        setcopyvLOOP_SEXP(r, SET_STRING_ELT)
         UNPROTECT(1);
       } else {
         const SEXP *restrict pr = SEXPPTR_RO(rep);
-        setcopyvLOOP(pr[i])
+        setcopyvLOOP_SEXP(pr[i], SET_STRING_ELT)
       }
       UNPROTECT(1);
     } else {
       const int *restrict pv = INTEGER(val); // ALTREP(val) ? (const int *)ALTVEC_DATAPTR(val) :
       if(lr == 1) {
         const SEXP r = PROTECT(asChar(rep));
-        setcopyvLOOPLVEC1
+        setcopyvLOOPLVEC1_SEXP(SET_STRING_ELT)
         UNPROTECT(1);
       } else {
         const SEXP *restrict pr = SEXPPTR_RO(rep);
-        setcopyvLOOPLVEC
+        setcopyvLOOPLVEC_SEXP(SET_STRING_ELT)
       }
     }
     break;
@@ -441,16 +474,16 @@ SEXP setcopyv(SEXP x, SEXP val, SEXP rep, SEXP Rinvert, SEXP Rset, SEXP Rind1) {
   case VECSXP:
   {
     if(set && ALTREP(x)) error("cannot modify ALTREP list by reference");
-    SEXP *restrict px = set ? SEXPPTR(x) : SEXPPTR(ans);
+    const SEXP target = set ? x : ans;
     if(lv == 1 && ind1 == 0) error("Cannot compare lists to a value");
     // if(tr != VECSXP) error("If X is a list and xlist = TRUE, R also needs to be a list");
     const int *restrict pv = INTEGER(val); // ALTREP(val) ? (const int *)ALTVEC_DATAPTR(val) :
     if(lr == 1) {
       const SEXP r = VECTOR_ELT(rep, 0);
-      setcopyvLOOPLVEC1
+      setcopyvLOOPLVEC1_SEXP(SET_VECTOR_ELT)
     } else {
       const SEXP *restrict pr = SEXPPTR_RO(rep);
-      setcopyvLOOPLVEC
+      setcopyvLOOPLVEC_SEXP(SET_VECTOR_ELT)
     }
     break;
   }

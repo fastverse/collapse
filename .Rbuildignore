@@ -36,3 +36,11 @@ _snaps
 testthat-problems.rds
 vignettes/figure
 vignettes/cache
+vignettes/collapse_intro\.Rmd$
+vignettes/collapse_and_dplyr\.Rmd$
+vignettes/collapse_and_data\.table\.Rmd$
+vignettes/collapse_and_plm\.Rmd$
+vignettes/collapse_intro\.html$
+vignettes/collapse_and_dplyr\.html$
+vignettes/collapse_and_data\.table\.html$
+vignettes/collapse_and_plm\.html$

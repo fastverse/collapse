@@ -30,7 +30,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/fastverse/collapse/blob/master/inst/CITATION)
+[`inst/CITATION`](https://github.com/fastverse/collapse/blob/v2.1.8/inst/CITATION)
 
 Krantz, S. (2026). collapse: Advanced and fast statistical computing and
 data transformation in R. Journal of Statistical Software, 116(1), 1–38.
@@ -48,14 +48,14 @@ https://doi.org/10.18637/jss.v116.i01
     }
 
 Krantz (2026). collapse: Advanced and Fast Data Transformation in R. R
-package version 2.1.7. doi:10.5281/zenodo.8433090.
+package version 2.1.8. doi:10.5281/zenodo.8433090.
 https://fastverse.org/collapse/.
 
     @Manual{rcollapse,
       title = {collapse: Advanced and Fast Data Transformation in R},
       author = {Sebastian Krantz},
       year = {2026},
-      note = {R package version 2.1.7},
+      note = {R package version 2.1.8},
       doi = {10.5281/zenodo.8433090},
       url = {https://fastverse.org/collapse/},
     }

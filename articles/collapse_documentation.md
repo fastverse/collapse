@@ -44,7 +44,7 @@ is always the most up-to-date resource.
 [DeepWiki](https://deepwiki.com/) is an AI-powered platform designed to
 automatically generate structured, interactive documentation for
 software repositories, primarily on GitHub. Developed by [Cognition
-AI](https://cognition.ai/)—the same laboratory behind the autonomous AI
+AI](https://cognition.com/)—the same laboratory behind the autonomous AI
 engineer [Devin](https://devin.ai/)—it serves as a dynamic,
 “Wikipedia-like” encyclopedia for codebases.
 

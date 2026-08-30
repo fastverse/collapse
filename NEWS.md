@@ -1,5 +1,7 @@
 # collapse 2.1.7
 
+* Fixed a bug in `setv()`/`copyv()` where assignments into character (`STRSXP`) or list (`VECSXP`) vectors bypassed R's generational write barrier, writing element pointers directly instead of using `SET_STRING_ELT()`/`SET_VECTOR_ELT()`. This could cause an old-generation target to hold an unrecorded reference to a younger value, which a subsequent young-generation garbage collection could free while still referenced, leading to memory corruption, cryptic `CHAR()`/`SET_STRING_ELT()` errors, or segfaults, most likely under heavy allocation in long-running processes. Thanks @SebKrantz for reporting and diagnosing (#876).
+
 * Fixed a bug in `fmatch()` (and thus `%in%`/`%!in%`/`%iin%`/`%!iin%` and joins) where a logical `NA` in `x` could spuriously match a non-`NA` value in `table` (e.g. `2L`) when `table` was not itself logical. Thanks @LJ-Jenkins for reporting (#870).
 
 * Fixed a bug in `fslice()` (grouped, `n = 1`, `with.ties = FALSE`) that caused R to crash with a fatal error when a group had only missing values in `order.by`. Thanks @chihyunkim for reporting (#867).

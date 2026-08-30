@@ -1,4 +1,4 @@
-# collapse 2.1.7
+# collapse 2.1.8
 
 * Fixed a bug in `setv()`/`copyv()` where assignments into character (`STRSXP`) or list (`VECSXP`) vectors bypassed R's generational write barrier, writing element pointers directly instead of using `SET_STRING_ELT()`/`SET_VECTOR_ELT()`. This could cause an old-generation target to hold an unrecorded reference to a younger value, which a subsequent young-generation garbage collection could free while still referenced, leading to memory corruption, cryptic `CHAR()`/`SET_STRING_ELT()` errors, or segfaults, most likely under heavy allocation in long-running processes. Thanks @SebKrantz for reporting and diagnosing (#876).
 
@@ -6,9 +6,11 @@
 
 * Fixed a bug in `fslice()` (grouped, `n = 1`, `with.ties = FALSE`) that caused R to crash with a fatal error when a group had only missing values in `order.by`. Thanks @chihyunkim for reporting (#867).
 
+# collapse 2.1.7
+
 * The *collapse* article is now published in the Journal of Statistical Software: https://doi.org/10.18637/jss.v116.i01. This article is now the primary citation for academic use of *collapse*. It is also a great reference to quickly and thoroughly understand the package. `citation("collapse")` was also updated in this regard. The APA-style citation is:
 
-  Krantz, S. (2026). **collapse**: Advanced and fast statistical computing and data transformation in R. *Journal of Statistical Software, 116*(1), 1–38. [https://doi.org/10.18637/jss.v116.i01](https://doi.org/10.18637/jss.v116.i01).
+  Krantz, S. (2026). **collapse**: Advanced and fast statistical computing and data transformation in R. *Journal of Statistical Software, 116*(1), 1–38. [https://doi.org/10.18637/jss.v116.i01](https://doi.org/10.18637/jss.v116.i01)
 
 
 * Performance improvements to `fsum()` and `fmean()` in the non-grouped case through multiple-accumulator SIMD optimizations, particularly benefiting systems without OpenMP support. `fsum()` sees ~2x speedup and `fmean()` ~7x speedup on such systems, with smaller but notable gains on systems with OpenMP. Thanks @TylerSagendorf for the implementation and benchmarking (#824, #828, #832, #833).

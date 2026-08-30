@@ -32,7 +32,7 @@ Reading `help("collapse-package")` and `help("collapse-documentation")` is the m
 
 ## DeepWiki
 
-[DeepWiki](https://deepwiki.com/) is an AI-powered platform designed to automatically generate structured, interactive documentation for software repositories, primarily on GitHub. Developed by [Cognition AI](https://cognition.ai/)—the same laboratory behind the autonomous AI engineer [Devin](https://devin.ai/)—it serves as a dynamic, "Wikipedia-like" encyclopedia for codebases.
+[DeepWiki](https://deepwiki.com/) is an AI-powered platform designed to automatically generate structured, interactive documentation for software repositories, primarily on GitHub. Developed by [Cognition AI](https://cognition.com/)—the same laboratory behind the autonomous AI engineer [Devin](https://devin.ai/)—it serves as a dynamic, "Wikipedia-like" encyclopedia for codebases.
 
 While not more comprehensive or accurate than the structured documentation, it is great to learn more about the internal structure of *collapse* and use a chatbot (Devin) to ask questions about or write code using *collapse*. 
 

@@ -775,7 +775,7 @@ lm(G(PCGDP, 5, p = 1/5) ~ L(G(LIFEEX, 5, p = 1/5), c(0, 5)), wldi) # p abbreviat
 plm::plm(G(PCGDP, 5, p = 1/5) ~ L(G(LIFEEX, 5, p = 1/5), c(0, 5)), to_plm(wldi), effect = "time")
 #> 
 #> Model Formula: G(PCGDP, 5, p = 1/5) ~ L(G(LIFEEX, 5, p = 1/5), c(0, 5))
-#> <environment: 0xa051bb3b8>
+#> <environment: 0xa5788f658>
 #> 
 #> Coefficients:
 #> L(G(LIFEEX, 5, p = 1/5), c(0, 5))-- L(G(LIFEEX, 5, p = 1/5), c(0, 5))L5 

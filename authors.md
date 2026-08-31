@@ -30,7 +30,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/fastverse/collapse/blob/v2.1.8/inst/CITATION)
+[`inst/CITATION`](https://github.com/fastverse/collapse/blob/master/inst/CITATION)
 
 Krantz, S. (2026). collapse: Advanced and fast statistical computing and
 data transformation in R. Journal of Statistical Software, 116(1), 1–38.

@@ -230,8 +230,8 @@ library(microbenchmark)
 microbenchmark(fmax(dat, cf), fmax(dat, cf2))
 #> Unit: microseconds
 #>            expr    min      lq     mean  median       uq     max neval
-#>   fmax(dat, cf) 88.519 91.2865 97.73990 95.3250 101.6185 161.868   100
-#>  fmax(dat, cf2) 83.189 86.6535 93.04909 91.7785  95.7555 136.981   100
+#>   fmax(dat, cf) 92.373 94.8945 108.9185 102.172 114.7180 293.601   100
+#>  fmax(dat, cf2) 86.141 88.9905 102.2782  96.350 103.8735 238.128   100
 
 finteraction(mtcars$cyl, mtcars$vs)  # Interacting two variables (can be factors)
 #>  [1] 6.0 6.0 4.1 6.1 8.0 6.1 8.0 4.1 4.1 6.1 6.1 8.0 8.0 8.0 8.0 8.0 8.0 4.1 4.1

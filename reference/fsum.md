@@ -355,14 +355,14 @@ microbenchmark(mtcDT[, lapply(.SD, sum), by = f],
                rowsum(mtcDT, f, reorder = FALSE),
                fsum(mtcDT, f, na.rm = FALSE), unit = "relative")
 #> Unit: relative
-#>                               expr  min        lq      mean    median        uq
-#>  mtcDT[, lapply(.SD, sum), by = f] 92.2 81.546218 67.335321 67.285235 59.950820
-#>  rowsum(mtcDT, f, reorder = FALSE)  3.5  3.310924  3.181049  3.154362  2.945355
-#>      fsum(mtcDT, f, na.rm = FALSE)  1.0  1.000000  1.000000  1.000000  1.000000
-#>         max neval
-#>  112.842975   100
-#>    5.588843   100
-#>    1.000000   100
+#>                               expr      min       lq      mean    median
+#>  mtcDT[, lapply(.SD, sum), by = f] 95.42708 85.32420 73.881233 77.008032
+#>  rowsum(mtcDT, f, reorder = FALSE)  3.65625  3.43379  3.294721  3.309237
+#>      fsum(mtcDT, f, na.rm = FALSE)  1.00000  1.00000  1.000000  1.000000
+#>         uq        max neval
+#>  62.865385 133.924171   100
+#>   3.012821   6.248815   100
+#>   1.000000   1.000000   100
 
 # Now larger data
 tdata <- qDT(replicate(100, rnorm(1e5), simplify = FALSE)) # 100 columns with 100.000 obs
@@ -373,13 +373,13 @@ microbenchmark(tdata[, lapply(.SD, sum), by = f],
                fsum(tdata, f, na.rm = FALSE), unit = "relative")
 #> Unit: relative
 #>                               expr      min       lq     mean   median       uq
-#>  tdata[, lapply(.SD, sum), by = f] 3.248987 3.294195 3.342248 3.280114 3.332753
-#>  rowsum(tdata, f, reorder = FALSE) 2.269753 2.276316 2.433417 2.270933 2.611645
+#>  tdata[, lapply(.SD, sum), by = f] 3.291483 3.330355 3.174763 3.323548 3.341430
+#>  rowsum(tdata, f, reorder = FALSE) 2.254579 2.259467 2.590475 2.205648 2.441053
 #>      fsum(tdata, f, na.rm = FALSE) 1.000000 1.000000 1.000000 1.000000 1.000000
-#>       max neval
-#>  13.98971   100
-#>  13.21949   100
-#>   1.00000   100
+#>        max neval
+#>   2.438295   100
+#>  12.124204   100
+#>   1.000000   100
 # Reset options
 set_collapse(opts)
 ```

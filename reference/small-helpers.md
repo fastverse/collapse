@@ -182,7 +182,7 @@ Overview](https://fastverse.org/collapse/reference/collapse-documentation.md)
 .c(T, N) %=% dim(EuStockMarkets)
 names(iris) %=% iris
 list2env(iris)          # Same thing
-#> <environment: 0xa652a5b60>
+#> <environment: 0x7e6fb1188>
 rm(list = c("a", "b", "T", "N", names(iris)))
 
 ## Variable labels

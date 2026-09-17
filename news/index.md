@@ -2,6 +2,8 @@
 
 ## collapse 2.1.8
 
+CRAN release: 2026-08-30
+
 - Fixed a bug in
   [`setv()`](https://fastverse.org/collapse/reference/efficient-programming.md)/[`copyv()`](https://fastverse.org/collapse/reference/efficient-programming.md)
   where assignments into character (`STRSXP`) or list (`VECSXP`) vectors

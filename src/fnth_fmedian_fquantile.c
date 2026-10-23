@@ -466,9 +466,9 @@ double w_compute_h(const double *pw, const int *po, const int l, const int sorte
 double wsum = pw[po[0]], wb;                                               \
 int k = 1;                                                                 \
 if(ret < 3) { /* lower (2), or average (1) element*/                       \
-  while(wsum < h) wsum += pw[po[k++]];                                     \
+  while(wsum < h*(1-eps)) wsum += pw[po[k++]]; /* relative tolerance */    \
   double a = px[po[k-1]];                                                  \
-  if(ret == 2 || wsum > h+eps) return a;/* h = sumw * Q must be > 0 here */\
+  if(ret == 2 || wsum > h*(1+eps)) return a; /* h = sumw * Q must be > 0 */\
   wb = px[po[k]]; wsum = 2.0;                                              \
   while(pw[po[k]] == 0.0) { /* l should never be reached, I tested it */   \
     wb += px[po[++k]]; ++wsum;                                             \
@@ -492,9 +492,9 @@ return (j >= l-1 || h < eps) ? px[po[j]] : (1 - h) * px[po[j]] + h * px[po[j+1]]
 double res, wsum = pw[i_cc[0]], wb;                                          \
 int k = 1;                                                                   \
 if(ret < 3) { /* lower (2), or average (1) element*/                         \
-  while(wsum < h) wsum += pw[i_cc[k++]];                                     \
+  while(wsum < h*(1-eps)) wsum += pw[i_cc[k++]]; /* relative tolerance */    \
   double a = x_cc[k-1];                                                      \
-  if(ret == 2 || wsum > h+eps) res = a; /* h = sumw * Q must be > 0 here */  \
+  if(ret == 2 || wsum > h*(1+eps)) res = a; /* h = sumw * Q must be > 0 */   \
   else {                                                                     \
     wb = x_cc[k]; wsum = 2.0;                                                \
     while(pw[i_cc[k]] == 0.0) { /* n should never be reached, I tested it */ \

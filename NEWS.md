@@ -4,6 +4,8 @@
 
 # collapse 2.1.8
 
+* Fixed a bug in `na_omit()` and `missing_cases()` where supplying `cols` on a single-row matrix dropped it to a vector, causing `na_omit()` to error and `missing_cases()` to return one value per selected column. Thanks @dbetebenner for reporting (#886).
+
 * Fixed a bug in `setv()`/`copyv()` where assignments into character (`STRSXP`) or list (`VECSXP`) vectors bypassed R's generational write barrier, writing element pointers directly instead of using `SET_STRING_ELT()`/`SET_VECTOR_ELT()`. This could cause an old-generation target to hold an unrecorded reference to a younger value, which a subsequent young-generation garbage collection could free while still referenced, leading to memory corruption, cryptic `CHAR()`/`SET_STRING_ELT()` errors, or segfaults, most likely under heavy allocation in long-running processes. Thanks @SebKrantz for reporting and diagnosing (#876).
 
 * Fixed a bug in `fmatch()` (and thus `%in%`/`%!in%`/`%iin%`/`%!iin%` and joins) where a logical `NA` in `x` could spuriously match a non-`NA` value in `table` (e.g. `2L`) when `table` was not itself logical. Thanks @LJ-Jenkins for reporting (#870).

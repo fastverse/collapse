@@ -681,5 +681,15 @@ test_that("fnth properly deals with missing data", {
   expect_error(fnth(1:2, w = c(NA, 1)))
 })
 
+test_that("fmedian with weights is invariant to weight scaling (#883)", {
+  x <- c(10, 20, 30, 40, 50, 60)
+  w <- rep(0.0003, 6)
+  g <- rep(1L, 6)
+  expect_equal(fmedian(x, w = w), 35)
+  expect_equal(fmedian(x, w = w * 1000), 35)
+  expect_equal(fmedian(x, w = w, g = g, use.g.names = FALSE), 35)
+  expect_equal(fmedian(x, w = w * 1000, g = g, use.g.names = FALSE), 35)
+})
+
 }
 

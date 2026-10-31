@@ -21,6 +21,8 @@ flm.default <- function(y, X, w = NULL, add.icpt = FALSE, #  sparse = FALSE,
   if(add.icpt) X <- cbind(`(Intercept)` = 1, X)
   n <- dim(X)[1L]
   if(n != NROW(y)) stop("NROW(y) must match nrow(X)")
+  if(isS4(X) && !any(method[1L] == c("qr", "chol"))) # e.g. Matrix::sparseMatrix
+    stop("X is an S4 (e.g. sparse) matrix: only method = 'qr' or 'chol' are supported")
   # if(sparse) X <- as(X, "dgCMatrix") # what about y ??
   if(length(w)) {
     if(length(w) != n) stop("w must be numeric and length(w) == nrow(X)")

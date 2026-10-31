@@ -98,3 +98,12 @@ test_that("fFtest works as intended", {
 
   }
 })
+
+test_that("flm errors for S4 (sparse) X unless method is qr or chol", {
+  skip_if_not_installed("Matrix")
+  Xs <- Matrix::Matrix(x, sparse = TRUE)
+  for(m in c("lm", "solve", "arma", "eigen")) {
+    expect_error(flm(y, Xs, method = m), "S4")
+    expect_error(flm(y, Xs, w, method = m), "S4")
+  }
+})

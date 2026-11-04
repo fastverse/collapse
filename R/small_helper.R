@@ -402,7 +402,7 @@ fcolSums <- function(x) {
 missing_cases <- function(X, cols = NULL, prop = 0, count = FALSE) {
   if(is.list(X)) return(.Call(C_dt_na, X, if(is.null(cols)) seq_along(unclass(X)) else cols2int(cols, X, attr(X, "names")), prop, count))
   if(is.matrix(X)) {
-    if(length(cols)) X <- X[, cols]
+    if(length(cols)) X <- X[, cols, drop = FALSE]
     if(is.matrix(X)) return(if(count) as.integer(frowSums(is.na(X))) else if(prop > 0) # as.integer() needed to establish consistency (integer output)
       frowSums(is.na(X)) >= bmax(as.integer(prop * NCOL(X)), 1L) else !complete.cases(X))
   }
@@ -435,7 +435,7 @@ na_omit <- function(X, cols = NULL, na.attr = FALSE, prop = 0, ...) {
       attr(res, "index") <- index_omit
     }
   } else {
-    Xcols <- if(is.null(cols)) X else X[, cols]
+    Xcols <- if(is.null(cols)) X else X[, cols, drop = FALSE]
     rl <- if(prop > 0 && is.matrix(Xcols)) frowSums(is.na(Xcols)) < bmax(as.integer(prop * ncol(Xcols)), 1L) else complete.cases(Xcols)
     rkeep <- which(rl)
     if(length(rkeep) == NROW(X)) return(X)

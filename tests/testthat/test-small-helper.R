@@ -33,3 +33,11 @@ test_that("copyv and setv modify data", {
   setv(d, 2L, 0L)
   expect_equal(d$a[2], 0L)
 })
+
+test_that("na_omit() and missing_cases() work on single-row matrix with cols", {
+  X <- matrix(c(1, 2, 3), nrow = 1, dimnames = list("a", c("A", "B", "C")))
+  expect_identical(na_omit(X, cols = c("A", "B")), X)
+  X[1, "B"] <- NA
+  expect_identical(missing_cases(X, cols = c("A", "B")), TRUE)
+  expect_equal(dim(na_omit(X, cols = c("A", "B"))), c(0L, 3L))
+})

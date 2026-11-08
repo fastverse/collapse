@@ -1,7 +1,7 @@
 Package: collapse
 Title: Advanced and Fast Data Transformation
-Version: 2.1.8
-Date: 2026-08-29
+Version: 2.1.9
+Date: 2026-11-07
 Authors@R: c(
            person("Sebastian", "Krantz", role = c("aut", "cre"), 
                   email = "sebastian.krantz@graduateinstitute.ch", 
@@ -43,6 +43,6 @@ Imports: Rcpp (>= 1.0.1)
 LinkingTo: Rcpp
 Suggests: fastverse, data.table, magrittr, kit, xts, zoo, plm, fixest, vars, 
           RcppArmadillo, RcppEigen, tibble, dplyr, ggplot2, scales, microbenchmark, 
-          testthat, covr, knitr, rmarkdown, withr, bit64
+          testthat, covr, knitr, rmarkdown, withr, bit64, Matrix
 VignetteBuilder: knitr
 

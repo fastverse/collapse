@@ -530,9 +530,9 @@ class(f2)                                # Note the added class
 library(microbenchmark)
 microbenchmark(fmean(mtcars, f1), fmean(mtcars, f2)) # A minor difference, larger on larger data
 #> Unit: microseconds
-#>               expr   min    lq    mean median     uq    max neval
-#>  fmean(mtcars, f1) 4.264 4.469 5.08769 4.5510 4.6945 44.608   100
-#>  fmean(mtcars, f2) 4.018 4.264 4.47720 4.3665 4.5100  6.150   100
+#>               expr   min     lq    mean median     uq    max neval
+#>  fmean(mtcars, f1) 4.387 5.1455 6.44110 5.5965 5.7605 67.076   100
+#>  fmean(mtcars, f2) 4.182 5.0225 5.24882 5.3710 5.5350  7.093   100
 
 with(mtcars, finteraction(cyl, vs, am))  # Efficient interactions of vectors and/or factors
 #>  [1] 6.0.1 6.0.1 4.1.1 6.1.0 8.0.0 6.1.0 8.0.0 4.1.0 4.1.0 6.1.0 6.1.0 8.0.0
@@ -618,9 +618,9 @@ head(TRA(mtcars, sds, "/"))     # Simple scaling (if sd's not needed, use fsd(mt
 
 microbenchmark(TRA(mtcars, sds, "/"), sweep(mtcars, 2, sds, "/")) # A remarkable performance gain..
 #> Unit: microseconds
-#>                        expr     min      lq      mean   median       uq     max
-#>       TRA(mtcars, sds, "/")   1.927   2.378   5.92409   3.5465   5.6375  53.136
-#>  sweep(mtcars, 2, sds, "/") 318.324 330.829 360.62124 350.6525 373.8790 631.769
+#>                        expr     min      lq     mean   median       uq     max
+#>       TRA(mtcars, sds, "/")   2.050   2.706   3.6326   3.1365   3.9565  14.391
+#>  sweep(mtcars, 2, sds, "/") 340.956 372.731 389.6390 382.7350 396.2035 603.479
 #>  neval
 #>    100
 #>    100

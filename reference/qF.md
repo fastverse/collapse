@@ -229,9 +229,9 @@ dat <- num_vars(wlddev)
 library(microbenchmark)
 microbenchmark(fmax(dat, cf), fmax(dat, cf2))
 #> Unit: microseconds
-#>            expr    min      lq     mean median      uq     max neval
-#>   fmax(dat, cf) 85.690 86.3665 88.57394 87.166 89.0315 103.771   100
-#>  fmax(dat, cf2) 80.073 80.7700 83.56866 81.426 83.4965 151.987   100
+#>            expr    min      lq      mean   median       uq     max neval
+#>   fmax(dat, cf) 93.480 98.1130 102.98790 100.0605 106.2925 126.977   100
+#>  fmax(dat, cf2) 83.189 86.8585  90.78015  87.7195  92.9060 130.667   100
 
 finteraction(mtcars$cyl, mtcars$vs)  # Interacting two variables (can be factors)
 #>  [1] 6.0 6.0 4.1 6.1 8.0 6.1 8.0 4.1 4.1 6.1 6.1 8.0 8.0 8.0 8.0 8.0 8.0 4.1 4.1

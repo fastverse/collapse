@@ -715,10 +715,10 @@ library(microbenchmark)
 microbenchmark(gby(GGDC10S, Variable, Country), gby(GGDC10S, Variable, Country, sort = FALSE))
 #> Warning: less accurate nanosecond times to avoid potential integer overflows
 #> Unit: microseconds
-#>                                           expr    min      lq     mean  median
-#>                gby(GGDC10S, Variable, Country) 76.383 79.3965 85.44072 80.6675
-#>  gby(GGDC10S, Variable, Country, sort = FALSE) 27.757 29.1510 31.73113 30.0120
+#>                                           expr    min     lq     mean  median
+#>                gby(GGDC10S, Variable, Country) 79.007 81.016 86.69737 81.9795
+#>  gby(GGDC10S, Variable, Country, sort = FALSE) 29.643 30.873 33.28257 31.7340
 #>       uq     max neval
-#>  87.1455 244.729   100
-#>  33.0255  47.642   100
+#>  86.9610 286.549   100
+#>  32.9025  49.077   100
 ```

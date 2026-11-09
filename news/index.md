@@ -1,5 +1,48 @@
 # Changelog
 
+## collapse 2.1.9
+
+CRAN release: 2026-11-08
+
+- collapse now bundles its agent skill, `collapse-r`, in `inst/skills/`.
+  With btw, it is discovered automatically when collapse is attached, or
+  can be installed with `btw::btw_skill_install_package("collapse")`.
+  Thanks [@arthurgailes](https://github.com/arthurgailes)
+  ([\#882](https://github.com/fastverse/collapse/issues/882)).
+
+- [`flm()`](https://fastverse.org/collapse/reference/flm.md) now throws
+  an informative error if `X` is an S4 object (e.g. a sparse matrix from
+  the *Matrix* package) and `method` is not `"qr"` or `"chol"`, instead
+  of failing with a cryptic error. The check is a single
+  [`isS4()`](https://rdrr.io/r/base/isS4.html) call and adds negligible
+  overhead. Thanks [@tyner](https://github.com/tyner) for suggesting
+  ([\#887](https://github.com/fastverse/collapse/issues/887)).
+
+- Fixed a bug in
+  [`na_omit()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  and
+  [`missing_cases()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  where supplying `cols` on a single-row matrix dropped it to a vector,
+  causing
+  [`na_omit()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  to error and
+  [`missing_cases()`](https://fastverse.org/collapse/reference/efficient-programming.md)
+  to return one value per selected column. Thanks
+  [@dbetebenner](https://github.com/dbetebenner) for reporting
+  ([\#886](https://github.com/fastverse/collapse/issues/886)).
+
+- Fixed a bug in weighted
+  [`fmedian()`](https://fastverse.org/collapse/reference/fnth_fmedian.md)
+  and
+  [`fnth()`](https://fastverse.org/collapse/reference/fnth_fmedian.md)
+  where the tie tolerance was an absolute epsilon. With an even number
+  of observations and equal weights, rescaling the weights could change
+  the result: `fmedian(c(10, 20, 30, 40, 50, 60), w = rep(0.0003, 6))`
+  returned 35, while the same weights multiplied by 1000 returned 40.
+  The comparison is now relative to the target weight sum. Thanks
+  [@s3rdia](https://github.com/s3rdia) for reporting
+  ([\#883](https://github.com/fastverse/collapse/issues/883)).
+
 ## collapse 2.1.8
 
 CRAN release: 2026-08-30

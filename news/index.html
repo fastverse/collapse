@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">collapse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,9 +32,16 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/fastverse/collapse/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/fastverse/collapse/blob/v2.1.9/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.1.9" id="collapse-219">collapse 2.1.9<a class="anchor" aria-label="anchor" href="#collapse-219"></a></h2><p class="text-muted">CRAN release: 2026-11-08</p>
+<ul><li><p>collapse now bundles its agent skill, <code>collapse-r</code>, in <code>inst/skills/</code>. With btw, it is discovered automatically when collapse is attached, or can be installed with <code>btw::btw_skill_install_package("collapse")</code>. Thanks <a href="https://github.com/arthurgailes" class="external-link">@arthurgailes</a> (<a href="https://github.com/fastverse/collapse/issues/882" class="external-link">#882</a>).</p></li>
+<li><p><code><a href="../reference/flm.html">flm()</a></code> now throws an informative error if <code>X</code> is an S4 object (e.g. a sparse matrix from the <em>Matrix</em> package) and <code>method</code> is not <code>"qr"</code> or <code>"chol"</code>, instead of failing with a cryptic error. The check is a single <code><a href="https://rdrr.io/r/base/isS4.html" class="external-link">isS4()</a></code> call and adds negligible overhead. Thanks <a href="https://github.com/tyner" class="external-link">@tyner</a> for suggesting (<a href="https://github.com/fastverse/collapse/issues/887" class="external-link">#887</a>).</p></li>
+<li><p>Fixed a bug in <code><a href="../reference/efficient-programming.html">na_omit()</a></code> and <code><a href="../reference/efficient-programming.html">missing_cases()</a></code> where supplying <code>cols</code> on a single-row matrix dropped it to a vector, causing <code><a href="../reference/efficient-programming.html">na_omit()</a></code> to error and <code><a href="../reference/efficient-programming.html">missing_cases()</a></code> to return one value per selected column. Thanks <a href="https://github.com/dbetebenner" class="external-link">@dbetebenner</a> for reporting (<a href="https://github.com/fastverse/collapse/issues/886" class="external-link">#886</a>).</p></li>
+<li><p>Fixed a bug in weighted <code><a href="../reference/fnth_fmedian.html">fmedian()</a></code> and <code><a href="../reference/fnth_fmedian.html">fnth()</a></code> where the tie tolerance was an absolute epsilon. With an even number of observations and equal weights, rescaling the weights could change the result: <code>fmedian(c(10, 20, 30, 40, 50, 60), w = rep(0.0003, 6))</code> returned 35, while the same weights multiplied by 1000 returned 40. The comparison is now relative to the target weight sum. Thanks <a href="https://github.com/s3rdia" class="external-link">@s3rdia</a> for reporting (<a href="https://github.com/fastverse/collapse/issues/883" class="external-link">#883</a>).</p></li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.1.8" id="collapse-218">collapse 2.1.8<a class="anchor" aria-label="anchor" href="#collapse-218"></a></h2><p class="text-muted">CRAN release: 2026-08-30</p>
 <ul><li><p>Fixed a bug in <code><a href="../reference/efficient-programming.html">setv()</a></code>/<code><a href="../reference/efficient-programming.html">copyv()</a></code> where assignments into character (<code>STRSXP</code>) or list (<code>VECSXP</code>) vectors bypassed R’s generational write barrier, writing element pointers directly instead of using <code>SET_STRING_ELT()</code>/<code>SET_VECTOR_ELT()</code>. This could cause an old-generation target to hold an unrecorded reference to a younger value, which a subsequent young-generation garbage collection could free while still referenced, leading to memory corruption, cryptic <code>CHAR()</code>/<code>SET_STRING_ELT()</code> errors, or segfaults, most likely under heavy allocation in long-running processes. Thanks <a href="https://github.com/SebKrantz" class="external-link">@SebKrantz</a> for reporting and diagnosing (<a href="https://github.com/fastverse/collapse/issues/876" class="external-link">#876</a>).</p></li>

@@ -775,7 +775,7 @@ lm(G(PCGDP, 5, p = 1/5) ~ L(G(LIFEEX, 5, p = 1/5), c(0, 5)), wldi) # p abbreviat
 plm::plm(G(PCGDP, 5, p = 1/5) ~ L(G(LIFEEX, 5, p = 1/5), c(0, 5)), to_plm(wldi), effect = "time")
 #> 
 #> Model Formula: G(PCGDP, 5, p = 1/5) ~ L(G(LIFEEX, 5, p = 1/5), c(0, 5))
-#> <environment: 0x7e810e3f8>
+#> <environment: 0x91cfa5460>
 #> 
 #> Coefficients:
 #> L(G(LIFEEX, 5, p = 1/5), c(0, 5))-- L(G(LIFEEX, 5, p = 1/5), c(0, 5))L5 
@@ -784,12 +784,8 @@ plm::plm(G(PCGDP, 5, p = 1/5) ~ L(G(LIFEEX, 5, p = 1/5), c(0, 5)), to_plm(wldi),
 
 # With country and time fixed effects via fixest
 fixest::feols(G(PCGDP, 5, p=1/5) ~ L(G(LIFEEX, 5, p=1/5), c(0, 5)), wldi, fixef = .c(iso3c, year))
-#> Warning: In fixest_env(fml = fml, data = data, weights = weig...:
-#>  Asked for 2 threads while the maximum is 1. Set to 1 threads instead.
 #> NOTES: 5,596 observations removed because of NA values (LHS: 4,720, RHS: 3,522).
 #>        1/0 fixed-effect singleton was removed (1 observation).
-#> Warning: In vcov.fixest(object, vcov = vcov, ssc = ssc, force...:
-#>  Asked for 2 threads while the maximum is 1. Set to 1 threads instead.
 #> OLS estimation, Dep. Var.: G(PCGDP, 5, p = 1/5)
 #> Observations: 7,579
 #> Fixed-effects: iso3c: 191,  year: 50

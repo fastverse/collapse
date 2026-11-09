@@ -355,14 +355,14 @@ microbenchmark(mtcDT[, lapply(.SD, sum), by = f],
                rowsum(mtcDT, f, reorder = FALSE),
                fsum(mtcDT, f, na.rm = FALSE), unit = "relative")
 #> Unit: relative
-#>                               expr      min       lq      mean    median
-#>  mtcDT[, lapply(.SD, sum), by = f] 95.42708 85.32420 73.881233 77.008032
-#>  rowsum(mtcDT, f, reorder = FALSE)  3.65625  3.43379  3.294721  3.309237
-#>      fsum(mtcDT, f, na.rm = FALSE)  1.00000  1.00000  1.000000  1.000000
-#>         uq        max neval
-#>  62.865385 133.924171   100
-#>   3.012821   6.248815   100
-#>   1.000000   1.000000   100
+#>                               expr       min        lq      mean    median
+#>  mtcDT[, lapply(.SD, sum), by = f] 99.609524 85.962825 58.523951 72.063953
+#>  rowsum(mtcDT, f, reorder = FALSE)  3.657143  3.252788  2.882138  3.226744
+#>      fsum(mtcDT, f, na.rm = FALSE)  1.000000  1.000000  1.000000  1.000000
+#>         uq       max neval
+#>  45.698630 64.219165   100
+#>   2.344178  4.308349   100
+#>   1.000000  1.000000   100
 
 # Now larger data
 tdata <- qDT(replicate(100, rnorm(1e5), simplify = FALSE)) # 100 columns with 100.000 obs
@@ -372,14 +372,14 @@ microbenchmark(tdata[, lapply(.SD, sum), by = f],
                rowsum(tdata, f, reorder = FALSE),
                fsum(tdata, f, na.rm = FALSE), unit = "relative")
 #> Unit: relative
-#>                               expr      min       lq     mean   median       uq
-#>  tdata[, lapply(.SD, sum), by = f] 3.291483 3.330355 3.174763 3.323548 3.341430
-#>  rowsum(tdata, f, reorder = FALSE) 2.254579 2.259467 2.590475 2.205648 2.441053
-#>      fsum(tdata, f, na.rm = FALSE) 1.000000 1.000000 1.000000 1.000000 1.000000
+#>                               expr      min      lq     mean   median       uq
+#>  tdata[, lapply(.SD, sum), by = f] 3.325690 3.38557 2.252871 3.472578 2.892165
+#>  rowsum(tdata, f, reorder = FALSE) 2.294777 2.26316 1.507267 2.218233 1.998287
+#>      fsum(tdata, f, na.rm = FALSE) 1.000000 1.00000 1.000000 1.000000 1.000000
 #>        max neval
-#>   2.438295   100
-#>  12.124204   100
-#>   1.000000   100
+#>  0.2114587   100
+#>  0.1668761   100
+#>  1.0000000   100
 # Reset options
 set_collapse(opts)
 ```
